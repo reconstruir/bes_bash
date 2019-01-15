@@ -8,8 +8,9 @@ _bes_trace_file "begin"
 
 _BES_BASIC_PATH=$(PATH=/bin:/usr/bin env -i bash -c "echo \"${PATH}\"")
 
-_BES_TR_EXE=$(PATH=$_BES_BASIC_PATH which tr)
-_BES_BASENAME_EXE=$(PATH=$_BES_BASIC_PATH which basename)
+_BES_AWK_EXE=$(PATH=${_BES_BASIC_PATH} which awk)
+_BES_TR_EXE=$(PATH=${_BES_BASIC_PATH} which tr)
+_BES_BASENAME_EXE=$(PATH=${_BES_BASIC_PATH} which basename)
 
 # return a colon separated path without the head item
 function bes_path_without_head()
@@ -574,6 +575,52 @@ function bes_assert()
   else
     echo "$_filename $_function: passed"
   fi
+}
+
+function bes_system_info()
+{
+  local _uname_exe=$(PATH=${_BES_BASIC_PATH} which uname)
+  local _uname=$(${_uname_exe})
+  local _system='unknown'
+  local _arch=$(${_uname_exe} -m)
+  local _distro=
+  local _major=
+  local _minor=
+  local _path=
+  local _version=
+  case ${_uname} in
+    Darwin)
+      _system='macos'
+      _version=$(/usr/bin/defaults read loginwindow SystemVersionStampAsString | ${_BES_AWK_EXE} -F"." '{ printf("%s.%s\n", $1, $2); }')
+      _major=$(echo {_version} | ${_BES_AWK_EXE} -F"." '{ print $1; }')
+      _minor=$(echo {_version} | ${_BES_AWK_EXE} -F"." '{ print $2; }')
+      _path=${_system}-${_major}/${_arch}
+      ;;
+	  Linux)
+      _system='linux'
+      _version=$(cat /etc/os-release | grep VERSION_ID= | ${_BES_AWK_EXE} -F"=" '{ print $2; }' | ${_BES_AWK_EXE}  -F"." '{ printf("%s.%s\n", $1, $2); }')
+      _major=$(echo ${_version} | ${_BES_AWK_EXE} -F"." '{ print $1; }')
+      _minor=$(echo ${_version} | ${_BES_AWK_EXE} -F"." '{ print $2; }')
+      _distro=$(cat /etc/os-release | grep -e '^ID=' | ${_BES_AWK_EXE} -F"=" '{ print $2; }')
+      _path=${_system}-${_distro}-${_major}/${_arch}
+      ;;
+	esac
+  echo ${_system}:${_distro}:${_major}:${_minor}:${_arch}:${_path}
+  return 0
+}
+
+function bes_system()
+{
+  local _path=$(bes_system_info | ${_BES_AWK_EXE} -F":" '{ print $1 }')
+  echo ${_path}
+  return 0
+}
+
+function bes_system_path()
+{
+  local _path=$(bes_system_info | ${_BES_AWK_EXE} -F":" '{ print $6 }')
+  echo ${_path}
+  return 0
 }
 
 _bes_trace_file "end"
