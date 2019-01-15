@@ -592,8 +592,8 @@ function bes_system_info()
     Darwin)
       _system='macos'
       _version=$(/usr/bin/defaults read loginwindow SystemVersionStampAsString | ${_BES_AWK_EXE} -F"." '{ printf("%s.%s\n", $1, $2); }')
-      _major=$(echo {_version} | ${_BES_AWK_EXE} -F"." '{ print $1; }')
-      _minor=$(echo {_version} | ${_BES_AWK_EXE} -F"." '{ print $2; }')
+      _major=$(echo ${_version} | ${_BES_AWK_EXE} -F"." '{ print $1; }')
+      _minor=$(echo ${_version} | ${_BES_AWK_EXE} -F"." '{ print $2; }')
       _path=${_system}-${_major}/${_arch}
       ;;
 	  Linux)
