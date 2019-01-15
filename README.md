@@ -5,6 +5,3 @@
 ## Overview
 
 * bes_env_path_append PATH /foo/bin /bar/bin /foo/bin
-* foo
-* bar
-
