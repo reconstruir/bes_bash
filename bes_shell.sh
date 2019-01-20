@@ -598,7 +598,8 @@ function bes_system_info()
       ;;
 	  Linux)
       _system='linux'
-      _version=$(cat /etc/os-release | grep VERSION_ID= | ${_BES_AWK_EXE} -F"=" '{ print $2; }' | ${_BES_AWK_EXE}  -F"." '{ printf("%s.%s\n", $1, $2); }')
+        
+      _version=$(cat /etc/os-release | grep VERSION_ID= | ${_BES_AWK_EXE} -F"=" '{ print $2; }' | ${_BES_AWK_EXE} -F"." '{ printf("%s.%s\n", $1, $2); }' | ${_BES_TR_EXE} -d '\"')
       _major=$(echo ${_version} | ${_BES_AWK_EXE} -F"." '{ print $1; }')
       _minor=$(echo ${_version} | ${_BES_AWK_EXE} -F"." '{ print $2; }')
       _distro=$(cat /etc/os-release | grep -e '^ID=' | ${_BES_AWK_EXE} -F"=" '{ print $2; }')
