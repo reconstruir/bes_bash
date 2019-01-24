@@ -531,11 +531,16 @@ function bes_tab_title()
   export PROMPT_COMMAND='${_prompt}'
 }
 
-# Mostly borrowed from https://unwiredcouch.com/2016/04/13/bash-unit-testing-101.html
+# Unit testing code mostly borrowed from:
+#   https://unwiredcouch.com/2016/04/13/bash-unit-testing-101.html
 
 # Print all the unit tests defined in this script environment (functions starting with test_)
 function bes_testing_print_unit_tests()
 {
+  if [[ ${BES_UNIT_TEST_LIST} ]]; then
+    echo "${BES_UNIT_TEST_LIST}"
+    return 0
+  fi
   local _result
   declare -a _result
   i=$(( 0 ))
@@ -621,6 +626,65 @@ function bes_system_path()
 {
   local _path=$(bes_system_info | ${_BES_AWK_EXE} -F":" '{ print $6 }')
   echo ${_path}
+  return 0
+}
+
+function bes_script_name()
+{
+  if [[ -n "${_BES_SCRIPT_NAME}"  ]]; then
+    echo "${_BES_SCRIPT_NAME}"
+    return 0
+  fi
+  if [[ ${0} =~ .+bash$ ]]; then
+    echo "bes_shell"
+    return 0
+  fi
+  echo $(basename "${0}")
+  return 0
+}
+
+function bes_message()
+{
+  local _script_name=$(bes_script_name)
+  #echo ${_script_name}:$$: ${1+"$@"}
+  echo ${_script_name}: ${1+"$@"}
+  return 0
+}
+
+function bes_debug_message()
+{
+  if [[ -z "${BES_DEBUG}" ]]; then
+    return 0
+  fi
+  local _console=$(tty)
+  local _script_name=$(bes_script_name)
+  local _pid=$$
+  printf "%s(%s): %s\n" ${_script_name} ${_pid} ${1+"$@"} >& ${_console}
+  return 0
+}
+
+function bes_file_sha256()
+{
+  if [[ $# != 1 ]]; then
+    echo "Usage: bes_file_sha256 filename"
+    return 1
+  fi
+  local _filename="${1}"
+  local _system=$(bes_system)
+  local _result
+  case "${_system}" in
+    linux)
+      _result=$(sha256sum "${_filename}" | ${_BES_AWK_EXE} '{ print($1); }')
+      ;;
+    macos)
+      _result=$(shasum -a 256 "${_filename}" | ${_BES_AWK_EXE} '{ print($1); }')
+      ;;
+    *)
+      echo "unknwon system: ${_system}"
+      return 1
+      ;;
+  esac
+  echo ${_result}
   return 0
 }
 

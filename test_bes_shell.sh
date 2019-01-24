@@ -211,5 +211,13 @@ function test_bes_path_strip_colon()
   bes_assert "[[ $(bes_path_strip_colon ::foo:) == foo ]]"
   bes_assert "[[ $(bes_path_strip_colon :f:) == f ]]"
 }
-    
+
+function test_bes_file_sha256()
+{
+  local _tmp=/tmp/test_bes_file_sha256_$$
+  echo "this is foo" > ${_tmp}
+  bes_assert "[[ $(bes_file_sha256 ${_tmp}) == 1573bd8941cf5cd92e31de77bf9cd458b0c32c451a7dfa3b17a2fbdda0f22128 ]]"
+  rm -f ${_tmp}
+}
+
 bes_testing_run_unit_tests
