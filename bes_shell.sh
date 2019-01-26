@@ -688,4 +688,6 @@ function bes_file_sha256()
   return 0
 }
 
+export BES_SYSTEM_PATH=$(bes_system_path)
+
 _bes_trace_file "end"
