@@ -11,6 +11,8 @@ _BES_BASIC_PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin
 _BES_AWK_EXE=$(PATH=${_BES_BASIC_PATH} which awk)
 _BES_TR_EXE=$(PATH=${_BES_BASIC_PATH} which tr)
 _BES_BASENAME_EXE=$(PATH=${_BES_BASIC_PATH} which basename)
+_BES_GREP_EXE=$(PATH=${_BES_BASIC_PATH} which grep)
+_BES_CAT_EXE=$(PATH=${_BES_BASIC_PATH} which cat)
 
 # return a colon separated path without the head item
 function bes_path_without_head()
@@ -544,7 +546,7 @@ function bes_testing_print_unit_tests()
   local _result
   declare -a _result
   i=$(( 0 ))
-  for unit_test in $(declare -f | grep -o "^test_[a-zA-Z_0-9]*"); do
+  for unit_test in $(declare -f | ${_BES_GREP_EXE} -o "^test_[a-zA-Z_0-9]*"); do
     _result[$i]=$unit_test
     i=$(( $i + 1 ))
   done
@@ -603,11 +605,10 @@ function bes_system_info()
       ;;
 	  Linux)
       _system='linux'
-        
-      _version=$(cat /etc/os-release | grep VERSION_ID= | ${_BES_AWK_EXE} -F"=" '{ print $2; }' | ${_BES_AWK_EXE} -F"." '{ printf("%s.%s\n", $1, $2); }' | ${_BES_TR_EXE} -d '\"')
+      _version=$(${_BES_CAT_EXE} /etc/os-release | ${_BES_GREP_EXE} VERSION_ID= | ${_BES_AWK_EXE} -F"=" '{ print $2; }' | ${_BES_AWK_EXE} -F"." '{ printf("%s.%s\n", $1, $2); }' | ${_BES_TR_EXE} -d '\"')
       _major=$(echo ${_version} | ${_BES_AWK_EXE} -F"." '{ print $1; }')
       _minor=$(echo ${_version} | ${_BES_AWK_EXE} -F"." '{ print $2; }')
-      _distro=$(cat /etc/os-release | grep -e '^ID=' | ${_BES_AWK_EXE} -F"=" '{ print $2; }')
+      _distro=$(${_BES_CAT_EXE} /etc/os-release | ${_BES_GREP_EXE} -e '^ID=' | ${_BES_AWK_EXE} -F"=" '{ print $2; }')
       _path=${_system}-${_distro}-${_major}/${_arch}
       ;;
 	esac
@@ -684,14 +685,8 @@ function _bes_checksum_text_macos()
     sha1)
       _result=$(echo "${_text}" | shasum -a 1 | ${_BES_AWK_EXE} '{ print($1); }')
       ;;
-    sha224)
-      _result=$(echo "${_text}" | shasum -a 224 | ${_BES_AWK_EXE} '{ print($1); }')
-      ;;
     sha256)
       _result=$(echo "${_text}" | shasum -a 256 | ${_BES_AWK_EXE} '{ print($1); }')
-      ;;
-    sha384)
-      _result=$(echo "${_text}" | shasum -a 384 | ${_BES_AWK_EXE} '{ print($1); }')
       ;;
     sha512)
       _result=$(echo "${_text}" | shasum -a 512 | ${_BES_AWK_EXE} '{ print($1); }')
@@ -721,14 +716,8 @@ function _bes_checksum_file_macos()
     sha1)
       _result=$(shasum -a 1 "${_filename}" | ${_BES_AWK_EXE} '{ print($1); }')
       ;;
-    sha224)
-      _result=$(shasum -a 224 "${_filename}" | ${_BES_AWK_EXE} '{ print($1); }')
-      ;;
     sha256)
       _result=$(shasum -a 256 "${_filename}" | ${_BES_AWK_EXE} '{ print($1); }')
-      ;;
-    sha384)
-      _result=$(shasum -a 384 "${_filename}" | ${_BES_AWK_EXE} '{ print($1); }')
       ;;
     sha512)
       _result=$(shasum -a 512 "${_filename}" | ${_BES_AWK_EXE} '{ print($1); }')
@@ -758,14 +747,8 @@ function _bes_checksum_file_linux()
     sha1)
       _result=$(sha1sum "${_filename}" | ${_BES_AWK_EXE} '{ print($1); }')
       ;;
-    sha224)
-      _result=$(sha224sum "${_filename}" | ${_BES_AWK_EXE} '{ print($1); }')
-      ;;
     sha256)
       _result=$(sha256sum "${_filename}" | ${_BES_AWK_EXE} '{ print($1); }')
-      ;;
-    sha384)
-      _result=$(sha384sum "${_filename}" | ${_BES_AWK_EXE} '{ print($1); }')
       ;;
     sha512)
       _result=$(sha512sum "${_filename}" | ${_BES_AWK_EXE} '{ print($1); }')
@@ -795,14 +778,8 @@ function _bes_checksum_text_linux()
     sha1)
       _result=$(echo "${_text}" | sha1sum | ${_BES_AWK_EXE} '{ print($1); }')
       ;;
-    sha224)
-      _result=$(echo "${_text}" | sha224sum | ${_BES_AWK_EXE} '{ print($1); }')
-      ;;
     sha256)
       _result=$(echo "${_text}" | sha256sum | ${_BES_AWK_EXE} '{ print($1); }')
-      ;;
-    sha384)
-      _result=$(echo "${_text}" | sha384sum | ${_BES_AWK_EXE} '{ print($1); }')
       ;;
     sha512)
       _result=$(echo "${_text}" | sha512sum | ${_BES_AWK_EXE} '{ print($1); }')
