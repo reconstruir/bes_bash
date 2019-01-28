@@ -212,12 +212,47 @@ function test_bes_path_strip_colon()
   bes_assert "[[ $(bes_path_strip_colon :f:) == f ]]"
 }
 
-function test_bes_file_sha256()
+function test_bes_checksum_file()
 {
-  local _tmp=/tmp/test_bes_file_sha256_$$
+  local _tmp=/tmp/test_bes_checksum_file_$$
   echo "this is foo" > ${_tmp}
-  bes_assert "[[ $(bes_file_sha256 ${_tmp}) == 1573bd8941cf5cd92e31de77bf9cd458b0c32c451a7dfa3b17a2fbdda0f22128 ]]"
+  bes_assert "[[ $(bes_checksum_file md5 ${_tmp}) == 4be8bde80854190cbe801133c6682ecf ]]"
+  bes_assert "[[ $(bes_checksum_file sha1 ${_tmp}) == b66399e65f956699e7ece173e73ab2b4021ff1ab ]]"
+  bes_assert "[[ $(bes_checksum_file sha224 ${_tmp}) == ff5e833507c74387a06c9aa1b08aad532bb192d1be28b528cd4223cf ]]"
+  bes_assert "[[ $(bes_checksum_file sha256 ${_tmp}) == 1573bd8941cf5cd92e31de77bf9cd458b0c32c451a7dfa3b17a2fbdda0f22128 ]]"
+  bes_assert "[[ $(bes_checksum_file sha384 ${_tmp}) == 699194214ad6dfa3ee4824be40d271a9b25009d1341623ecab37f378c43b1cb0e052e8344a0379590e22aa3b6bec9ae3 ]]"
+  bes_assert "[[ $(bes_checksum_file sha512 ${_tmp}) == 215f8edcc2c879dcc24b1358cae92cbb8007e2cca52de5a2bf80b68503852bbbb1d4825e60748753f93fdfbde0009ad2129be1158a505b91b78a239c2665bcf0 ]]"
   rm -f ${_tmp}
+}
+
+function test_bes_checksum_text()
+{
+  local _text="this is foo"
+  function _call_bes_checksum_text() ( bes_checksum_text $1 "${_text}" )
+  bes_assert "[[ $(_call_bes_checksum_text md5) == 4be8bde80854190cbe801133c6682ecf ]]"
+  bes_assert "[[ $(_call_bes_checksum_text sha1) == b66399e65f956699e7ece173e73ab2b4021ff1ab ]]"
+  bes_assert "[[ $(_call_bes_checksum_text sha224) == ff5e833507c74387a06c9aa1b08aad532bb192d1be28b528cd4223cf ]]"
+  bes_assert "[[ $(_call_bes_checksum_text sha256) == 1573bd8941cf5cd92e31de77bf9cd458b0c32c451a7dfa3b17a2fbdda0f22128 ]]"
+  bes_assert "[[ $(_call_bes_checksum_text sha384) == 699194214ad6dfa3ee4824be40d271a9b25009d1341623ecab37f378c43b1cb0e052e8344a0379590e22aa3b6bec9ae3 ]]"
+  bes_assert "[[ $(_call_bes_checksum_text sha512) == 215f8edcc2c879dcc24b1358cae92cbb8007e2cca52de5a2bf80b68503852bbbb1d4825e60748753f93fdfbde0009ad2129be1158a505b91b78a239c2665bcf0 ]]"
+}
+
+function test_bes_checksum_dir_files()
+{
+  local _tmp=/tmp/test_bes_checksum_file_$$
+  mkdir -p ${_tmp}/a/b/c/d
+  mkdir -p ${_tmp}/z
+  echo "this is foo" > ${_tmp}/foo.txt
+  echo "this is bar" > ${_tmp}/z/bar.txt
+  echo "this is foo bar" > ${_tmp}/"foo bar.txt"
+  echo "this is baz" > ${_tmp}/a/b/c/d/baz.txt
+  bes_assert "[[ $(bes_checksum_dir_files md5 ${_tmp}) == c7a77a840e37bc0e8f75b1b0c98b5b12 ]]"
+  bes_assert "[[ $(bes_checksum_dir_files sha1 ${_tmp}) == 9c7c8010fbbfb58f7d7364f2116ed2e1eeaa59ff ]]"
+  bes_assert "[[ $(bes_checksum_dir_files sha224 ${_tmp}) == 0e3789ba6deae30704857cce819c4976714c156adbd2df8557313bf3 ]]"
+  bes_assert "[[ $(bes_checksum_dir_files sha256 ${_tmp}) == 08fd0870650d1c59fcef81fbf1782b4186793f00ff3490843274ca34af692c89 ]]"
+  bes_assert "[[ $(bes_checksum_dir_files sha384 ${_tmp}) == af0fad2c485de622127076321a5b9de9acbaf0af08b596bef2c23e4b2553593973befebf7a1b9324fbe2087118bdb4e7 ]]"
+  bes_assert "[[ $(bes_checksum_dir_files sha512 ${_tmp}) == 7faf90f7200de814894a855af8778cea39365278e569a8e678959793003b5f31b087e96d0b5161e7fcbd5af461bfa995a1063d92b25519b9ded08bc685516dce ]]"
+  rm -rf ${_tmp}
 }
 
 function test_bes_debug_message()
