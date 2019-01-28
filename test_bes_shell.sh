@@ -220,4 +220,32 @@ function test_bes_file_sha256()
   rm -f ${_tmp}
 }
 
+function test_bes_debug_message()
+{
+  local _tmp=/tmp/test_bes_debug_message_$$.log
+  export BES_LOG_FILE=${_tmp}
+  export BES_DEBUG=1
+  export _BES_SCRIPT_NAME=myscript
+  bes_debug_message foo
+  local _actual=$(cat ${_tmp} | tr ' ' '_' | tr '(' '_'| tr ')' '_')
+  local _expected="myscript_$$_:_foo"
+  bes_assert "[[ ${_expected} == ${_actual} ]]"
+  rm -f ${_tmp}
+  unset BES_LOG_FILE BES_DEBUG _BES_SCRIPT_NAME
+}
+
+function test_bes_debug_message_no_debug()
+{
+  local _tmp=/tmp/test_bes_debug_message_$$.log
+  export BES_LOG_FILE=${_tmp}
+  touch ${BES_LOG_FILE}
+  export _BES_SCRIPT_NAME=myscript
+  bes_debug_message foo
+  local _actual=$(cat ${_tmp} | tr ' ' '_' | tr '(' '_'| tr ')' '_')
+  test -z "${_actual}"
+  #bes_assert "[[ -z ${actual} ]]"
+  rm -f ${_tmp}
+  unset BES_LOG_FILE BES_DEBUG _BES_SCRIPT_NAME
+}
+
 bes_testing_run_unit_tests

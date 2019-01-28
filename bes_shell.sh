@@ -656,10 +656,15 @@ function bes_debug_message()
   if [[ -z "${BES_DEBUG}" ]]; then
     return 0
   fi
-  local _console=$(tty)
+  local _output
+  if [[ -n "${BES_LOG_FILE}" ]]; then
+    _output="${BES_LOG_FILE}"
+  else
+    _output=$(tty)
+  fi
   local _script_name=$(bes_script_name)
   local _pid=$$
-  printf "%s(%s): %s\n" ${_script_name} ${_pid} ${1+"$@"} >& ${_console}
+  printf "%s(%s): %s\n" ${_script_name} ${_pid} ${1+"$@"} >& ${_output}
   return 0
 }
 
