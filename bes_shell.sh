@@ -864,7 +864,7 @@ function bes_checksum_dir_files()
   local _dir="${2}"
   local _file
   local _checksum
-  local _checksums==$(cd ${_dir} && find . -type f -print0 | while read -d $'\0' _file; do
+  local _checksums=$(cd ${_dir} && find . -type f -print0 | while read -d $'\0' _file; do
     _checksum=$(bes_checksum_file ${_algorithm} "${_file}")
     printf "%s %s" "${_file}" "${_checksum}" | $_BES_TR_EXE ' ' '_'
   done | sort)

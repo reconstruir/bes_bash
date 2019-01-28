@@ -242,10 +242,10 @@ function test_bes_checksum_dir_files()
   echo "this is bar" > ${_tmp}/z/bar.txt
   echo "this is foo bar" > ${_tmp}/"foo bar.txt"
   echo "this is baz" > ${_tmp}/a/b/c/d/baz.txt
-  bes_assert "[[ $(bes_checksum_dir_files md5 ${_tmp}) == c7a77a840e37bc0e8f75b1b0c98b5b12 ]]"
-  bes_assert "[[ $(bes_checksum_dir_files sha1 ${_tmp}) == 9c7c8010fbbfb58f7d7364f2116ed2e1eeaa59ff ]]"
-  bes_assert "[[ $(bes_checksum_dir_files sha256 ${_tmp}) == 08fd0870650d1c59fcef81fbf1782b4186793f00ff3490843274ca34af692c89 ]]"
-  bes_assert "[[ $(bes_checksum_dir_files sha512 ${_tmp}) == 7faf90f7200de814894a855af8778cea39365278e569a8e678959793003b5f31b087e96d0b5161e7fcbd5af461bfa995a1063d92b25519b9ded08bc685516dce ]]"
+  bes_assert "[[ $(bes_checksum_dir_files md5 ${_tmp}) == 3156e187d62934b4f26f3cbed80ca0a5 ]]"
+  bes_assert "[[ $(bes_checksum_dir_files sha1 ${_tmp}) == 8c60e0c7c6fce9fe1779547960166e3f0d966132 ]]"
+  bes_assert "[[ $(bes_checksum_dir_files sha256 ${_tmp}) == cf4fc3cba2646528fb5e4868b7985f6f47a76c79565f64d0949cfbb0dd1a800a ]]"
+  bes_assert "[[ $(bes_checksum_dir_files sha512 ${_tmp}) == 9ddfa6ae03cc3d3cefd807928671504d8bfca60c5dc38078ad6d07e60a12877b85716ac2e5bebe550de379873f5f5d6d7d223a3479d99af6dc698f74b7c76abb ]]"
   rm -rf ${_tmp}
 }
 
