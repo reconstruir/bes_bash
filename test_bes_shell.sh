@@ -249,6 +249,25 @@ function test_bes_checksum_dir_files()
   rm -rf ${_tmp}
 }
 
+function test_bes_checksum_manifest()
+{
+  local _tmp=/tmp/test_bes_checksum_file_$$
+  local _dir=${_tmp}/dir
+  local _manifest=${_tmp}/manifest
+  mkdir -p ${_dir}/a/b/c/d
+  mkdir -p ${_dir}/z
+  echo "this is foo" > ${_dir}/foo.txt
+  echo "this is bar" > ${_dir}/z/bar.txt
+  echo "this is foo bar" > ${_dir}/"foo bar.txt"
+  echo "this is baz" > ${_dir}/a/b/c/d/baz.txt
+  ( cd ${_dir} && find . -type f -print > ${_manifest} )
+  bes_assert "[[ $(bes_checksum_manifest md5 ${_dir} ${_manifest}) == 404ded59fd3628453e8b11c052cf1c72 ]]"
+  bes_assert "[[ $(bes_checksum_manifest sha1 ${_dir} ${_manifest}) == c7e02b7e5010d15723d7bf3daae0a6829bcead5e ]]"
+  bes_assert "[[ $(bes_checksum_manifest sha256 ${_dir} ${_manifest}) == 1dfa06817a2e5d9d60f28ae131f6784f5fd9b3beae4d23051b9a9cb487889e4d ]]"
+  bes_assert "[[ $(bes_checksum_manifest sha512 ${_dir} ${_manifest}) == 6f6957b4818efd8d22554555f6b23ef016cf43faa68f6bb0a96afd617cf9d82be19deb9e34746ac5ddadb5395296854c40bfe0c2965a81cb1a2cd527e9f0af4d ]]"
+  rm -rf ${_tmp}
+}
+
 function test_bes_debug_message()
 {
   local _tmp=/tmp/test_bes_debug_message_$$.log

@@ -873,4 +873,32 @@ function bes_checksum_dir_files()
   return 0
 }
 
+# Checksum a manifest of files
+function bes_checksum_manifest()
+{
+  if [[ $# != 3 ]]; then
+    echo "Usage: bes_checksum_manifest algorithm dir manifest"
+    return 1
+  fi
+  local _algorithm="${1}"
+  local _dir="${2}"
+  local _manifest="${3}"
+  if [[ ! -f "${_manifest}" ]]; then
+    echo "bes_checksum_manifest: manifest not found: ${_manifest}"
+    return 1
+  fi
+  local _file
+  local _checksum
+  local _saveIFS="${IFS}"
+  IFS=''
+  local _checksums=$(while read _file; do
+    _checksum=$(bes_checksum_file ${_algorithm} "${_dir}/${_file}")
+    printf "%s %s\n" "${_file}" "${_checksum}" | $_BES_TR_EXE ' ' '_'
+  done < "${_manifest}" | sort)
+  IFS="${_saveIFS}"
+  local _result=$(bes_checksum_text ${_algorithm} "${_checksums}")
+  echo ${_result}
+  return 0
+}
+
 _bes_trace_file "end"
