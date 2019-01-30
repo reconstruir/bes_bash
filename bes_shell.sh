@@ -296,22 +296,6 @@ function bes_source()
   return 1
 }
 
-function bes_invoke()
-{
-  _bes_trace_function $*
-  if [[ $# < 1 ]]; then
-    printf "\nUsage: bes_invoke function\n\n"
-    return 1
-  fi
-  local _function=$1
-  local _rv=1
-  if type $_function >& /dev/null; then
-    eval $_function
-    _rv=$?
-  fi
-  return $_rv
-}
-
 # Source all the *.sh files in a dir if it exists and has such files
 function bes_source_dir()
 {
@@ -901,7 +885,7 @@ function bes_checksum_manifest()
   return 0
 }
 
-function bes_has_function()
+function bes_function_exists()
 {
   local _name=${1}
   local _type=$(type -t ${_name})
@@ -910,6 +894,61 @@ function bes_has_function()
   else
     return 1
   fi
+}
+
+function _bes_function_invoke()
+{
+  _bes_trace_function $*
+  if [[ $# < 2 ]]; then
+    printf "\nUsage: _bes_function_invoke function default_rv args\n\n"
+    return 1
+  fi
+  local _function=${1}
+  shift
+  local _default_rv=${1}
+  shift
+  local _rv=${_default_rv}
+  if bes_function_exists ${_function}; then
+    eval ${_function} ${1+"$@"}
+    _rv=$?
+  fi
+  return ${_rv}
+}
+
+# invoke a function if it exists.  returns exit code of function or 1 if the function does not exist.
+function bes_function_invoke()
+{
+  _bes_trace_function $*
+  if [[ $# < 1 ]]; then
+    printf "\nUsage: bes_function_invoke_if function args\n\n"
+    return 1
+  fi
+  local _function=${1}
+  shift
+  _bes_function_invoke ${_function} 1 ${1+"$@"}
+  local _rv=$?
+  return ${_rv}
+}
+
+# invoke a function if it exists.  returns exit code of function or 0 if the function does not exist.
+function bes_function_invoke_if()
+{
+  _bes_trace_function $*
+  if [[ $# < 1 ]]; then
+    printf "\nUsage: bes_function_invoke_if function args\n\n"
+    return 1
+  fi
+  local _function=${1}
+  shift
+  _bes_function_invoke ${_function} 0 ${1+"$@"}
+  local _rv=$?
+  return ${_rv}
+}
+
+# FIXME: retire this one
+function bes_invoke()
+{
+  bes_function_invoke_if ${1+"$@"}
 }
 
 _bes_trace_file "end"

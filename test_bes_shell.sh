@@ -296,12 +296,36 @@ function test_bes_debug_message_no_debug()
   unset BES_LOG_FILE BES_DEBUG _BES_SCRIPT_NAME
 }
 
-function test_bes_has_function()
+function test_bes_function_exists()
 {
-  function _call_bes_has_function() ( bes_has_function ${1}; echo $? )
+  function _call_bes_function_exists() ( bes_function_exists ${1}; echo $? )
   function _foo() ( true )
-  bes_assert "[[ $(_call_bes_has_function nothere) == 1 ]]"
-  bes_assert "[[ $(_call_bes_has_function _foo) == 0 ]]"
+  bes_assert "[[ $(_call_bes_function_exists nothere) == 1 ]]"
+  bes_assert "[[ $(_call_bes_function_exists _foo) == 0 ]]"
+}
+
+function test_bes_function_invoke()
+{
+  function _call_bes_function_invoke() ( output=$(bes_function_invoke "$@"); rv=$?; echo ${output}:${rv} )
+  function _print() ( echo print:$@ )
+  function _foo() ( echo foo )
+  function _bar() ( echo bar )
+  bes_assert "[[ $(_call_bes_function_invoke nothere) == :1 ]]"
+  bes_assert "[[ $(_call_bes_function_invoke _foo) == foo:0 ]]"
+  bes_assert "[[ $(_call_bes_function_invoke _bar) == bar:0 ]]"
+  bes_assert "[[ $(_call_bes_function_invoke _print abc ) == print:abc:0 ]]"
+}
+
+function test_bes_function_invoke_if()
+{
+  function _call_bes_function_invoke_if() ( output=$(bes_function_invoke_if "$@"); rv=$?; echo ${output}:${rv} )
+  function _print() ( echo print:$@ )
+  function _foo() ( echo foo )
+  function _bar() ( echo bar )
+  bes_assert "[[ $(_call_bes_function_invoke_if nothere) == :0 ]]"
+  bes_assert "[[ $(_call_bes_function_invoke_if _foo) == foo:0 ]]"
+  bes_assert "[[ $(_call_bes_function_invoke_if _bar) == bar:0 ]]"
+  bes_assert "[[ $(_call_bes_function_invoke_if _print abc ) == print:abc:0 ]]"
 }
 
 bes_testing_run_unit_tests
