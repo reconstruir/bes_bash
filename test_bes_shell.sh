@@ -296,4 +296,12 @@ function test_bes_debug_message_no_debug()
   unset BES_LOG_FILE BES_DEBUG _BES_SCRIPT_NAME
 }
 
+function test_bes_has_function()
+{
+  function _call_bes_has_function() ( bes_has_function ${1}; echo $? )
+  function _foo() ( true )
+  bes_assert "[[ $(_call_bes_has_function nothere) == 1 ]]"
+  bes_assert "[[ $(_call_bes_has_function _foo) == 0 ]]"
+}
+
 bes_testing_run_unit_tests

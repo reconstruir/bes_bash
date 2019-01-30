@@ -901,4 +901,15 @@ function bes_checksum_manifest()
   return 0
 }
 
+function bes_has_function()
+{
+  local _name=${1}
+  local _type=$(type -t ${_name})
+  if [[ "${_type}" == "function" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 _bes_trace_file "end"
