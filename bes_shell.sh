@@ -631,7 +631,6 @@ function bes_script_name()
 function bes_message()
 {
   local _script_name=$(bes_script_name)
-  #echo ${_script_name}:$$: ${1+"$@"}
   echo ${_script_name}: ${1+"$@"}
   return 0
 }
@@ -641,15 +640,22 @@ function bes_debug_message()
   if [[ -z "${BES_DEBUG}" ]]; then
     return 0
   fi
-  local _output
+  local _output=""
   if [[ -n "${BES_LOG_FILE}" ]]; then
     _output="${BES_LOG_FILE}"
   else
-    _output=$(tty)
+    if [[ -t 1 ]]; then
+      _output=$(tty)
+    fi
   fi
   local _script_name=$(bes_script_name)
   local _pid=$$
-  printf "%s(%s): %s\n" ${_script_name} ${_pid} ${1+"$@"} >& ${_output}
+  local _message=$(printf "%s(%s): %s\n" ${_script_name} ${_pid} ${1+"$@"})
+  if [[ -n "${_output}" ]]; then
+    echo ${_message} >> ${_output}
+  else
+    echo ${_message}
+  fi
   return 0
 }
 

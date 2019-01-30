@@ -268,30 +268,47 @@ function test_bes_checksum_manifest()
   rm -rf ${_tmp}
 }
 
-function test_bes_debug_message()
+function test_bes_debug_message_debug_is_false()
+{
+  export _BES_SCRIPT_NAME=myscript
+  local actual=$(bes_debug_message foo)
+  bes_assert "[[ x == x${actual} ]]"
+  unset _BES_SCRIPT_NAME
+}
+
+function test_bes_debug_message_debug_is_true()
+{
+  export _BES_SCRIPT_NAME=myscript
+  export BES_DEBUG=1
+  local actual=$(bes_debug_message foo | tr ' ' '_' | tr '(' '_' | tr ')' '_')
+  local expected="myscript_$$_:_foo"
+  bes_assert "[[ ${expected} == ${actual} ]]"
+  unset _BES_SCRIPT_NAME BES_DEBUG
+}
+
+function test_bes_debug_message_log_file_debug_is_true()
 {
   local _tmp=/tmp/test_bes_debug_message_$$.log
   export BES_LOG_FILE=${_tmp}
   export BES_DEBUG=1
   export _BES_SCRIPT_NAME=myscript
   bes_debug_message foo
-  local _actual=$(cat ${_tmp} | tr ' ' '_' | tr '(' '_'| tr ')' '_')
-  local _expected="myscript_$$_:_foo"
-  bes_assert "[[ ${_expected} == ${_actual} ]]"
+  local actual=$(cat ${_tmp} | tr ' ' '_' | tr '(' '_'| tr ')' '_')
+  local expected="myscript_$$_:_foo"
+  bes_assert "[[ ${expected} == ${actual} ]]"
   rm -f ${_tmp}
   unset BES_LOG_FILE BES_DEBUG _BES_SCRIPT_NAME
 }
 
-function test_bes_debug_message_no_debug()
+function test_bes_debug_message_log_file_debug_is_false()
 {
   local _tmp=/tmp/test_bes_debug_message_$$.log
   export BES_LOG_FILE=${_tmp}
   touch ${BES_LOG_FILE}
   export _BES_SCRIPT_NAME=myscript
   bes_debug_message foo
-  local _actual=$(cat ${_tmp} | tr ' ' '_' | tr '(' '_'| tr ')' '_')
-  test -z "${_actual}"
-  #bes_assert "[[ -z ${actual} ]]"
+  local actual=$(cat ${_tmp} | tr ' ' '_' | tr '(' '_'| tr ')' '_')
+  bes_assert "[[ x == x${actual} ]]"
   rm -f ${_tmp}
   unset BES_LOG_FILE BES_DEBUG _BES_SCRIPT_NAME
 }
