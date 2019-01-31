@@ -345,4 +345,12 @@ function test_bes_function_invoke_if()
   bes_assert "[[ $(_call_bes_function_invoke_if _print abc ) == print:abc:0 ]]"
 }
 
+function test_bes_has_program()
+{
+  function _call_bes_has_program() ( if $(bes_has_program "$@"); then echo yes; else echo no; fi )
+  bes_assert "[[ $(_call_bes_has_program bash) == yes ]]"
+  bes_assert "[[ $(_call_bes_has_program notthere) == no ]]"
+  #bes_assert "[[ $(_call_bes_has_program curl) == yes ]]"
+  #bes_assert "[[ $(_call_bes_has_program wget) == no ]]"
+}
 bes_testing_run_unit_tests

@@ -957,4 +957,12 @@ function bes_invoke()
   bes_function_invoke_if ${1+"$@"}
 }
 
+function bes_has_program()
+{
+  local _program="$1"
+  $(/usr/bin/which "${_program}" >& /dev/null)
+  local _rv=$?
+  return ${_rv}
+}
+
 _bes_trace_file "end"
