@@ -8,11 +8,12 @@ _bes_trace_file "begin"
 
 _BES_BASIC_PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin
 
-_BES_AWK_EXE=$(PATH=${_BES_BASIC_PATH} which awk)
-_BES_TR_EXE=$(PATH=${_BES_BASIC_PATH} which tr)
-_BES_BASENAME_EXE=$(PATH=${_BES_BASIC_PATH} which basename)
-_BES_GREP_EXE=$(PATH=${_BES_BASIC_PATH} which grep)
-_BES_CAT_EXE=$(PATH=${_BES_BASIC_PATH} which cat)
+_BES_WHICH_EXE=/usr/bin/which
+_BES_AWK_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} awk)
+_BES_TR_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} tr)
+_BES_BASENAME_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} basename)
+_BES_GREP_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} grep)
+_BES_CAT_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} cat)
 
 # return a colon separated path without the head item
 function bes_path_without_head()
@@ -262,7 +263,7 @@ function bes_env_path_print()
 function bes_system()
 {
   _bes_trace_function $*
-  local _uname_exe=$(PATH=${_BES_BASIC_PATH} which uname)
+  local _uname_exe=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} uname)
   local _uname=$(${_uname_exe})
   local _result
   case "${_uname}" in
@@ -570,7 +571,7 @@ function bes_assert()
 
 function bes_system_info()
 {
-  local _uname_exe=$(PATH=${_BES_BASIC_PATH} which uname)
+  local _uname_exe=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} uname)
   local _uname=$(${_uname_exe})
   local _system='unknown'
   local _arch=$(${_uname_exe} -m)
@@ -960,7 +961,7 @@ function bes_invoke()
 function bes_has_program()
 {
   local _program="$1"
-  $(/usr/bin/which "${_program}" >& /dev/null)
+  $(${_BES_WHICH_EXE} "${_program}" >& /dev/null)
   local _rv=$?
   return ${_rv}
 }
