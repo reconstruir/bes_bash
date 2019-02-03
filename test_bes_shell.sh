@@ -353,4 +353,5 @@ function test_bes_has_program()
   #bes_assert "[[ $(_call_bes_has_program curl) == yes ]]"
   #bes_assert "[[ $(_call_bes_has_program wget) == no ]]"
 }
+
 bes_testing_run_unit_tests

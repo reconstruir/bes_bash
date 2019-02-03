@@ -660,6 +660,12 @@ function bes_debug_message()
   return 0
 }
 
+function bes_console_message()
+{
+  BES_DEBUG=1 BES_LOG_FILE=$(tty) bes_debug_message ${1+"$@"}
+  return $?
+}
+
 function _bes_checksum_text_macos()
 {
   if [[ $# != 2 ]]; then
