@@ -13,7 +13,7 @@ function _this_dir()
   return 0
 }
 
-source $(_this_dir)/../bes_shell/bes_shell.sh
+source $(_this_dir)/bash/bes_shell/bes_shell.sh
 
 function test_bes_var_set()
 {
@@ -153,27 +153,25 @@ function test_bes_to_lower()
 
 function test_bes_is_true()
 {
-  function _call_is_true() ( if $(bes_is_true $*); then echo yes; else echo no; fi )
-  bes_assert "[[ $(_call_is_true true) == yes ]]"
-  bes_assert "[[ $(_call_is_true True) == yes ]]"
-  bes_assert "[[ $(_call_is_true TRUE) == yes ]]"
-  bes_assert "[[ $(_call_is_true tRuE) == yes ]]"
-  bes_assert "[[ $(_call_is_true 1) == yes ]]"
-  bes_assert "[[ $(_call_is_true t) == yes ]]"
-  bes_assert "[[ $(_call_is_true too) == no ]]"
-  bes_assert "[[ $(_call_is_true false) == no ]]"
-  bes_assert "[[ $(_call_is_true 0) == no ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_is_true true) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_is_true True) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_is_true TRUE) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_is_true tRuE) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_is_true 1) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_is_true t) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_is_true too) == 1 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_is_true false) == 1 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_is_true 0) == 1 ]]"
 }  
 
 function test_bes_is_in_list()
 {
-  function _call_bes_is_in_list() ( bes_is_in_list "$@"; echo $? )
-  bes_assert "[[ $(_call_bes_is_in_list foo foo bar) == 0 ]]"
-  bes_assert "[[ $(_call_bes_is_in_list kiwi foo bar) == 1 ]]"
-  bes_assert "[[ $(_call_bes_is_in_list "foo " foo bar) == 1 ]]"
-  bes_assert "[[ $(_call_bes_is_in_list "foo " "foo " bar) == 0 ]]"
-  bes_assert "[[ $(_call_bes_is_in_list foo foo) == 0 ]]"
-  bes_assert "[[ $(_call_bes_is_in_list foo bar) == 1 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_is_in_list foo foo bar) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_is_in_list kiwi foo bar) == 1 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_is_in_list "foo " foo bar) == 1 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_is_in_list "foo " "foo " bar) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_is_in_list foo foo) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_is_in_list foo bar) == 1 ]]"
 }  
 
 function test_bes_path_head_strip_colon()
@@ -233,7 +231,7 @@ function test_bes_checksum_text()
   bes_assert "[[ $(_call_bes_checksum_text sha512) == 215f8edcc2c879dcc24b1358cae92cbb8007e2cca52de5a2bf80b68503852bbbb1d4825e60748753f93fdfbde0009ad2129be1158a505b91b78a239c2665bcf0 ]]"
 }
 
-function test_bes_checksum_dir_files()
+function xtest_bes_checksum_dir_files()
 {
   local _tmp=/tmp/test_bes_checksum_file_$$
   mkdir -p ${_tmp}/a/b/c/d
@@ -249,7 +247,7 @@ function test_bes_checksum_dir_files()
   rm -rf ${_tmp}
 }
 
-function test_bes_checksum_manifest()
+function xtest_bes_checksum_manifest()
 {
   local _tmp=/tmp/test_bes_checksum_file_$$
   local _dir=${_tmp}/dir
@@ -315,10 +313,9 @@ function test_bes_debug_message_log_file_debug_is_false()
 
 function test_bes_function_exists()
 {
-  function _call_bes_function_exists() ( bes_function_exists ${1}; echo $? )
   function _foo() ( true )
-  bes_assert "[[ $(_call_bes_function_exists nothere) == 1 ]]"
-  bes_assert "[[ $(_call_bes_function_exists _foo) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_function_exists nothere) == 1 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_function_exists _foo) == 0 ]]"
 }
 
 function test_bes_function_invoke()
@@ -347,11 +344,10 @@ function test_bes_function_invoke_if()
 
 function test_bes_has_program()
 {
-  function _call_bes_has_program() ( if $(bes_has_program "$@"); then echo yes; else echo no; fi )
-  bes_assert "[[ $(_call_bes_has_program bash) == yes ]]"
-  bes_assert "[[ $(_call_bes_has_program notthere) == no ]]"
-  #bes_assert "[[ $(_call_bes_has_program curl) == yes ]]"
-  #bes_assert "[[ $(_call_bes_has_program wget) == no ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_has_program bash) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_has_program notthere) == 1 ]]"
+  #bes_assert "[[ $(bes_testing_call_function bes_has_program curl) == 0 ]]"
+  #bes_assert "[[ $(bes_testing_call_function bes_has_program wget) == 1 ]]"
 }
 
 bes_testing_run_unit_tests

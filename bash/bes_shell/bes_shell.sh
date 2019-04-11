@@ -539,6 +539,17 @@ function bes_testing_print_unit_tests()
   return 0
 }
 
+# Call a function and print the exit code
+function bes_testing_call_function()
+{
+  local _function=${1}
+  shift
+  ${_function} ${1+"$@"}
+  local _rv=$?
+  echo ${_rv}
+  return 0
+}
+
 _bes_testing_exit_code=0
 
 # Run all the unit tests found in this script environment
