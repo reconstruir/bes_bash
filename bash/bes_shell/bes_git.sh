@@ -25,12 +25,15 @@ function bes_git_repo_is_clean()
     local _path=$(pwd)
   fi
   if ! bes_git_is_repo ${_path}; then
+    bes_message "not a git repo: ${_path}"
     return 1
   fi
   if bes_git_repo_has_uncommitted_changes ${_path}; then
+    bes_message "not clean - uncommitted changes: ${_path}"
     return 1
   fi
   if bes_git_repo_has_unpushed_changes ${_path}; then
+    bes_message "not clean - unpushed changes: ${_path}"
     return 1
   fi
   return 0
