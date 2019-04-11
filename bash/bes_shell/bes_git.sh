@@ -44,7 +44,7 @@ function bes_git_repo_has_uncommitted_changes()
   else
     local _path=$(pwd)
   fi
-  if ! bes_git_is_repo; then
+  if ! bes_git_is_repo ${_path}; then
     return 1
   fi
   local _diff=$(git diff)
@@ -62,10 +62,10 @@ function bes_git_repo_has_unpushed_changes()
   else
     local _path=$(pwd)
   fi
-  if ! bes_git_is_repo; then
+  if ! bes_git_is_repo ${_path}; then
     return 1
   fi
-  local _cherries=$(git cherry | grep -E '^\+\s[a-f0-9]+$' | wc -l)
+  local _cherries=$(cd ${_path} && git cherry | grep -E '^\+\s[a-f0-9]+$' | wc -l)
   if [[ ${_cherries} -ne 0 ]]; then
     return 0
   fi

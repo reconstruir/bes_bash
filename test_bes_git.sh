@@ -48,4 +48,22 @@ function test_bes_git_repo_has_uncommitted_changes()
   rm -rf ${_tmp}
 }
 
+function test_bes_git_repo_has_unpushed_changes()
+{
+  local _tmp_remote=/tmp/test_bes_git_repo_has_unpushed_changes_remote_$$
+  local _tmp_remote_repo=${_tmp_remote}/repo
+  mkdir -p ${_tmp_remote_repo}
+  ( cd ${_tmp_remote_repo} && git init --bare --shared ) >& /dev/null
+  local _tmp_local=/tmp/test_bes_git_repo_has_unpushed_changes_local_$$
+  local _tmp_local_repo=${_tmp_local}/repo
+  mkdir -p ${_tmp_local}
+  ( cd ${_tmp_local} && git clone ${_tmp_remote_repo} repo ) >& /dev/null
+  ( cd ${_tmp_local_repo} && echo "foo.txt" > foo.txt && git add foo.txt && git commit -mtest1 foo.txt && git push origin master ) >& /dev/null
+  bes_assert "[[ $(bes_testing_call_function bes_git_repo_has_unpushed_changes ${_tmp_local_repo} ) == 1 ]]"
+  ( cd ${_tmp_local_repo} && echo "bar.txt" > foo.txt && git commit -mtest2 foo.txt ) >& /dev/null  
+  bes_assert "[[ $(bes_testing_call_function bes_git_repo_has_unpushed_changes ${_tmp_local_repo} ) == 0 ]]"
+  rm -rf ${_tmp_remote}
+  rm -rf ${_tmp_local}
+}
+
 bes_testing_run_unit_tests
