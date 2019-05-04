@@ -983,4 +983,17 @@ function bes_has_program()
   return ${_rv}
 }
 
+# atexit function suitable for trapping and printing the exit code
+# trap "bes_atexit_message_successful ${_remote_name}" EXIT
+function bes_atexit_message_successful()
+{
+  local _actual_exit_code=$?
+  if [[ ${_actual_exit_code} == 0 ]]; then
+    bes_message success ${1+"$@"}
+  else
+    bes_message failed ${1+"$@"}
+  fi
+  return ${_actual_exit_code}
+}
+
 _bes_trace_file "end"
