@@ -983,6 +983,33 @@ function bes_has_program()
   return ${_rv}
 }
 
+function bes_find_program()
+{
+  if [[ $# < 2 ]]; then
+    bes_message "usage: bes_find_program env_var_name prog_name1 [ prog_name1 ... prog_nameN ]"
+    return 1
+  fi
+  local _env_var_name=${1}
+  shift
+  local _exe=$(bes_var_get ${_env_var_name})
+  if [[ -n ${_exe} ]]; then
+    if ! $(bes_has_program ${_exe}); then
+      echo ""
+      return 1
+    fi
+    echo "${_exe}"
+    return 0  
+  fi
+  for _exe in "$@"; do
+    if bes_has_program ${_exe}; then
+      echo ${_exe}
+      return 0
+    fi
+  done
+  echo ""
+  return 1
+}
+
 # atexit function suitable for trapping and printing the exit code
 # trap "bes_atexit_message_successful ${_remote_name}" EXIT
 function bes_atexit_message_successful()

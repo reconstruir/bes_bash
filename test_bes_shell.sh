@@ -350,4 +350,18 @@ function test_bes_has_program()
   #bes_assert "[[ $(bes_testing_call_function bes_has_program wget) == 1 ]]"
 }
 
+function test_bes_find_program()
+{
+  local _tmp=/tmp/test_bes_find_program_$$
+  mkdir -p ${_tmp}
+  printf "#!/bin/bash\necho foo\n" > ${_tmp}/foo.sh ; chmod 755 ${_tmp}/foo.sh
+  printf "#!/bin/bash\necho bar\n" > ${_tmp}/bar.sh ; chmod 755 ${_tmp}/bar.sh
+  ( PATH=${_tmp}:${PATH} ; bes_assert "[[ $(bes_find_program FOO foo.sh) == foo.sh ]]" )
+  ( PATH=${_tmp}:${PATH} FOO=bar.sh ; bes_assert "[[ $(bes_find_program FOO foo.sh) == bar.sh ]]" )
+  ( PATH=${_tmp}:${PATH} FOO=${_tmp}/foo.sh ; bes_assert "[[ $(bes_find_program FOO foo.sh) == ${_tmp}/foo.sh ]]" )
+  ( PATH=${_tmp}:${PATH} ; bes_assert "[[ $(bes_find_program FOO baz.sh foo.sh) == foo.sh ]]" )
+  ( PATH=${_tmp}:${PATH} ; bes_assert "[[ $(bes_testing_call_function bes_find_program FOO notfound.sh) == 1 ]]" )
+  rm -rf ${_tmp}
+}
+
 bes_testing_run_unit_tests
