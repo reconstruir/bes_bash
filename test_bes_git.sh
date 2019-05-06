@@ -87,4 +87,29 @@ function test_bes_git_local_branch_delete()
   rm -rf ${_tmp}
 }
 
+function test_bes_git_remote_is_added()
+{
+  local _tmp=$(bes_git_make_temp_repo bes_git_remote_is_added)
+  local _tmp_repo=${_tmp}/local
+  bes_assert "[[ $(bes_testing_call_function bes_git_remote_is_added ${_tmp_repo} foo ) == 1 ]]"
+  bes_git_call ${_tmp_repo} remote add foo https://github.com/git/git.git >& /dev/null
+  bes_assert "[[ $(bes_testing_call_function bes_git_remote_is_added ${_tmp_repo} foo ) == 0 ]]"
+  rm -rf ${_tmp}
+}
+
+function test_bes_git_remote_remove()
+{
+  local _tmp=$(bes_git_make_temp_repo bes_git_remote_is_added)
+  local _tmp_repo=${_tmp}/local
+  bes_git_call ${_tmp_repo} remote add foo https://github.com/git/git.git >& /dev/null
+  bes_assert "[[ $(bes_testing_call_function bes_git_remote_is_added ${_tmp_repo} foo ) == 0 ]]"
+  bes_git_remote_remove ${_tmp_repo} foo
+  bes_assert "[[ $(bes_testing_call_function bes_git_remote_is_added ${_tmp_repo} foo ) == 1 ]]"
+  rm -rf ${_tmp}
+}
+
+
+#bes_git_local_branch_delete
+#bes_git_remote_remove
+
 bes_testing_run_unit_tests

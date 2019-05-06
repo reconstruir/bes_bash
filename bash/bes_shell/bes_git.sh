@@ -148,4 +148,32 @@ function bes_git_local_branch_delete()
   return 0
 }
 
+function bes_git_remote_is_added()
+{
+  if [[ $# != 2 ]]; then
+    bes_message "usage: bes_git_remote_is_added root remote_name"
+    return 1
+  fi
+  local _root="${1}"
+  local _remote_name=${2}
+  if bes_git_call "${_root}" ls-remote --exit-code ${_remote_name} >& /dev/null; then
+    return 0
+  fi
+  return 1
+}
+
+function bes_git_remote_remove()
+{
+  if [[ $# != 2 ]]; then
+    bes_message "usage: bes_git_has_remote root remote_name"
+    return 1
+  fi
+  local _root="${1}"
+  local _remote_name=${2}
+  if bes_git_remote_is_added "${_root}" ${_remote_name}; then
+    bes_git_call "${_root}" remote remove ${_remote_name}
+  fi
+  return 0
+}  
+
 _bes_trace_file "end"
