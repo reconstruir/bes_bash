@@ -1023,4 +1023,16 @@ function bes_atexit_message_successful()
   return ${_actual_exit_code}
 }
 
+# Return the absolute path for the path arg
+function bes_abs_path()
+{
+  if [[ $# < 1 ]]; then
+    bes_message "usage: bes_abs_path path"
+    return 1
+  fi
+  local _path="${1}"
+  echo $(cd ${_path} && pwd)
+  return 0
+}
+
 _bes_trace_file "end"
