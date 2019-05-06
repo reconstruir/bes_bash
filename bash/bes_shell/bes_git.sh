@@ -75,4 +75,36 @@ function bes_git_repo_has_unpushed_changes()
   return 1
 }
 
+function bes_git_add_file()
+{
+  if [[ $# != 3 ]]; then
+    echo "usage: bes_git_add_file root filename content"
+    return 1
+  fi
+  local _root="${1}"
+  local _filename="${2}"
+  local _content="${3}"
+  local _dirname=$(dirname "${_filename}")
+  ( cd ${_root} && mkdir -p ${_dirname} && echo "${_content}" > ${_filename} && git add ${_filename} && git commit -m"add ${_filename}" ${_filename} && git push origin master ) >& /dev/null
+  return 0
+}
+
+function bes_git_make_temp_repo()
+{
+  if [[ $# != 1 ]]; then
+    echo "usage: bes_git_make_temp_repo name"
+    return 1
+  fi
+  local _name="${1}"
+  local _tmp=/tmp/temp_git_repo_${_name}_$$
+  local _tmp_remote_repo=${_tmp}/remote
+  mkdir -p ${_tmp_remote_repo}
+  ( cd ${_tmp_remote_repo} && git init --bare --shared ) >& /dev/null
+  local _tmp_local_repo=${_tmp}/local
+  ( cd ${_tmp} && git clone ${_tmp_remote_repo} local ) >& /dev/null
+  bes_git_add_file ${_tmp_local_repo} readme.txt "this is readme.txt\n" 
+  echo ${_tmp}
+  return 0
+}
+
 _bes_trace_file "end"
