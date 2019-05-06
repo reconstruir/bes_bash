@@ -120,10 +120,10 @@ function bes_git_make_temp_repo()
   return 0
 }
 
-function bes_git_has_local_branch()
+function bes_git_local_branch_exists()
 {
   if [[ $# != 2 ]]; then
-    echo "usage: bes_git_has_local_branch root branch_name"
+    echo "usage: bes_git_local_branch_exists root branch_name"
     return 1
   fi
   local _root="${1}"
@@ -132,6 +132,20 @@ function bes_git_has_local_branch()
     return 0
   fi
   return 1
+}
+
+function bes_git_local_branch_delete()
+{
+  if [[ $# != 2 ]]; then
+    echo "usage: bes_git_local_branch_delete root branch_name"
+    return 1
+  fi
+  local _root="${1}"
+  local _branch_name="${2}"
+  if bes_git_local_branch_exists "${_root}" ${_branch_name}; then
+    bes_git_call "${_root}" branch --delete ${_branch_name}
+  fi
+  return 0
 }
 
 _bes_trace_file "end"

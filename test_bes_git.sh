@@ -66,13 +66,25 @@ function test_bes_git_repo_has_unpushed_changes()
   rm -rf ${_tmp_local}
 }
 
-function test_bes_git_has_local_branch()
+function test_bes_git_local_branch_exists()
 {
-  local _tmp=$(bes_git_make_temp_repo git_has_local_branch)
+  local _tmp=$(bes_git_make_temp_repo git_local_branch_exists)
   local _tmp_repo=${_tmp}/local
-  bes_assert "[[ $(bes_testing_call_function bes_git_has_local_branch ${_tmp_repo} foo ) == 1 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_git_local_branch_exists ${_tmp_repo} foo ) == 1 ]]"
   bes_git_call ${_tmp_repo} branch foo >& /dev/null
-  bes_assert "[[ $(bes_testing_call_function bes_git_has_local_branch ${_tmp_repo} foo ) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_git_local_branch_exists ${_tmp_repo} foo ) == 0 ]]"
+  rm -rf ${_tmp}
+}
+
+function test_bes_git_local_branch_delete()
+{
+  local _tmp=$(bes_git_make_temp_repo git_local_branch_exists)
+  local _tmp_repo=${_tmp}/local
+  bes_git_call ${_tmp_repo} branch foo >& /dev/null
+  bes_assert "[[ $(bes_testing_call_function bes_git_local_branch_exists ${_tmp_repo} foo ) == 0 ]]"
+  bes_git_local_branch_delete ${_tmp_repo} foo >& /dev/null
+  bes_assert "[[ $(bes_testing_call_function bes_git_local_branch_exists ${_tmp_repo} foo ) == 1 ]]"
+  rm -rf ${_tmp}
 }
 
 bes_testing_run_unit_tests
