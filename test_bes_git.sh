@@ -60,10 +60,19 @@ function test_bes_git_repo_has_unpushed_changes()
   ( cd ${_tmp_local} && git clone ${_tmp_remote_repo} repo ) >& /dev/null
   ( cd ${_tmp_local_repo} && echo "foo.txt" > foo.txt && git add foo.txt && git commit -mtest1 foo.txt && git push origin master ) >& /dev/null
   bes_assert "[[ $(bes_testing_call_function bes_git_repo_has_unpushed_changes ${_tmp_local_repo} ) == 1 ]]"
-  ( cd ${_tmp_local_repo} && echo "bar.txt" > foo.txt && git commit -mtest2 foo.txt ) >& /dev/null  
+  ( cd ${_tmp_local_repo} && echo "2foo.txt" > foo.txt && git commit -mtest2 foo.txt ) >& /dev/null  
   bes_assert "[[ $(bes_testing_call_function bes_git_repo_has_unpushed_changes ${_tmp_local_repo} ) == 0 ]]"
   rm -rf ${_tmp_remote}
   rm -rf ${_tmp_local}
+}
+
+function test_bes_git_has_local_branch()
+{
+  local _tmp=$(bes_git_make_temp_repo git_has_local_branch)
+  local _tmp_repo=${_tmp}/local
+  bes_assert "[[ $(bes_testing_call_function bes_git_has_local_branch ${_tmp_repo} foo ) == 1 ]]"
+  bes_git_call ${_tmp_repo} branch foo >& /dev/null
+  bes_assert "[[ $(bes_testing_call_function bes_git_has_local_branch ${_tmp_repo} foo ) == 0 ]]"
 }
 
 bes_testing_run_unit_tests

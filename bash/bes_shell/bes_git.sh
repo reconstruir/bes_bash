@@ -75,6 +75,19 @@ function bes_git_repo_has_unpushed_changes()
   return 1
 }
 
+# Call git with a specific root
+function bes_git_call()
+{
+  if [[ $# < 1 ]]; then
+    echo "usage: bes_git_call root <args>"
+    return 1
+  fi
+  local _root="${1}"
+  shift
+  git --git-dir "${_root}/.git" --work-tree "${_root}" ${1+"$@"}
+  return $?
+}
+
 function bes_git_add_file()
 {
   if [[ $# != 3 ]]; then
@@ -105,6 +118,20 @@ function bes_git_make_temp_repo()
   bes_git_add_file ${_tmp_local_repo} readme.txt "this is readme.txt\n" 
   echo ${_tmp}
   return 0
+}
+
+function bes_git_has_local_branch()
+{
+  if [[ $# != 2 ]]; then
+    echo "usage: bes_git_has_local_branch root branch_name"
+    return 1
+  fi
+  local _root="${1}"
+  local _branch_name="${2}"
+  if bes_git_call "${_root}" branch | sed -r 's/^\*/ /' | awk '{ print $1; }' | grep -w ${_branch_name} >& /dev/null; then
+    return 0
+  fi
+  return 1
 }
 
 _bes_trace_file "end"
