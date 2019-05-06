@@ -108,8 +108,4 @@ function test_bes_git_remote_remove()
   rm -rf ${_tmp}
 }
 
-
-#bes_git_local_branch_delete
-#bes_git_remote_remove
-
 bes_testing_run_unit_tests
