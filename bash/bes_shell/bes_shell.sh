@@ -1036,6 +1036,7 @@ function bes_atexit_message_successful()
   return ${_actual_exit_code}
 }
 
+# DEPRECATED: use bes_abs_dir instead
 # Return the absolute path for the path arg
 function bes_abs_path()
 {
