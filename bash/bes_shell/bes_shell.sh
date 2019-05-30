@@ -6,14 +6,23 @@ function _bes_trace_file() ( _bes_trace "file: ${BASH_SOURCE}: $*" )
 
 _bes_trace_file "begin"
 
+# A basic UNIX path that is guranteed to find common exeutables on both linux and macos
 _BES_BASIC_PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin
 
+# Which is in the same place on both linux and macos
 _BES_WHICH_EXE=/usr/bin/which
+
+# Use which to find the abs paths to a handful of executables used in this library.
+# The reason for using _BES_BASIC_PATH in this manner is that we want this library to
+# work *even* if the callers PATH is empty or "bad"
 _BES_AWK_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} awk)
 _BES_TR_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} tr)
 _BES_BASENAME_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} basename)
+_BES_DIRNAME_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} dirname)
 _BES_GREP_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} grep)
 _BES_CAT_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} cat)
+_BES_PWD_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} pwd)
+_BES_MKDIR_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} mkdir)
 
 # return a colon separated path without the head item
 function bes_path_without_head()
@@ -108,6 +117,7 @@ function bes_path_sanitize()
   return 0
 }
 
+# remove one or more items from a colon delimited path
 function bes_path_remove()
 {
   _bes_trace_function $*
@@ -134,6 +144,7 @@ function bes_path_remove()
   return 0
 }
 
+# append one or more items to a colon delimited path
 function bes_path_append()
 {
   _bes_trace_function $*
@@ -156,6 +167,7 @@ function bes_path_append()
   return 0
 }
 
+# prepend one or more items to a colon delimited path
 function bes_path_prepend()
 {
   _bes_trace_function $*
@@ -176,6 +188,7 @@ function bes_path_prepend()
   return 0
 }
 
+# pretty print a path one item per line including unexpanding ~/
 function bes_path_print()
 {
   if [[ $# != 1 ]]; then
@@ -1032,6 +1045,40 @@ function bes_abs_path()
   fi
   local _path="${1}"
   echo $(cd ${_path} && pwd)
+  return 0
+}
+
+# Return the absolute dir path for path.  Note that path will be created
+# if it doesnt exist so that this function can be used for paths that
+# dont yet exist.  That is useful for scripts that want to normalize
+# their file input/output arguments.
+function bes_abs_dir()
+{
+  if [[ $# < 1 ]]; then
+    bes_message "usage: bes_abs_dir path"
+    return 1
+  fi
+  local _path="${1}"
+  if [[ ! -d "${_path}" ]]; then
+    $_BES_MKDIR_EXE -p "${_path}"
+  fi
+  local _result="$(cd "${_path}" && $_BES_PWD_EXE)"
+  echo ${_result}
+  return 0
+}
+
+function bes_abs_file()
+{
+  if [[ $# < 1 ]]; then
+    bes_message "usage: bes_abs_file filename"
+    return 1
+  fi
+  local _filename="${1}"
+  local _dirname="$($_BES_DIRNAME_EXE "${_filename}")"
+  local _basename="$($_BES_BASENAME_EXE "${_filename}")"
+  local _abs_dirname="$(bes_abs_dir "${_dirname}")"
+  local _result="${_abs_dirname}"/"${_basename}"
+  echo ${_result}
   return 0
 }
 
