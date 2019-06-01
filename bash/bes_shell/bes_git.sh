@@ -128,7 +128,7 @@ function bes_git_local_branch_exists()
   fi
   local _root="${1}"
   local _branch_name="${2}"
-  if bes_git_call "${_root}" branch | sed -r 's/^\*/ /' | awk '{ print $1; }' | grep -w ${_branch_name} >& /dev/null; then
+  if bes_git_call "${_root}" branch | sed -E 's/^\*/ /' | awk '{ print $1; }' | grep -w ${_branch_name} >& /dev/null; then
     return 0
   fi
   return 1
