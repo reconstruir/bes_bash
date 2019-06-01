@@ -108,4 +108,13 @@ function test_bes_git_remote_remove()
   rm -rf ${_tmp}
 }
 
+function test_bes_git_last_commit_hash()
+{
+  local _tmp=$(bes_git_make_temp_repo bes_git_remote_is_added)
+  local _tmp_repo=${_tmp}/local
+  local _commit_hash=$(bes_git_call ${_tmp_repo} log --format=%H -n 1)
+  bes_assert "[[ $(bes_git_last_commit_hash ${_tmp_repo}) == ${_commit_hash} ]]"
+  rm -rf ${_tmp}
+}
+
 bes_testing_run_unit_tests

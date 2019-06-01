@@ -176,4 +176,21 @@ function bes_git_remote_remove()
   return 0
 }  
 
+function bes_git_last_commit_hash()
+{
+  if [[ $# > 1 ]]; then
+    bes_message "usage: bes_git_last_commit_hash <root>"
+    return 1
+  fi
+  local _root=
+  
+  if [[ $# == 1 ]]; then
+    _root="${1}"
+  else
+    _root="$(pwd)"
+  fi
+  bes_git_call "${_root}" log --format=%H -n 1
+  return 0
+}  
+
 _bes_trace_file "end"
