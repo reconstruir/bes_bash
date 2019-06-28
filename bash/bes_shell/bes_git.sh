@@ -292,13 +292,14 @@ function bes_git_gc()
   else
     _root="$(pwd)"
   fi
-  bes_git_call "${_root}" \
-               -c gc.auto=1 \
-               -c gc.autodetach=false \
-               -c gc.autopacklimit=1 \
-               -c gc.garbageexpire=now \
-               -c gc.reflogexpireunreachable=now \
-               gc --prune=all
+  cd "${_root}"
+  git \
+      -c gc.auto=1 \
+      -c gc.autodetach=false \
+      -c gc.autopacklimit=1 \
+      -c gc.garbageexpire=now \
+      -c gc.reflogexpireunreachable=now \
+      gc --prune=all
 }
 
 function bes_git_pack_size()
