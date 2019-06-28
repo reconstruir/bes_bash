@@ -16,6 +16,15 @@ function _this_dir()
 source $(_this_dir)/bash/bes_shell/bes_shell.sh
 source $(_this_dir)/bash/bes_shell/bes_git.sh
 
+function test_bes_git_is_bare_repo_true()
+{
+  local _tmp=/tmp/test_bes_git_is_repo_true_$$
+  mkdir -p ${_tmp}
+  ( cd ${_tmp} && git init --bare --shared .  >& /dev/null )
+  bes_assert "[[ $(bes_testing_call_function bes_git_is_bare_repo ${_tmp}) == 0 ]]"
+  rm -rf ${_tmp}
+}
+
 function test_bes_git_is_repo_true()
 {
   local _tmp=/tmp/test_bes_git_is_repo_true_$$
@@ -33,7 +42,7 @@ function test_bes_git_is_repo_false()
   rm -rf ${_tmp}
 }
 
-function test_bes_git_repo_has_uncommitted_changes()
+function xtest_bes_git_repo_has_uncommitted_changes()
 {
   local _tmp=/tmp/test_bes_git_is_repo_true_$$
   mkdir -p ${_tmp}

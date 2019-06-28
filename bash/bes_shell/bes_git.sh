@@ -2,15 +2,41 @@
 
 _bes_trace_file "begin"
 
+# Return 0 if ${1} (or pwd if not given) is a bare git repo
+function bes_git_is_bare_repo()
+{
+  if [[ $# -ge 1 ]]; then
+    local _path="${1}"
+  else
+    local _path="$(pwd)"
+  fi
+  if [[ ! -f "${_path}"/HEAD ]]; then
+    return 1
+  fi
+  if [[ ! -f "${_path}"/config ]]; then
+    return 1
+  fi
+  if [[ ! -d "${_path}"/refs ]]; then
+    return 1
+  fi
+  if [[ ! -d "${_path}"/objects ]]; then
+    return 1
+  fi
+  return 0
+}
+
 # Return 0 if ${1} (or pwd if not given) is a git repo
 function bes_git_is_repo()
 {
   if [[ $# -ge 1 ]]; then
     local _path="${1}"
   else
-    local _path=$(pwd)
+    local _path="$(pwd)"
   fi
   if [[ -d ${_path}/.git ]]; then
+    return 0
+  fi
+  if bes_git_is_bare_repo "${_path}"/.git; then
     return 0
   fi
   return 1
@@ -48,10 +74,12 @@ function bes_git_repo_has_uncommitted_changes()
     local _path=$(pwd)
   fi
   if ! bes_git_is_repo ${_path}; then
+    echo bad1
     return 1
   fi
   local _diff=$(git diff)
   if [[ -n "${_diff}" ]]; then
+    echo bad2
     return 0
   fi
   return 1
@@ -183,7 +211,6 @@ function bes_git_last_commit_hash()
     return 1
   fi
   local _root=
-  
   if [[ $# == 1 ]]; then
     _root="${1}"
   else
@@ -192,5 +219,83 @@ function bes_git_last_commit_hash()
   bes_git_call "${_root}" log --format=%H -n 1
   return 0
 }  
+
+# print the revision (commit hash) at which a submodule is pegged.
+function bes_git_submodule_revision()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "usage: bes_git_submodule_revision submodule"
+    return 1
+  fi
+  local _submodule=${1}
+  local _revision=$(git submodule status ${_submodule} | sed -E 's/^\+//' | sed -E 's/^\-//' | awk '{ print $1; }')
+  echo ${_revision}
+  return 0
+}
+
+# update a submodule to the HEAD of its branch and commit the result with a meaningful message
+function bes_git_submodule_update()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "usage: bes_git_submodule_update submodule"
+    return 1
+  fi
+  
+  if bes_git_repo_has_uncommitted_changes; then
+    bes_message "bes_git_submodule_update: The git tree needs to be clean with no uncommitted changes."
+    return 1
+  fi
+  local _submodule=${1}
+  local _old_revision=$(bes_git_submodule_revision ${_submodule})
+  git submodule update --init ${_submodule}
+  git submodule update --remote --merge ${_submodule}
+  local _new_revision=$(bes_git_submodule_revision ${_submodule})
+  if [[ ${_old_revision} == ${_new_revision} ]]; then
+    bes_message "submodule ${_submodule} already at latest revision ${_new_revision}"
+    return 0
+  fi
+  local _message="submodule ${_submodule} updated from ${_old_revision} to ${_new_revision}"
+  git commit -m"${_message}" .
+  bes_message "${_message}"
+  return 0
+}
+
+function bes_git_gc()
+{
+  if [[ $# > 1 ]]; then
+    bes_message "usage: bes_git_gc <root>"
+    return 1
+  fi
+  local _root=
+  if [[ $# == 1 ]]; then
+    _root="${1}"
+  else
+    _root="$(pwd)"
+  fi
+  bes_git_call "${_root}" \
+               -c gc.auto=1 \
+               -c gc.autodetach=false \
+               -c gc.autopacklimit=1 \
+               -c gc.garbageexpire=now \
+               -c gc.reflogexpireunreachable=now \
+               gc --prune=all
+}
+
+function bes_git_pack_size()
+{
+  if [[ $# > 1 ]]; then
+    bes_message "usage: bes_git_pack_size <root>"
+    return 1
+  fi
+  local _root=
+  if [[ $# == 1 ]]; then
+    _root="${1}"
+  else
+    _root="$(pwd)"
+  fi
+  local _pack_size=$(bes_git_call "${_root}" count-objects -v | grep size-pack  | awk '{ print $2; }')
+  echo ${_pack_size}
+  return 0
+}
 
 _bes_trace_file "end"

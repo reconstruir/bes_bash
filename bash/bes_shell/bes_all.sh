@@ -1,10 +1,12 @@
 #-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
 
-function _this_dir()
+function _bes_all_this_dir()
 {
   echo "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
   return 0
 }
 
-source $(_this_dir)/bes_shell.sh
-source $(_this_dir)/bes_git.sh
+source $(_bes_all_this_dir)/bes_shell.sh
+source $(_bes_all_this_dir)/bes_git.sh
+source $(_bes_all_this_dir)/bes_download.sh
+source $(_bes_all_this_dir)/bes_bfg.sh
