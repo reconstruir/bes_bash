@@ -33,9 +33,6 @@ function bes_git_is_repo()
   else
     local _path="$(pwd)"
   fi
-  if [[ -d "${_path}"/.git ]]; then
-    return 0
-  fi
   if bes_git_is_bare_repo "${_path}"/.git; then
     return 0
   fi
@@ -66,6 +63,32 @@ function bes_git_repo_is_clean()
     local _path="${1}"
   else
     local _path="$(pwd)"
+  fi
+  if ! bes_git_is_repo "${_path}"; then
+    bes_message "not a git repo: ${_path}"
+    return 1
+  fi
+  if bes_git_repo_has_uncommitted_changes "${_path}"; then
+    bes_message "not clean - uncommitted changes: ${_path}"
+    return 1
+  fi
+  if bes_git_repo_has_unpushed_changes "${_path}"; then
+    bes_message "not clean - unpushed changes: ${_path}"
+    return 1
+  fi
+  return 0
+}
+
+# Return 0 if git repo is clean with no uncommitted or unpushed changes.
+function bes_git_non_bare_repo_is_clean()
+{
+  if [[ $# -ge 1 ]]; then
+    local _path="${1}"
+  else
+    local _path="$(pwd)"
+  fi
+  if bes_git_is_bare_repo "${_path}"; then
+    return 0
   fi
   if ! bes_git_is_repo "${_path}"; then
     bes_message "not a git repo: ${_path}"
@@ -297,10 +320,32 @@ function bes_git_pack_size()
   return 0
 }
 
+# gc strategy published by bfg docs
 function bes_git_gc()
 {
   if [[ $# > 1 ]]; then
     bes_message "usage: bes_git_gc <repo>"
+    return 1
+  fi
+  local _repo=
+  if [[ $# == 1 ]]; then
+    _repo="${1}"
+  else
+    _repo="$(pwd)"
+  fi
+  local _size_before=$(bes_git_pack_size "${_repo}")
+  local _log="$(pwd)"/gc.log
+  ( cd "${_repo}" && git reflog expire --expire=now --all && git gc --prune=now --aggressive >& ${_log} )
+  local _size_after=$(bes_git_pack_size "${_repo}")
+  bes_message "bes_git_gc: delta: before=${_size_before} after=${_size_after} log=${_log}"
+  return 0
+}
+
+# gc strategy published by atlassian bitbucket
+function bes_git_gc2()
+{
+  if [[ $# > 1 ]]; then
+    bes_message "usage: bes_git_gc2 <repo>"
     return 1
   fi
   local _repo=
