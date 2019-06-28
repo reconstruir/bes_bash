@@ -10,6 +10,10 @@ function bes_bfg_call()
     bes_message "usage: version"
     return 1
   fi
+  if ! $(bes_has_program java); then
+    bes_message "java not f.ound"
+    return 1
+  fi
   local _version="${1}"
   shift
   local _local_jar="${HOME}/.besbfg/bfg/bfg-${_version}.jar"
