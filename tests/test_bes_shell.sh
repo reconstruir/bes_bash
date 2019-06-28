@@ -1,19 +1,19 @@
 #!/bin/bash
 
-function _this_dir()
+function _test_bes_shell_this_dir()
 {
   local _this_file
-  local _this_dir
+  local _test_bes_shell_this_dir
   _this_file="$(command readlink "${BASH_SOURCE}" )" || _this_file="${BASH_SOURCE}"
-  _this_dir="${_this_file%/*}"
-  if [ "${_this_dir}" == "${_this_file}" ]; then
-    _this_dir=.
+  _test_bes_shell_this_dir="${_this_file%/*}"
+  if [ "${_test_bes_shell_this_dir}" == "${_this_file}" ]; then
+    _test_bes_shell_this_dir=.
   fi
-  echo $(command cd -P "${_this_dir}" > /dev/null && command pwd -P )
+  echo $(command cd -P "${_test_bes_shell_this_dir}" > /dev/null && command pwd -P )
   return 0
 }
 
-source $(_this_dir)/bash/bes_shell/bes_shell.sh
+source $(_test_bes_shell_this_dir)/../bash/bes_shell/bes_shell.sh
 
 function test_bes_var_set()
 {
