@@ -33,10 +33,27 @@ function bes_git_is_repo()
   else
     local _path="$(pwd)"
   fi
-  if [[ -d ${_path}/.git ]]; then
+  if [[ -d "${_path}"/.git ]]; then
     return 0
   fi
   if bes_git_is_bare_repo "${_path}"/.git; then
+    return 0
+  fi
+  return 1
+}
+
+# Return 0 if ${1} (or pwd if not given) is either a working or bare git repo
+function bes_git_is_any_repo()
+{
+  if [[ $# -ge 1 ]]; then
+    local _path="${1}"
+  else
+    local _path="$(pwd)"
+  fi
+  if bes_git_is_repo "${_path}"; then
+    return 0
+  fi
+  if bes_git_is_bare_repo "${_path}"; then
     return 0
   fi
   return 1
@@ -48,17 +65,17 @@ function bes_git_repo_is_clean()
   if [[ $# -ge 1 ]]; then
     local _path="${1}"
   else
-    local _path=$(pwd)
+    local _path="$(pwd)"
   fi
-  if ! bes_git_is_repo ${_path}; then
+  if ! bes_git_is_repo "${_path}"; then
     bes_message "not a git repo: ${_path}"
     return 1
   fi
-  if bes_git_repo_has_uncommitted_changes ${_path}; then
+  if bes_git_repo_has_uncommitted_changes "${_path}"; then
     bes_message "not clean - uncommitted changes: ${_path}"
     return 1
   fi
-  if bes_git_repo_has_unpushed_changes ${_path}; then
+  if bes_git_repo_has_unpushed_changes "${_path}"; then
     bes_message "not clean - unpushed changes: ${_path}"
     return 1
   fi
@@ -71,15 +88,18 @@ function bes_git_repo_has_uncommitted_changes()
   if [[ $# -ge 1 ]]; then
     local _path="${1}"
   else
-    local _path=$(pwd)
+    local _path="$(pwd)"
   fi
-  if ! bes_git_is_repo ${_path}; then
-    echo bad1
+
+  if bes_git_is_bare_repo "${_path}"; then
+    return 0
+  fi
+
+  if ! bes_git_is_repo "${_path}"; then
     return 1
   fi
   local _diff=$(git diff)
   if [[ -n "${_diff}" ]]; then
-    echo bad2
     return 0
   fi
   return 1
@@ -91,12 +111,12 @@ function bes_git_repo_has_unpushed_changes()
   if [[ $# -ge 1 ]]; then
     local _path="${1}"
   else
-    local _path=$(pwd)
+    local _path="$(pwd)"
   fi
-  if ! bes_git_is_repo ${_path}; then
+  if ! bes_git_is_repo "${_path}"; then
     return 1
   fi
-  local _cherries=$(cd ${_path} && git cherry | grep -E '^\+\s[a-f0-9]+$' | wc -l)
+  local _cherries=$(cd "${_path}" && git cherry | grep -E '^\+\s[a-f0-9]+$' | wc -l)
   if [[ ${_cherries} -ne 0 ]]; then
     return 0
   fi

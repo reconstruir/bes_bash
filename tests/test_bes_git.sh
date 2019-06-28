@@ -34,6 +34,24 @@ function test_bes_git_is_repo_true()
   rm -rf ${_tmp}
 }
 
+function test_bes_git_is_any_repo_bare_true()
+{
+  local _tmp=/tmp/test_bes_git_is_repo_true_$$
+  mkdir -p ${_tmp}
+  ( cd ${_tmp} && git init --bare --shared .  >& /dev/null )
+  bes_assert "[[ $(bes_testing_call_function bes_git_is_any_repo ${_tmp}) == 0 ]]"
+  rm -rf ${_tmp}
+}
+
+function test_bes_git_is_any_repo_true()
+{
+  local _tmp=/tmp/test_bes_git_is_repo_true_$$
+  mkdir -p ${_tmp}
+  ( cd ${_tmp} && git init .  >& /dev/null )
+  bes_assert "[[ $(bes_testing_call_function bes_git_is_any_repo ${_tmp}) == 0 ]]"
+  rm -rf ${_tmp}
+}
+
 function test_bes_git_is_repo_false()
 {
   local _tmp=/tmp/test_bes_git_is_repo_false_$$
