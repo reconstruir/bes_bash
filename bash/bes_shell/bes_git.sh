@@ -303,6 +303,31 @@ function bes_git_submodule_update()
   return 0
 }
 
+function bes_git_short_hash()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "usage: bes_git_short_hash long_hash"
+    return 1
+  fi
+  local _long_hash=${1}
+  local _short_hash=$(git rev-parse --short ${_long_hash})
+  echo ${_short_hash}
+  return 0
+}
+
+# return the commit hash to which the submodule points
+function bes_git_submodule_commit()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "usage: bes_git_submodule_commit submodule"
+    return 1
+  fi
+  local _submodule="${1}"
+  local _commit_hash=$(git ls-tree HEAD "${_submodule}" | awk '$2 == "commit"' | awk '{ print $3; }')
+  echo ${_commit_hash}
+  return 0
+}
+
 function bes_git_pack_size()
 {
   if [[ $# > 1 ]]; then
