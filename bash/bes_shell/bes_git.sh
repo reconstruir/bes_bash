@@ -280,28 +280,6 @@ function bes_git_submodule_update()
   return 0
 }
 
-function bes_git_gc()
-{
-  if [[ $# > 1 ]]; then
-    bes_message "usage: bes_git_gc <root>"
-    return 1
-  fi
-  local _root=
-  if [[ $# == 1 ]]; then
-    _root="${1}"
-  else
-    _root="$(pwd)"
-  fi
-  cd "${_root}"
-  git \
-      -c gc.auto=1 \
-      -c gc.autodetach=false \
-      -c gc.autopacklimit=1 \
-      -c gc.garbageexpire=now \
-      -c gc.reflogexpireunreachable=now \
-      gc --prune=all
-}
-
 function bes_git_pack_size()
 {
   if [[ $# > 1 ]]; then
@@ -314,8 +292,34 @@ function bes_git_pack_size()
   else
     _root="$(pwd)"
   fi
-  local _pack_size=$(bes_git_call "${_root}" count-objects -v | grep size-pack  | awk '{ print $2; }')
+  local _pack_size=$(cd "${_root}" && git count-objects -v | grep size-pack  | awk '{ print $2; }')
   echo ${_pack_size}
+  return 0
+}
+
+function bes_git_gc()
+{
+  if [[ $# > 1 ]]; then
+    bes_message "usage: bes_git_gc <repo>"
+    return 1
+  fi
+  local _repo=
+  if [[ $# == 1 ]]; then
+    _repo="${1}"
+  else
+    _repo="$(pwd)"
+  fi
+  local _size_before=$(bes_git_pack_size "${_repo}")
+  local _log="$(pwd)"/gc.log
+  ( cd "${_repo}" && git \
+      -c gc.auto=1 \
+      -c gc.autodetach=false \
+      -c gc.autopacklimit=1 \
+      -c gc.garbageexpire=now \
+      -c gc.reflogexpireunreachable=now \
+      gc --prune=all >& ${_log} )
+  local _size_after=$(bes_git_pack_size "${_repo}")
+  bes_message "bes_git_gc: delta: before=${_size_before} after=${_size_after} "
   return 0
 }
 
