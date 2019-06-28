@@ -333,11 +333,11 @@ function bes_git_gc()
   else
     _repo="$(pwd)"
   fi
-  local _size_before=$(bes_git_pack_size "${_repo}")
+  local _pack_size_before=$(bes_git_pack_size "${_repo}")
   local _gc_log="$(pwd)"/gc.log
   ( cd "${_repo}" && git reflog expire --expire=now --all && git gc --prune=now --aggressive >& ${_gc_log} )
-  local _size_after=$(bes_git_pack_size "${_repo}")
-  bes_message "bes_git_gc: delta: before=${_size_before} after=${_size_after} gc_log=${_gc_log}"
+  local _pack_size_after=$(bes_git_pack_size "${_repo}")
+  bes_message "bes_git_gc: delta: before=${_pack_size_before} after=${_pack_size_after} gc_log=${_gc_log}"
   return 0
 }
 
@@ -354,7 +354,7 @@ function bes_git_gc2()
   else
     _repo="$(pwd)"
   fi
-  local _size_before=$(bes_git_pack_size "${_repo}")
+  local _pack_size_before=$(bes_git_pack_size "${_repo}")
   local _gc_log="$(pwd)"/gc.log
   ( cd "${_repo}" && git \
       -c gc.auto=1 \
@@ -363,8 +363,8 @@ function bes_git_gc2()
       -c gc.garbageexpire=now \
       -c gc.reflogexpireunreachable=now \
       gc --prune=all >& ${_gc_log} )
-  local _size_after=$(bes_git_pack_size "${_repo}")
-  bes_message "bes_git_gc: delta: before=${_size_before} after=${_size_after} gc_log=${_gc_log}"
+  local _pack_size_after=$(bes_git_pack_size "${_repo}")
+  bes_message "bes_git_gc: delta: before=${_pack_size_before} after=${_pack_size_after} gc_log=${_gc_log}"
   return 0
 }
 
