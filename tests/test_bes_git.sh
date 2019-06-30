@@ -137,11 +137,64 @@ function test_bes_git_remote_remove()
 
 function test_bes_git_last_commit_hash()
 {
-  local _tmp=$(bes_git_make_temp_repo bes_git_remote_is_added)
+  local _tmp=$(bes_git_make_temp_repo bes_git_last_commit_hash)
   local _tmp_repo=${_tmp}/local
   local _commit_hash=$(bes_git_call ${_tmp_repo} log --format=%H -n 1)
   bes_assert "[[ $(bes_git_last_commit_hash ${_tmp_repo}) == ${_commit_hash} ]]"
   rm -rf ${_tmp}
+}
+
+function test_bes_git_last_commit_hash_short()
+{
+  local _tmp=$(bes_git_make_temp_repo bes_git_last_commit_hash)
+  local _tmp_repo=${_tmp}/local
+  local _commit_hash=$(bes_git_call ${_tmp_repo} log --format=%h -n 1)
+  bes_assert "[[ $(bes_git_last_commit_hash ${_tmp_repo} true) == ${_commit_hash} ]]"
+  rm -rf ${_tmp}
+}
+
+function _add_lfs_file()
+{
+  local _repo="${1}"
+  ( cd ${_repo} && \
+      git lfs install && \
+      echo "*.bin filter=lfs diff=lfs merge=lfs -text" > .gitattributes && \
+      git add .gitattributes && \
+      git commit -m"add attributes" .gitattributes && \
+      echo "foo.bin" > foo.bin && \
+      git add foo.bin && \
+      git commit -m"add attributes" foo.bin
+  ) >& /dev/null
+}
+
+function test_bes_git_repo_has_lfs_files()
+{
+  local _tmp=$(bes_git_make_temp_repo bes_git_repo_has_lfs_files)
+  local _tmp_repo=${_tmp}/local
+  local _commit_hash=$(bes_git_call ${_tmp_repo} log --format=%H -n 1)
+  bes_assert "[[ $(bes_testing_call_function bes_git_repo_has_lfs_files ${_tmp_repo} ) == 1 ]]"
+  _add_lfs_file ${_tmp_repo}
+  bes_assert "[[ $(bes_testing_call_function bes_git_repo_has_lfs_files ${_tmp_repo} ) == 0 ]]"
+  rm -rf ${_tmp}
+}
+
+function test_bes_git_submodule_revision()
+{
+  local _tmp=$(bes_git_make_temp_repo bes_git_submodule_revision)
+  local _tmp_repo=${_tmp}/local
+
+  local _tmp_sub=$(bes_git_make_temp_repo bes_git_submodule_revision_sub)
+  local _tmp_sub_repo=${_tmp_sub}/local
+  
+  ( cd ${_tmp_sub_repo} && echo "insub.txt" > insub.txt && git add insub.txt && git commit -m"add" . ) >& /dev/null
+
+  ( cd ${_tmp_repo} && git submodule add ${_tmp_sub_repo} addons/foo && git commit -m"add" . ) >& /dev/null
+
+  local _sub_commit=$(bes_git_last_commit_hash ${_tmp_sub_repo})
+  local _sub_commit_short=$(bes_git_last_commit_hash ${_tmp_sub_repo} true)
+
+  bes_assert "[[ $(bes_git_submodule_revision ${_tmp_repo} addons/foo) == ${_sub_commit} ]]"
+  bes_assert "[[ $(bes_git_submodule_revision ${_tmp_repo} addons/foo true) == ${_sub_commit_short} ]]"
 }
 
 bes_testing_run_unit_tests

@@ -132,14 +132,14 @@ function bes_git_repo_has_uncommitted_changes()
 function bes_git_repo_has_unpushed_changes()
 {
   if [[ $# -ge 1 ]]; then
-    local _path="${1}"
+    local _repo="${1}"
   else
-    local _path="$(pwd)"
+    local _repo="$(pwd)"
   fi
-  if ! bes_git_is_repo "${_path}"; then
+  if ! bes_git_is_repo "${_repo}"; then
     return 1
   fi
-  local _cherries=$(cd "${_path}" && git cherry | grep -E '^\+\s[a-f0-9]+$' | wc -l)
+  local _cherries=$(bes_git_call "${_repo}" cherry | grep -E '^\+\s[a-f0-9]+$' | wc -l)
   if [[ ${_cherries} -ne 0 ]]; then
     return 0
   fi
@@ -150,12 +150,12 @@ function bes_git_repo_has_unpushed_changes()
 function bes_git_call()
 {
   if [[ $# < 1 ]]; then
-    echo "usage: bes_git_call root <args>"
+    echo "usage: bes_git_call repo <args>"
     return 1
   fi
-  local _root="${1}"
+  local _repo="${1}"
   shift
-  git --git-dir "${_root}/.git" --work-tree "${_root}" ${1+"$@"}
+  ( cd "${_repo}" && git ${1+"$@"} )
   return $?
 }
 
@@ -183,9 +183,9 @@ function bes_git_make_temp_repo()
   local _tmp=/tmp/temp_git_repo_${_name}_$$
   local _tmp_remote_repo=${_tmp}/remote
   mkdir -p ${_tmp_remote_repo}
-  ( cd ${_tmp_remote_repo} && git init --bare --shared ) >& /dev/null
+  ( bes_git_call "${_tmp_remote_repo}" init --bare --shared ) >& /dev/null
   local _tmp_local_repo=${_tmp}/local
-  ( cd ${_tmp} && git clone ${_tmp_remote_repo} local ) >& /dev/null
+  ( bes_git_call "${_tmp}" clone ${_tmp_remote_repo} local ) >& /dev/null
   bes_git_add_file ${_tmp_local_repo} readme.txt "this is readme.txt\n" 
   echo ${_tmp}
   return 0
@@ -249,34 +249,75 @@ function bes_git_remote_remove()
 
 function bes_git_last_commit_hash()
 {
-  if [[ $# > 1 ]]; then
-    bes_message "usage: bes_git_last_commit_hash <root>"
+  if [[ $# < 1 ]]; then
+    bes_message "usage: bes_git_last_commit_hash repo <short_hash>"
     return 1
   fi
-  local _root=
-  if [[ $# == 1 ]]; then
-    _root="${1}"
-  else
-    _root="$(pwd)"
+  local _repo="${1}"
+  local _long_hash=$(bes_git_call "${_repo}" log --format=%H -n 1)
+  local _want_short_hash="false"
+  if [[ $# > 1 ]]; then
+    _want_short_hash=${2}
   fi
-  bes_git_call "${_root}" log --format=%H -n 1
+  if [[ ${_want_short_hash} == "true" ]]; then
+    _hash=$(bes_git_short_hash "${_repo}" ${_long_hash})
+  else
+    _hash=${_long_hash}
+  fi
+  echo ${_hash}
   return 0
 }  
 
-# print the revision (commit hash) at which a submodule is pegged.
+# return the commit hash to which the submodule points
 function bes_git_submodule_revision()
 {
-  if [[ $# != 1 ]]; then
-    bes_message "usage: bes_git_submodule_revision submodule"
+  if [[ $# < 2 ]]; then
+    bes_message "usage: bes_git_submodule_commit repo submodule <short_hash>"
     return 1
   fi
-  local _submodule=${1}
-  local _revision=$(git submodule status ${_submodule} | sed -E 's/^\+//' | sed -E 's/^\-//' | awk '{ print $1; }')
-  echo ${_revision}
+  local _repo="${1}"
+  local _submodule="${2}"
+  local _want_short_hash="false"
+  if [[ $# > 2 ]]; then
+    _want_short_hash=${3}
+  fi
+  local _hash
+  local _long_hash=$(bes_git_call "${_repo}" ls-tree HEAD "${_submodule}" | awk '$2 == "commit"' | awk '{ print $3; }')
+  if [[ ${_want_short_hash} == "true" ]]; then
+    _hash=$(bes_git_short_hash "${_repo}/${_submodule}" ${_long_hash})
+  else
+    _hash=${_long_hash}
+  fi
+  echo ${_hash}
   return 0
 }
 
-# update a submodule to the HEAD of its branch and commit the result with a meaningful message
+# init a submodule.  optional recursive argument
+function bes_git_submodule_init()
+{
+  if [[ $# < 1 ]]; then
+    bes_message "usage: bes_git_submodule_checkout submodule [recursive]"
+    return 1
+  fi
+  
+  if bes_git_repo_has_uncommitted_changes; then
+    bes_message "bes_git_submodule_update: The git tree needs to be clean with no uncommitted changes."
+    return 1
+  fi
+  local _submodule="${1}"
+  local _recursive_flag=""
+  if [[ $# > 1 ]]; then
+    if [[ ${2} == "true" ]]; then
+      _recursive_flag="--recursive"
+    fi
+  fi
+  git submodule update --init ${_recursive_flag} "${_submodule}"
+  return 0
+}
+
+# update a submodule to the HEAD of its branch
+# commit the result with a meaningful message
+# update is *NOT* recursive.  only the top level submodule is updated
 function bes_git_submodule_update()
 {
   if [[ $# != 1 ]]; then
@@ -305,42 +346,30 @@ function bes_git_submodule_update()
 
 function bes_git_short_hash()
 {
-  if [[ $# != 1 ]]; then
-    bes_message "usage: bes_git_short_hash long_hash"
+  if [[ $# != 2 ]]; then
+    bes_message "usage: bes_git_short_hash repo long_hash"
     return 1
   fi
-  local _long_hash=${1}
-  local _short_hash=$(git rev-parse --short ${_long_hash})
+  local _repo="${1}"
+  local _long_hash=${2}
+  local _short_hash=$(bes_git_call "${_repo}" rev-parse --short ${_long_hash})
   echo ${_short_hash}
-  return 0
-}
-
-# return the commit hash to which the submodule points
-function bes_git_submodule_commit()
-{
-  if [[ $# != 1 ]]; then
-    bes_message "usage: bes_git_submodule_commit submodule"
-    return 1
-  fi
-  local _submodule="${1}"
-  local _commit_hash=$(git ls-tree HEAD "${_submodule}" | awk '$2 == "commit"' | awk '{ print $3; }')
-  echo ${_commit_hash}
   return 0
 }
 
 function bes_git_pack_size()
 {
   if [[ $# > 1 ]]; then
-    bes_message "usage: bes_git_pack_size <root>"
+    bes_message "usage: bes_git_pack_size <repo>"
     return 1
   fi
-  local _root=
+  local _repo=
   if [[ $# == 1 ]]; then
-    _root="${1}"
+    _repo="${1}"
   else
-    _root="$(pwd)"
+    _repo="$(pwd)"
   fi
-  local _pack_size=$(cd "${_root}" && git count-objects -v | grep size-pack  | awk '{ print $2; }')
+  local _pack_size=$(bes_git_call "${_repo}" && git count-objects -v | grep size-pack  | awk '{ print $2; }')
   echo ${_pack_size}
   return 0
 }
@@ -360,7 +389,7 @@ function bes_git_gc()
   fi
   local _pack_size_before=$(bes_git_pack_size "${_repo}")
   local _gc_log="$(pwd)"/gc.log
-  ( cd "${_repo}" && git reflog expire --expire=now --all && git gc --prune=now --aggressive >& ${_gc_log} )
+  ( cd "${_repo}" && git reflog expire --expire=now --all && git gc --prune=now --aggressive ) >& ${_gc_log}
   local _pack_size_after=$(bes_git_pack_size "${_repo}")
   bes_message "bes_git_gc: delta: before=${_pack_size_before} after=${_pack_size_after} gc_log=${_gc_log}"
   return 0
@@ -381,16 +410,32 @@ function bes_git_gc2()
   fi
   local _pack_size_before=$(bes_git_pack_size "${_repo}")
   local _gc_log="$(pwd)"/gc.log
-  ( cd "${_repo}" && git \
+  bes_git_call "${_repo}" \
       -c gc.auto=1 \
       -c gc.autodetach=false \
       -c gc.autopacklimit=1 \
       -c gc.garbageexpire=now \
       -c gc.reflogexpireunreachable=now \
-      gc --prune=all >& ${_gc_log} )
+      gc --prune=all >& ${_gc_log}
   local _pack_size_after=$(bes_git_pack_size "${_repo}")
   bes_message "bes_git_gc: delta: before=${_pack_size_before} after=${_pack_size_after} gc_log=${_gc_log}"
   return 0
+}
+
+# Return true (1) if the repo has git lfs files
+function bes_git_repo_has_lfs_files()
+{
+  local _repo=
+  if [[ $# == 1 ]]; then
+    _repo="${1}"
+  else
+    _repo="$(pwd)"
+  fi
+  local _n=$(bes_git_call "${_repo}" lfs ls-files | wc -l | awk '{ print $1; }')
+  if [[ ${_n} != 0 ]]; then
+    return 0
+  fi
+  return 1
 }
 
 _bes_trace_file "end"
