@@ -32,7 +32,13 @@ function main()
   done
 
   rm -rf "${_temp_home}"
-                       
+
+  if [[ ${_result} == 0 ]]; then
+    echo "PASSED: all tests passed"
+  else
+    echo "FAILED: some tests failed"
+  fi
+  
   return ${_result}
 }
 

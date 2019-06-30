@@ -213,33 +213,65 @@ function test_bes_git_submodule_revision()
   rm -rf "${_tmp}" "${_tmp_sub}"
 }
 
-function test_bes_git_submodule_with_lfs()
+function test_bes_git_submodule_revision_with_lfs()
 {
-  local _temp_home=/tmp/test_bes_git_submodule_revision_temp_home_$$
+  local _temp_home=/tmp/test_bes_git_submodule_with_lfs_temp_home_$$
   mkdir -p "${_temp_home}"
   local _save_home="${HOME}"
   export HOME="${_temp_home}"
 
-  local _tmp=$(bes_git_make_temp_repo bes_git_submodule_revision)
+  local _tmp=$(bes_git_make_temp_repo bes_git_submodule_with_lfs)
   local _tmp_repo=${_tmp}/local
 
-  local _tmp_sub=$(bes_git_make_temp_repo bes_git_submodule_revision_sub)
-  local _tmp_sub_repo=${_tmp_sub}/local
-  
-  ( cd ${_tmp_sub_repo} && echo "insub.txt" > insub.txt && git add insub.txt && git commit -m"add" . ) >& /dev/null
-  _add_lfs_file "${_tmp_sub_repo}" foo.bin "this is foo.bin"
-  
-  ( cd ${_tmp_repo} && git submodule add ${_tmp_sub_repo} addons/foo && git commit -m"add" . ) >& /dev/null
+  local _tmp_lfs_clone=$(_git_test_clone git@gitlab.com:rebuilder/lfs_test.git)
 
-  local _sub_commit=$(bes_git_last_commit_hash ${_tmp_sub_repo})
-  local _sub_commit_short=$(bes_git_last_commit_hash ${_tmp_sub_repo} true)
+  local _sub_commit_long=$(bes_git_last_commit_hash ${_tmp_lfs_clone})
+  local _sub_commit_short=$(bes_git_last_commit_hash ${_tmp_lfs_clone} true)
 
-#  bes_assert "[[ $(bes_git_submodule_revision ${_tmp_repo} addons/foo) == ${_sub_commit} ]]"
-#  bes_assert "[[ $(bes_git_submodule_revision ${_tmp_repo} addons/foo true) == ${_sub_commit_short} ]]"
+  ( cd ${_tmp_repo} && git submodule add git@gitlab.com:rebuilder/lfs_test.git sub/foo && git commit -m"add" . && git push ) >& /dev/null
+
+  bes_assert "[[ $(bes_git_submodule_revision ${_tmp_repo} sub/foo) == ${_sub_commit_long} ]]"
+  bes_assert "[[ $(bes_git_submodule_revision ${_tmp_repo} sub/foo true) == ${_sub_commit_short} ]]"
 
   export HOME="${_save_home}"
 
-  rm -rf "${_tmp}" "${_tmp_sub}" "${_temp_home}"
+  rm -rf "${_tmp}" "${_tmp_lfs_clone}"
+}
+
+function _check_num_args()
+{
+  if [[ $# != 3 ]]; then
+    bes_message "ERROR: _check_num_args got ${#} instead of 3 args."
+    exit 1
+  fi
+  local _msg="${1}"
+  local _expected="${2}"
+  local _actual="${3}"
+  if [[ ${_expected} != ${_actual} ]]; then
+    bes_message "expecting ${_exepected} instead of ${_actual} num args: ${_msg}"
+    exit 1
+  fi
+}  
+
+function _git_test_address_name()
+{
+  _check_num_args "_git_test_address_name" 1 $#
+  local _address=${1}
+  local _name=$( echo ${_address}  | awk -F"/" '{ print $NF; }'  | sed 's/\.git//')
+  echo ${_name}
+  return 0
+}
+
+# Clone a repo to a tmp dir
+function _git_test_clone()
+{
+  _check_num_args "_git_test_clone" 1 $#
+  local _address=${1}
+  local _name=$(_git_test_address_name ${_address})
+  local _tmp=/tmp/temp_git_repo_${_name}_$$
+  git clone ${_address} ${_tmp} >& /dev/null
+  echo ${_tmp}
+  return 0
 }
 
 bes_testing_run_unit_tests
