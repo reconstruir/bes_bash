@@ -396,4 +396,11 @@ function test_bes_abs_file()
   rm -rf ${_tmp}
 }
 
+function test_bes_file_extension()
+{
+  bes_assert "[ $(bes_file_extension foo.png) = png ]"
+  bes_assert "[ $(bes_file_extension foo.tar.gz) = gz ]"
+  bes_assert "[ $(bes_file_extension foo) = foo ]"
+}
+
 bes_testing_run_unit_tests

@@ -6,13 +6,17 @@ function main()
   local _result=0
   local _test_file
   local _tests
+
+  local _temp_home=/tmp/run_test_temp_home_$$
+  mkdir -p "${_temp_home}"
+
   if [[ $# > 0 ]]; then
     _tests=${1+"$@"}
   else
     _tests="${_test_dir}/*.sh"
   fi
   for _test_file in ${_tests}; do
-    ${_test_file}
+    HOME="${_temp_home}" ${_test_file}
     local _rv=$?
     if [[ ${_rv} != 0 ]]; then
       echo "FAILED: ${_test_file}"
@@ -21,6 +25,14 @@ function main()
       echo "PASSED: ${_test_file}"
     fi
   done
+  local _side_effect
+  for _side_effect in $(find "${_temp_home}" -type f); do
+    echo "SIDE_EFFECT: ${_side_effect}"
+    _result=1
+  done
+
+  rm -rf "${_temp_home}"
+                       
   return ${_result}
 }
 

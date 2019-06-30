@@ -1083,4 +1083,18 @@ function bes_abs_file()
   return 0
 }
 
+# reuturn just the extension of a file
+function bes_file_extension()
+{
+  if [[ $# < 1 ]]; then
+    bes_message "usage: bes_file_extension filename"
+    return 1
+  fi
+  local _filename="${1}"
+  local _base=$($_BES_BASENAME_EXE -- "${_filename}")
+  local _ext="${_base##*.}"
+  echo "${_ext}"
+  return 0
+}
+
 _bes_trace_file "end"
