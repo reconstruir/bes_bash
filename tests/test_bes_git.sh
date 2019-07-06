@@ -238,6 +238,31 @@ function test_bes_git_submodule_revision_with_lfs()
   rm -rf "${_tmp}" "${_tmp_lfs_clone}"
 }
 
+function test_bes_git_submodule_update()
+{
+  local _tmp=$(bes_git_make_temp_repo bes_git_submodule_update)
+  local _tmp_repo=${_tmp}/local
+
+  local _tmp_sub=$(bes_git_make_temp_repo bes_git_submodule_update_sub)
+  local _tmp_sub_repo=${_tmp_sub}/local
+  
+  ( cd ${_tmp_sub_repo} && echo "insub.txt" > insub.txt && git add insub.txt && git commit -m"add" . && git push ) >& /dev/null
+  ( cd ${_tmp_repo} && git submodule add ${_tmp_sub_repo} addons/foo && git commit -m"add" . && git push ) >& /dev/null
+
+  local _sub_commit=$(bes_git_last_commit_hash ${_tmp_sub_repo})
+
+  bes_assert "[[ $(bes_git_submodule_revision ${_tmp_repo} addons/foo) == ${_sub_commit} ]]"
+
+  ( cd ${_tmp_sub_repo} && echo "insub2.txt" > insub.txt && git commit -m"update" .  && git push ) >& /dev/null
+
+  local _new_sub_commit=$(bes_git_last_commit_hash ${_tmp_sub_repo})
+  bes_git_submodule_update "${_tmp_repo}" addons/foo >& /dev/null
+
+  bes_assert "[[ $(bes_git_submodule_revision ${_tmp_repo} addons/foo) == ${_new_sub_commit} ]]"
+
+  rm -rf "${_tmp}" "${_tmp_sub}"
+}
+
 function _check_num_args()
 {
   if [[ $# != 3 ]]; then

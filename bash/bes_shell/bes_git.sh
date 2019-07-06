@@ -121,7 +121,7 @@ function bes_git_repo_has_uncommitted_changes()
   if ! bes_git_is_repo "${_path}"; then
     return 1
   fi
-  local _diff=$(git diff)
+  local _diff=$(cd "${_path}" && git diff)
   if [[ -n "${_diff}" ]]; then
     return 0
   fi
@@ -320,27 +320,27 @@ function bes_git_submodule_init()
 # update is *NOT* recursive.  only the top level submodule is updated
 function bes_git_submodule_update()
 {
-  if [[ $# != 1 ]]; then
-    bes_message "usage: bes_git_submodule_update submodule"
+  if [[ $# != 2 ]]; then
+    bes_message "usage: bes_git_submodule_update repo submodule"
     return 1
   fi
-  
-  if bes_git_repo_has_uncommitted_changes; then
-    bes_message "bes_git_submodule_update: The git tree needs to be clean with no uncommitted changes."
+  local _repo="${1}"
+  if bes_git_repo_has_uncommitted_changes "${_repo}"; then
+    bes_message "bes_git_submodule_update: The git tree needs to be clean with no uncommitted changes: ${_repo}"
     return 1
   fi
-  local _submodule=${1}
-  local _old_revision=$(bes_git_submodule_revision ${_submodule})
-  git submodule update --init ${_submodule}
-  git submodule update --remote --merge ${_submodule}
-  local _new_revision=$(bes_git_submodule_revision ${_submodule})
+  local _submodule=${2}
+  local _old_revision=$(bes_git_submodule_revision "${_repo}" ${_submodule} true)
+  ( cd "${_repo}" && git submodule update --init ${_submodule} )
+  ( cd "${_repo}" && git submodule update --remote --merge ${_submodule} )
+  local _new_revision=$(bes_git_last_commit_hash "${_repo}/${_submodule}" true)
   if [[ ${_old_revision} == ${_new_revision} ]]; then
     bes_message "submodule ${_submodule} already at latest revision ${_new_revision}"
     return 0
   fi
-  git add ${1}
+  ( cd "${_repo}" && git add ${1} )
   local _message="submodule ${_submodule} updated from ${_old_revision} to ${_new_revision}"
-  git commit -m"${_message}" .
+  ( cd "${_repo}" && git commit -m"${_message}" . )
   bes_message "${_message}"
   return 0
 }
