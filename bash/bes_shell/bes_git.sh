@@ -338,6 +338,7 @@ function bes_git_submodule_update()
     bes_message "submodule ${_submodule} already at latest revision ${_new_revision}"
     return 0
   fi
+  git add ${1}
   local _message="submodule ${_submodule} updated from ${_old_revision} to ${_new_revision}"
   git commit -m"${_message}" .
   bes_message "${_message}"
