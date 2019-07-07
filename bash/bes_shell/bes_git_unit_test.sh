@@ -34,10 +34,10 @@ function _bes_git_make_temp_repo()
   return 0
 }
 
-function _check_num_args()
+function _bes_git_check_num_args()
 {
   if [[ $# != 3 ]]; then
-    bes_message "ERROR: _check_num_args got ${#} instead of 3 args."
+    bes_message "ERROR: _bes_git_check_num_args got ${#} instead of 3 args."
     exit 1
   fi
   local _msg="${1}"
@@ -49,9 +49,9 @@ function _check_num_args()
   fi
 }  
 
-function _git_test_address_name()
+function _bes_git_test_address_name()
 {
-  _check_num_args "_git_test_address_name" 1 $#
+  _bes_git_check_num_args "_bes_git_test_address_name" 1 $#
   local _address=${1}
   local _name=$( echo ${_address}  | awk -F"/" '{ print $NF; }'  | sed 's/\.git//')
   echo ${_name}
@@ -59,11 +59,11 @@ function _git_test_address_name()
 }
 
 # Clone a repo to a tmp dir
-function _git_test_clone()
+function _bes_git_test_clone()
 {
-  _check_num_args "_git_test_clone" 1 $#
+  _bes_git_check_num_args "_bes_git_test_clone" 1 $#
   local _address=${1}
-  local _name=$(_git_test_address_name ${_address})
+  local _name=$(_bes_git_test_address_name ${_address})
   local _tmp=/tmp/temp_git_repo_${_name}_$$
   git clone ${_address} ${_tmp} >& /dev/null
   echo ${_tmp}

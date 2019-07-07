@@ -242,7 +242,7 @@ function test_bes_git_submodule_revision_with_lfs()
   local _tmp=$(_bes_git_make_temp_repo bes_git_submodule_with_lfs)
   local _tmp_repo=${_tmp}/local
 
-  local _tmp_lfs_clone=$(_git_test_clone git@gitlab.com:rebuilder/lfs_test.git)
+  local _tmp_lfs_clone=$(_bes_git_test_clone git@gitlab.com:rebuilder/lfs_test.git)
 
   local _sub_commit_long=$(bes_git_last_commit_hash ${_tmp_lfs_clone})
   local _sub_commit_short=$(bes_git_last_commit_hash ${_tmp_lfs_clone} true)
