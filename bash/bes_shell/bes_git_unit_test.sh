@@ -16,6 +16,28 @@ function _bes_git_add_file()
   return 0
 }
 
+function _bes_git_add_lfs_file()
+{
+  if [[ $# != 3 ]]; then
+    bes_message "usage: _bes_git_add_lfs_file repo filename content"
+    return 1
+  fi
+  local _repo="${1}"
+  local _filename="${2}"
+  local _content="${3}"
+  
+  local _ext=$(bes_file_extension "${_filename}")
+  ( cd ${_repo} && \
+      git lfs install && \
+      echo "*.${_ext} filter=lfs diff=lfs merge=lfs -text" > .gitattributes && \
+      git add .gitattributes && \
+      git commit -m"add attributes" .gitattributes && \
+      echo "${_content}" > "${_filename}" && \
+      git add "${_filename}" && \
+      git commit -m"add ${_filename}" "${_filename}"
+  ) >& /dev/null
+}
+
 function _bes_git_make_temp_repo()
 {
   if [[ $# != 1 ]]; then
