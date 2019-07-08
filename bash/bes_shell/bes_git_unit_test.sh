@@ -2,17 +2,33 @@
 
 _bes_trace_file "begin"
 
+# Add a file to repo with filename and content and optional push (false by default)
 function _bes_git_add_file()
 {
-  if [[ $# != 3 ]]; then
-    echo "usage: _bes_git_add_file root filename content"
+  if [[ $# < 3 ]]; then
+    echo "usage: _bes_git_add_file repo filename content [push]"
     return 1
   fi
-  local _root="${1}"
-  local _filename="${2}"
-  local _content="${3}"
+  local _repo="${1}"
+  shift
+  local _filename="${1}"
+  shift
+  local _content="${1}"
+  shift
+  local _push=false
+  if [[ $# > 0 ]]; then
+    _push=${1}
+  fi
   local _dirname=$(dirname "${_filename}")
-  ( cd ${_root} && mkdir -p ${_dirname} && echo "${_content}" > ${_filename} && git add ${_filename} && git commit -m"add ${_filename}" ${_filename} && git push origin master ) >& /dev/null
+  (
+    cd ${_repo} && \
+    mkdir -p ${_dirname} && \
+    echo "${_content}" > ${_filename} && \
+    git add ${_filename} && \
+    git commit -m"add ${_filename}" ${_filename} && \
+    if [[ "${_push}" == "true" ]]; then git push origin master; fi
+  ) >& /dev/null
+
   return 0
 }
 
@@ -51,7 +67,7 @@ function _bes_git_make_temp_repo()
   ( bes_git_call "${_tmp_remote_repo}" init --bare --shared ) >& /dev/null
   local _tmp_local_repo=${_tmp}/local
   ( bes_git_call "${_tmp}" clone ${_tmp_remote_repo} local ) >& /dev/null
-  _bes_git_add_file ${_tmp_local_repo} readme.txt "this is readme.txt\n" 
+  _bes_git_add_file ${_tmp_local_repo} readme.txt "this is readme.txt\n" true
   echo ${_tmp}
   return 0
 }

@@ -305,21 +305,28 @@ function bes_git_submodule_init()
   return 0
 }
 
-# update a submodule to the HEAD of its branch
+# update a submodule to the given revision or HEAD if none is given
 # commit the result with a meaningful message
 # update is *NOT* recursive.  only the top level submodule is updated
 function bes_git_submodule_update()
 {
-  if [[ $# != 2 ]]; then
-    bes_message "usage: bes_git_submodule_update repo submodule"
+  if [[ $# < 2 ]]; then
+    bes_message "usage: bes_git_submodule_update repo submodule [revision]"
     return 1
   fi
   local _repo="${1}"
+  shift
   if bes_git_repo_has_uncommitted_changes "${_repo}"; then
     bes_message "bes_git_submodule_update: The git tree needs to be clean with no uncommitted changes: ${_repo}"
     return 1
   fi
-  local _submodule=${2}
+  local _submodule=${1}
+  shift
+  local _revision="HEAD"
+  if [[ $# > 0 ]]; then
+    _revision=${1}
+  fi
+    
   local _old_revision=$(bes_git_submodule_revision "${_repo}" ${_submodule} true)
   ( cd "${_repo}" && git submodule update --init ${_submodule} )
   ( cd "${_repo}" && git submodule update --remote --merge ${_submodule} )

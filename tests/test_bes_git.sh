@@ -93,7 +93,7 @@ function test_bes_git_repo_has_unpushed_changes()
   local _tmp_local_repo=${_tmp_local}/repo
   mkdir -p ${_tmp_local}
   ( cd ${_tmp_local} && git clone ${_tmp_remote_repo} repo ) >& /dev/null
-  _bes_git_add_file "${_tmp_local_repo}" "foo.txt" foo.txt
+  _bes_git_add_file "${_tmp_local_repo}" "foo.txt" foo.txt true
   bes_assert "[[ $(bes_testing_call_function bes_git_repo_has_unpushed_changes ${_tmp_local_repo} ) == 1 ]]"
   ( cd ${_tmp_local_repo} && echo "2foo.txt" > foo.txt && git commit -mtest2 foo.txt ) >& /dev/null  
   bes_assert "[[ $(bes_testing_call_function bes_git_repo_has_unpushed_changes ${_tmp_local_repo} ) == 0 ]]"
@@ -196,7 +196,7 @@ function test_bes_git_submodule_revision()
   local _tmp_sub=$(_bes_git_make_temp_repo bes_git_submodule_revision_sub)
   local _tmp_sub_repo=${_tmp_sub}/local
   
-  ( cd ${_tmp_sub_repo} && echo "insub.txt" > insub.txt && git add insub.txt && git commit -m"add" . ) >& /dev/null
+  _bes_git_add_file "${_tmp_sub_repo}" insub.txt "this is insub.txt\n" false
 
   ( cd ${_tmp_repo} && git submodule add ${_tmp_sub_repo} addons/foo && git commit -m"add" . ) >& /dev/null
 
@@ -234,15 +234,15 @@ function test_bes_git_submodule_revision_with_lfs()
   rm -rf "${_tmp}" "${_tmp_lfs_clone}" "${_temp_home}"
 }
 
-function test_bes_git_submodule_update()
+function test_bes_git_submodule_update_no_revision()
 {
   local _tmp=$(_bes_git_make_temp_repo bes_git_submodule_update)
   local _tmp_repo=${_tmp}/local
 
   local _tmp_sub=$(_bes_git_make_temp_repo bes_git_submodule_update_sub)
   local _tmp_sub_repo=${_tmp_sub}/local
-  
-  ( cd ${_tmp_sub_repo} && echo "insub.txt" > insub.txt && git add insub.txt && git commit -m"add" . && git push ) >& /dev/null
+
+  _bes_git_add_file "${_tmp_sub_repo}" insub.txt "this is insub.txt\n" true
   ( cd ${_tmp_repo} && git submodule add ${_tmp_sub_repo} addons/foo && git commit -m"add" . && git push ) >& /dev/null
 
   local _sub_commit=$(bes_git_last_commit_hash ${_tmp_sub_repo})
@@ -258,6 +258,5 @@ function test_bes_git_submodule_update()
 
   rm -rf "${_tmp}" "${_tmp_sub}"
 }
-
 
 bes_testing_run_unit_tests
