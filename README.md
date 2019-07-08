@@ -1,6 +1,11 @@
 # bes_shell
 
-**bes_shell** is a one file shell framework for manipulating unix shell paths.
+**bes_shell** is a bash library for making it easier to do the following in bash:
+
+ - manipulate paths
+ - deal with git
+ - download stuff from the web
+ - do the above in a portable fashion on macos and any unix
 
 ## Overview
 
