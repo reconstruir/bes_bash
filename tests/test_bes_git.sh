@@ -63,7 +63,7 @@ function test_bes_git_is_repo_false()
 
 function test_bes_git_repo_has_uncommitted_changes()
 {
-  local _tmp=$(_bes_git_make_temp_repo git_local_branch_exists)
+  local _tmp=$(_bes_git_make_temp_repo git_repo_has_uncommitted_changes)
   local _tmp_repo=${_tmp}/local
   bes_assert "[[ $(bes_testing_call_function bes_git_repo_has_uncommitted_changes ${_tmp_repo} ) == 1 ]]"
   ( cd "${_tmp_repo}" && echo "changed" > readme.txt )
@@ -87,6 +87,16 @@ function test_bes_git_repo_has_unpushed_changes()
   bes_assert "[[ $(bes_testing_call_function bes_git_repo_has_unpushed_changes ${_tmp_local_repo} ) == 0 ]]"
   rm -rf ${_tmp_remote}
   rm -rf ${_tmp_local}
+}
+
+function test_bes_git_repo_has_untracked_files()
+{
+  local _tmp=$(_bes_git_make_temp_repo git_repo_has_untracked_files)
+  local _tmp_repo=${_tmp}/local
+  bes_assert "[[ $(bes_testing_call_function bes_git_repo_has_untracked_files ${_tmp_repo} ) == 1 ]]"
+  ( cd "${_tmp_repo}" && echo "iamnew" > new_file.txt )
+  bes_assert "[[ $(bes_testing_call_function bes_git_repo_has_untracked_files ${_tmp_repo} ) == 0 ]]"
+  rm -rf ${_tmp}
 }
 
 function test_bes_git_local_branch_exists()
@@ -236,5 +246,6 @@ function test_bes_git_submodule_update()
 
   rm -rf "${_tmp}" "${_tmp_sub}"
 }
+
 
 bes_testing_run_unit_tests

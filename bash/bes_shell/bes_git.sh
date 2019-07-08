@@ -144,8 +144,8 @@ function bes_git_repo_has_untracked_files()
   if ! bes_git_is_repo "${_path}"; then
     return 1
   fi
-  local _num=$(git status --untracked=all --porcelain | grep "?? " | wc -l)
-  if [[ ${_num} > 0 ]]; then
+  local _num=$(cd "${_path}" && git status --untracked=all --porcelain | grep "?? " | wc -l)
+  if [[ $(expr ${_num}) > 0 ]]; then
     return 0
   fi
   return 1
