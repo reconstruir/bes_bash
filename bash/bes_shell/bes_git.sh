@@ -286,12 +286,12 @@ function bes_git_submodule_revision()
 function bes_git_submodule_init()
 {
   if [[ $# < 1 ]]; then
-    bes_message "usage: bes_git_submodule_checkout submodule [recursive]"
+    bes_message "usage: bes_git_submodule_init submodule [recursive]"
     return 1
   fi
   
   if bes_git_repo_has_uncommitted_changes; then
-    bes_message "bes_git_submodule_update: The git tree needs to be clean with no uncommitted changes."
+    bes_message "bes_git_submodule_init: The git tree needs to be clean with no uncommitted changes."
     return 1
   fi
   local _submodule="${1}"
