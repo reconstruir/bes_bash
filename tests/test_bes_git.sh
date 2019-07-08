@@ -67,6 +67,18 @@ function test_bes_git_repo_has_uncommitted_changes()
   local _tmp_repo=${_tmp}/local
   bes_assert "[[ $(bes_testing_call_function bes_git_repo_has_uncommitted_changes ${_tmp_repo} ) == 1 ]]"
   ( cd "${_tmp_repo}" && echo "changed" > readme.txt )
+  bes_git_repo_has_uncommitted_changes "${_tmp_repo}"
+  bes_assert "[[ $(bes_testing_call_function bes_git_repo_has_uncommitted_changes ${_tmp_repo} ) == 0 ]]"
+  rm -rf ${_tmp}
+}
+
+function test_bes_git_repo_has_uncommitted_changes_added_file()
+{
+  local _tmp=$(_bes_git_make_temp_repo git_repo_has_uncommitted_changes)
+  local _tmp_repo=${_tmp}/local
+  bes_assert "[[ $(bes_testing_call_function bes_git_repo_has_uncommitted_changes ${_tmp_repo} ) == 1 ]]"
+  ( cd "${_tmp_repo}" && echo "iamnew" > new_file.txt && git add -A )
+  bes_git_repo_has_uncommitted_changes "${_tmp_repo}"
   bes_assert "[[ $(bes_testing_call_function bes_git_repo_has_uncommitted_changes ${_tmp_repo} ) == 0 ]]"
   rm -rf ${_tmp}
 }

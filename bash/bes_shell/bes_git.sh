@@ -121,11 +121,10 @@ function bes_git_repo_has_uncommitted_changes()
   if ! bes_git_is_repo "${_path}"; then
     return 1
   fi
-  local _diff=$(cd "${_path}" && git diff)
-  if [[ -n "${_diff}" ]]; then
-    return 0
+  if $(cd "${_path}" && git diff-index --quiet HEAD --); then
+    return 1
   fi
-  return 1
+  return 0
 }
 
 # Return 0 if git repo has untracked files
