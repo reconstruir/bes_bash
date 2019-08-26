@@ -420,7 +420,7 @@ function bes_git_gc2()
   return 0
 }
 
-# Return true (1) if the repo has git lfs files
+# Return true (0) if the repo has git lfs files
 function bes_git_repo_has_lfs_files()
 {
   local _repo=
@@ -434,6 +434,27 @@ function bes_git_repo_has_lfs_files()
     return 0
   fi
   return 1
+}
+
+# Return true (0) if a git lfs file needs pulling
+function bes_git_lfs_file_needs_pull()
+{
+  if [[ $# != 2 ]]; then
+    echo "usage: bes_git_lfs_file_needs_pull repo filename"
+    return 1
+  fi
+  local _repo="${1}"
+  local _filename="${2}"
+  local _found=$(cd "${_repo}" && git lfs ls-files | grep -w "${_filename}")
+  if [[ -z "${_found}" ]]; then
+    bes_message "lfs file ${_filename} not found in ${_repo}"
+    return 1
+  fi
+  local _status=$(echo "${_found}" | awk '{ print $2; }')
+  if [[ ${_status} == "*" ]]; then
+    return 1
+  fi
+  return 0
 }
 
 _bes_trace_file "end"
