@@ -1083,6 +1083,22 @@ function bes_abs_file()
   return 0
 }
 
+function bes_str_split()
+{
+  if [[ $# < 2 ]]; then
+    bes_message "usage: bes_str_split string delimiter"
+    return 1
+  fi
+  local _string="${1}"
+  local _delimiter="${2}"
+  local _saveIFS="${IFS}"
+  local _result
+  IFS="${_delimiter}" read -r -a _result <<< "${_string}"
+  echo "${_result[@]}"
+  IFS="${_saveIFS}"
+  return 0
+}
+
 # reuturn just the extension of a file
 function bes_file_extension()
 {

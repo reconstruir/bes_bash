@@ -403,4 +403,10 @@ function test_bes_file_extension()
   bes_assert "[ $(bes_file_extension foo) = foo ]"
 }
 
+function test_bes_str_split()
+{
+  bes_assert "[ $(bes_str_split a:b:c : | tr ' ' '_') = 'a_b_c' ]"
+  bes_assert "[ $(bes_str_split a\ :b:c : | tr ' ' '_') = 'a__b_c' ]"
+}
+
 bes_testing_run_unit_tests
