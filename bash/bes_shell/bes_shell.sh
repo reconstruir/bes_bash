@@ -684,9 +684,21 @@ function bes_debug_message()
   return 0
 }
 
+function bes_is_ci()
+{
+  if [[ -n "${CI}"|| -n "${HUDSON_COOKIE}" ]]; then
+    return 0
+  fi
+  return 1
+}
+
 function bes_console_message()
 {
-  BES_DEBUG=1 BES_LOG_FILE=$(tty) bes_debug_message ${1+"$@"}
+  if bes_is_ci ; then
+    BES_DEBUG=1 bes_debug_message ${1+"$@"}
+  else    
+    BES_DEBUG=1 BES_LOG_FILE=$(tty) bes_debug_message ${1+"$@"}
+  fi
   return $?
 }
 
