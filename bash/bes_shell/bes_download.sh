@@ -55,8 +55,8 @@ function _bes_download_curl()
   else
     _auth_args=""
   fi
-  local _http_code=$(curl -silent ${_auth_args} ${_url} --location --output ${_filename} -w "%{http_code}\n")
-  if [[ ${_http_code} != 200 ]]; then
+  local _http_code=$(curl ${_auth_args} ${_url} --location --output ${_filename} -w "%{http_code}\n" 2> /dev/null)
+  if [[ "${_http_code}" != "200" ]]; then
     return 1
   fi
   return 0

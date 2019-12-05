@@ -798,7 +798,7 @@ function _bes_checksum_file_linux()
 function _bes_checksum_text_linux()
 {
   if [[ $# != 2 ]]; then
-    echo "Usage: _bes_checksum_file_linux algorithm text"
+    echo "Usage: _bes_checksum_text_linux algorithm text"
     return 1
   fi
   local _algorithm="${1}"
