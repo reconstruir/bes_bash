@@ -259,4 +259,25 @@ function test_bes_git_submodule_update_no_revision()
   rm -rf "${_tmp}" "${_tmp_sub}"
 }
 
+function test_custom_git_exe()
+{
+  local _tmp=$(_bes_git_make_temp_repo test_custom_git_exe_success)
+  local _tmp_repo=${_tmp}/local
+  local _fake_git=${_tmp}/fake_git.sh
+  local _fake_git_breadcrumb=${_tmp}/breadcrumb.txt
+  cat > ${_fake_git} << EOF
+#!/bin/bash
+echo foo > ${_fake_git_breadcrumb}
+exec git \${1+"\$@"}
+EOF
+  chmod 755 ${_fake_git}
+  export BES_GIT_EXE=${_fake_git}
+  bes_assert "[[ $(bes_testing_call_function bes_git_repo_has_uncommitted_changes ${_tmp_repo} ) == 1 ]]"
+  ( cd "${_tmp_repo}" && echo "changed" > readme.txt )
+  bes_git_repo_has_uncommitted_changes "${_tmp_repo}"
+  bes_assert "[[ $(bes_testing_call_function bes_git_repo_has_uncommitted_changes ${_tmp_repo} ) == 0 ]]"
+  bes_assert "[[ $(cat ${_fake_git_breadcrumb} ) == foo ]]"
+  rm -rf ${_tmp}
+}
+
 bes_testing_run_unit_tests

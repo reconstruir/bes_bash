@@ -121,7 +121,7 @@ function bes_git_repo_has_uncommitted_changes()
   if ! bes_git_is_repo "${_path}"; then
     return 1
   fi
-  if $(cd "${_path}" && git diff-index --quiet HEAD --); then
+  if $(cd "${_path}" && ${BES_GIT_EXE:-git} diff-index --quiet HEAD --); then
     return 1
   fi
   return 0
@@ -143,7 +143,7 @@ function bes_git_repo_has_untracked_files()
   if ! bes_git_is_repo "${_path}"; then
     return 1
   fi
-  local _num=$(cd "${_path}" && git status --untracked=all --porcelain | grep "?? " | wc -l)
+  local _num=$(cd "${_path}" && ${BES_GIT_EXE:-git} status --untracked=all --porcelain | grep "?? " | wc -l)
   if [[ $(expr ${_num}) > 0 ]]; then
     return 0
   fi
@@ -177,7 +177,7 @@ function bes_git_call()
   fi
   local _repo="${1}"
   shift
-  ( cd "${_repo}" && git ${1+"$@"} )
+  ( cd "${_repo}" && ${BES_GIT_EXE:-git} ${1+"$@"} )
   return $?
 }
 
@@ -301,7 +301,7 @@ function bes_git_submodule_init()
       _recursive_flag="--recursive"
     fi
   fi
-  git submodule update --init ${_recursive_flag} "${_submodule}"
+  ${BES_GIT_EXE:-git} submodule update --init ${_recursive_flag} "${_submodule}"
   return 0
 }
 
@@ -328,16 +328,16 @@ function bes_git_submodule_update()
   fi
     
   local _old_revision=$(bes_git_submodule_revision "${_repo}" ${_submodule} true)
-  ( cd "${_repo}" && git submodule update --init ${_submodule} )
-  ( cd "${_repo}" && git submodule update --remote --merge ${_submodule} )
+  ( cd "${_repo}" && ${BES_GIT_EXE:-git} submodule update --init ${_submodule} )
+  ( cd "${_repo}" && ${BES_GIT_EXE:-git} submodule update --remote --merge ${_submodule} )
   local _new_revision=$(bes_git_last_commit_hash "${_repo}/${_submodule}" true)
   if [[ ${_old_revision} == ${_new_revision} ]]; then
     bes_message "submodule ${_submodule} already at latest revision ${_new_revision}"
     return 0
   fi
-  ( cd "${_repo}" && git add ${1} )
+  ( cd "${_repo}" && ${BES_GIT_EXE:-git} add ${1} )
   local _message="submodule ${_submodule} updated from ${_old_revision} to ${_new_revision}"
-  ( cd "${_repo}" && git commit -m"${_message}" . )
+  ( cd "${_repo}" && ${BES_GIT_EXE:-git} commit -m"${_message}" . )
   bes_message "${_message}"
   return 0
 }
@@ -367,7 +367,7 @@ function bes_git_pack_size()
   else
     _repo="$(pwd)"
   fi
-  local _pack_size=$(bes_git_call "${_repo}" && git count-objects -v | grep size-pack  | awk '{ print $2; }')
+  local _pack_size=$(bes_git_call "${_repo}" && ${BES_GIT_EXE:-git} count-objects -v | grep size-pack  | awk '{ print $2; }')
   echo ${_pack_size}
   return 0
 }
@@ -387,7 +387,7 @@ function bes_git_gc()
   fi
   local _pack_size_before=$(bes_git_pack_size "${_repo}")
   local _gc_log="$(pwd)"/gc.log
-  ( cd "${_repo}" && git reflog expire --expire=now --all && git gc --prune=now --aggressive ) >& ${_gc_log}
+  ( cd "${_repo}" && ${BES_GIT_EXE:-git} reflog expire --expire=now --all && ${BES_GIT_EXE:-git} gc --prune=now --aggressive ) >& ${_gc_log}
   local _pack_size_after=$(bes_git_pack_size "${_repo}")
   bes_message "bes_git_gc: delta: before=${_pack_size_before} after=${_pack_size_after} gc_log=${_gc_log}"
   return 0
@@ -445,7 +445,7 @@ function bes_git_lfs_file_needs_pull()
   fi
   local _repo="${1}"
   local _filename="${2}"
-  local _found=$(cd "${_repo}" && git lfs ls-files | grep -w "${_filename}")
+  local _found=$(cd "${_repo}" && ${BES_GIT_EXE:-git} lfs ls-files | grep -w "${_filename}")
   if [[ -z "${_found}" ]]; then
     bes_message "lfs file ${_filename} not found in ${_repo}"
     return 1

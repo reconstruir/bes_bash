@@ -24,9 +24,9 @@ function _bes_git_add_file()
     cd ${_repo} && \
     mkdir -p ${_dirname} && \
     echo "${_content}" > ${_filename} && \
-    git add ${_filename} && \
-    git commit -m"add ${_filename}" ${_filename} && \
-    if [[ "${_push}" == "true" ]]; then git push origin master; fi
+    ${BES_GIT_EXE:-git} add ${_filename} && \
+    ${BES_GIT_EXE:-git} commit -m"add ${_filename}" ${_filename} && \
+    if [[ "${_push}" == "true" ]]; then ${BES_GIT_EXE:-git} push origin master; fi
   ) >& /dev/null
 
   return 0
@@ -44,13 +44,13 @@ function _bes_git_add_lfs_file()
   
   local _ext=$(bes_file_extension "${_filename}")
   ( cd ${_repo} && \
-      git lfs install && \
+      ${BES_GIT_EXE:-git} lfs install && \
       echo "*.${_ext} filter=lfs diff=lfs merge=lfs -text" > .gitattributes && \
-      git add .gitattributes && \
-      git commit -m"add attributes" .gitattributes && \
+      ${BES_GIT_EXE:-git} add .gitattributes && \
+      ${BES_GIT_EXE:-git} commit -m"add attributes" .gitattributes && \
       echo "${_content}" > "${_filename}" && \
-      git add "${_filename}" && \
-      git commit -m"add ${_filename}" "${_filename}"
+      ${BES_GIT_EXE:-git} add "${_filename}" && \
+      ${BES_GIT_EXE:-git} commit -m"add ${_filename}" "${_filename}"
   ) >& /dev/null
 }
 
@@ -103,7 +103,7 @@ function _bes_git_test_clone()
   local _address=${1}
   local _name=$(_bes_git_test_address_name ${_address})
   local _tmp=/tmp/temp_git_repo_${_name}_$$
-  git clone ${_address} ${_tmp} >& /dev/null
+  ${BES_GIT_EXE:-git} clone ${_address} ${_tmp} >& /dev/null
   echo ${_tmp}
   return 0
 }
