@@ -418,4 +418,13 @@ function test_bes_str_is_integer()
   bes_assert "[[ $(bes_testing_call_function bes_str_is_integer 1a ) == 1 ]]"
 }
 
+function test_bes_str_starts_with()
+{
+  bes_assert "[[ $(bes_testing_call_function bes_str_starts_with foo/bar foo ) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_str_starts_with foo/bar foo/ ) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_str_starts_with foo/bar foo/bar ) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_str_starts_with foo/bar f ) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_str_starts_with foo/bar food ) == 1 ]]"
+}
+
 bes_testing_run_unit_tests

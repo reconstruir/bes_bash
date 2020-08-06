@@ -1140,4 +1140,20 @@ function bes_str_is_integer()
   return 1
 }
 
+# return 0 if str starts with head
+function bes_str_starts_with()
+{
+  if [[ $# < 1 ]]; then
+    bes_message "usage: bes_str_starts_with str head"
+    return 1
+  fi
+  local _str="${1}"
+  local _head="${2}"
+  local _pattern="^${_head}.*"
+  if [[ "${_str}" =~ ${_pattern} ]]; then
+    return 0
+  fi
+  return 1
+}
+
 _bes_trace_file "end"
