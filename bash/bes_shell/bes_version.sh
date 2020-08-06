@@ -124,4 +124,31 @@ function bes_version_bump()
   return 0
 }
 
+function bes_version_bump_prefixed()
+{
+  if [[ $# < 2 ]]; then
+    echo "usage: bes_version_bump_prefixed tag prefix <part>"
+    return 1
+  fi
+  local _tag="${1}"
+  shift
+  local _prefix="${1}"
+  shift
+  local _part=revision
+  if [[ $# > 0 ]]; then
+    _part=${1}
+  fi
+
+  if ! bes_str_starts_with ${_tag} ${_prefix}; then
+    bes_message "tag ${_tag} does not start with ${_prefix}"
+    return 1
+  fi
+  
+  local _version=$(bes_str_remove_head ${_tag} ${_prefix})
+  local _new_version=$(bes_version_bump ${_version} ${_part})
+  echo ${_prefix}${_new_version}
+  
+  return 0
+}
+
 _bes_trace_file "end"

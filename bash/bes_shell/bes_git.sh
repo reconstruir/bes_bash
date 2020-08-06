@@ -574,33 +574,6 @@ function bes_git_greatest_remote_prefixed_tag()
   return 0
 }
 
-function bes_git_bump_prefixed_tag()
-{
-  if [[ $# < 2 ]]; then
-    echo "usage: bes_git_bump_prefixed_tag tag prefix <part>"
-    return 1
-  fi
-  local _tag="${1}"
-  shift
-  local _prefix="${1}"
-  shift
-  local _part=revision
-  if [[ $# > 0 ]]; then
-    _part=${1}
-  fi
-
-  if ! bes_str_starts_with ${_tag} ${_prefix}; then
-    bes_message "tag ${_tag} does not start with ${_prefix}"
-    return 1
-  fi
-  
-  local _version=$(bes_str_remove_head ${_tag} ${_prefix})
-  local _new_version=$(bes_version_bump ${_version} ${_part})
-  echo ${_prefix}${_new_version}
-  
-  return 0
-}
-
 #function bes_git_bump_tag()
 #{
 #  if [[ $# != 1 ]]; then

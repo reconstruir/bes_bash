@@ -334,13 +334,4 @@ function test_bes_git_greatest_remote_prefixed_tag()
   rm -rf ${_tmp}
 }
 
-function test_bes_git_bump_prefixed_tag()
-{
-  bes_assert "[[ $(bes_git_bump_prefixed_tag rel/fruit/1.2.3 rel/fruit/ ) == rel/fruit/1.2.4 ]]"
-  bes_assert "[[ $(bes_git_bump_prefixed_tag rel/fruit/0.0.0 rel/fruit/ ) == rel/fruit/0.0.1 ]]"
-  bes_assert "[[ $(bes_git_bump_prefixed_tag rel/fruit/1.2.3 rel/fruit/ major ) == rel/fruit/2.2.3 ]]"
-  bes_assert "[[ $(bes_git_bump_prefixed_tag rel/fruit/1.2.3 rel/fruit/ minor ) == rel/fruit/1.3.3 ]]"
-  bes_assert "[[ $(bes_git_bump_prefixed_tag rel/fruit/1.2.3 rel/fruit/ revision ) == rel/fruit/1.2.4 ]]"
-}
-
 bes_testing_run_unit_tests

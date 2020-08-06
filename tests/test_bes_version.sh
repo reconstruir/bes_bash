@@ -56,4 +56,13 @@ function test_bes_version_bump()
   bes_assert "[[ $(bes_version_bump 1.2.3 revision ) == 1.2.4 ]]"
 }
 
+function test_bes_version_bump_prefixed()
+{
+  bes_assert "[[ $(bes_version_bump_prefixed rel/fruit/1.2.3 rel/fruit/ ) == rel/fruit/1.2.4 ]]"
+  bes_assert "[[ $(bes_version_bump_prefixed rel/fruit/0.0.0 rel/fruit/ ) == rel/fruit/0.0.1 ]]"
+  bes_assert "[[ $(bes_version_bump_prefixed rel/fruit/1.2.3 rel/fruit/ major ) == rel/fruit/2.2.3 ]]"
+  bes_assert "[[ $(bes_version_bump_prefixed rel/fruit/1.2.3 rel/fruit/ minor ) == rel/fruit/1.3.3 ]]"
+  bes_assert "[[ $(bes_version_bump_prefixed rel/fruit/1.2.3 rel/fruit/ revision ) == rel/fruit/1.2.4 ]]"
+}
+
 bes_testing_run_unit_tests
