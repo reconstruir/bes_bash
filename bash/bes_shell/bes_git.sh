@@ -459,7 +459,7 @@ function bes_git_lfs_file_needs_pull()
   return 0
 }
 
-# Return all the remote tags ordered bu software version
+# Return all the remote tags ordered by software version
 function bes_git_list_remote_tags()
 {
   if [[ $# != 1 ]]; then
@@ -527,6 +527,31 @@ function bes_git_tag()
   bes_git_call "${_root_dir}" tag ${_tag} >& "${_BES_GIT_LOG_FILE}"
   bes_git_call "${_root_dir}" push origin ${_tag} >& "${_BES_GIT_LOG_FILE}"
   bes_git_call "${_root_dir}" fetch --tags >& "${_BES_GIT_LOG_FILE}"
+  return 0
+}
+
+# Return all the remote tags that start with prefix
+function bes_git_list_remote_prefixed_tags()
+{
+  if [[ $# != 2 ]]; then
+    echo "usage: bes_git_list_remote_prefixed_tags root_dir prefix"
+    return 1
+  fi
+  local _root_dir="${1}"
+  local _prefix="${2}"
+  
+  if ! bes_git_is_repo "${_root_dir}"; then
+    bes_message "not a git repo: ${_root_dir}"
+    return 1
+  fi
+
+  local _all_tags=( $(bes_git_list_remote_tags ${_root_dir}) )
+  local _tag
+  for _tag in "${_all_tags[@]}"; do
+    if bes_str_starts_with ${_tag} ${_prefix}; then
+      echo ${_tag}
+    fi
+  done
   return 0
 }
 
