@@ -13,7 +13,7 @@ function main()
   if [[ $# > 0 ]]; then
     _tests=${1+"$@"}
   else
-    _tests="${_test_dir}/*.sh"
+    _tests="${_test_dir}/test*.sh"
   fi
   for _test_file in ${_tests}; do
     HOME="${_temp_home}" ${_test_file}
