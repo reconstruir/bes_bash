@@ -334,4 +334,26 @@ function test_bes_git_greatest_remote_prefixed_tag()
   rm -rf ${_tmp}
 }
 
+function test_bes_git_commit_for_ref()
+{
+  local _tmp=$(_bes_git_make_temp_repo bes_git_commit_for_ref)
+  local _tmp_repo=${_tmp}/local
+  _bes_git_add_file "${_tmp_repo}" "kiwi.txt" kiwi.txt true
+  bes_git_tag "${_tmp_repo}" "rel/fruit/1.2.3"
+  local _commit_hash=$(bes_git_call ${_tmp_repo} rev-list -n 1 rel/fruit/1.2.3)
+  bes_assert "[[ $(bes_git_commit_for_ref ${_tmp_repo} rel/fruit/1.2.3) == ${_commit_hash} ]]"
+  rm -rf ${_tmp}
+}
+
+function test_bes_git_commit_for_ref_short()
+{
+  local _tmp=$(_bes_git_make_temp_repo bes_git_commit_for_ref)
+  local _tmp_repo=${_tmp}/local
+  _bes_git_add_file "${_tmp_repo}" "kiwi.txt" kiwi.txt true
+  bes_git_tag "${_tmp_repo}" "rel/fruit/1.2.3"
+  local _commit_hash=$(bes_git_call ${_tmp_repo} rev-list -n 1 rel/fruit/1.2.3)
+  bes_assert "[[ $(bes_git_commit_for_ref ${_tmp_repo} rel/fruit/1.2.3 true) == ${_commit_hash} ]]"
+  rm -rf ${_tmp}
+}
+
 bes_testing_run_unit_tests

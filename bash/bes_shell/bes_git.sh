@@ -260,6 +260,31 @@ function bes_git_last_commit_hash()
   return 0
 }  
 
+# return the commit hash for ref
+function bes_git_commit_for_ref()
+{
+  if [[ $# < 2 ]]; then
+    bes_message "usage: bes_git_commit_for_ref root_dir ref <short_hash>"
+    return 1
+  fi
+  local _root_dir="${1}"
+  shift
+  local _ref="${1}"
+  shift
+  local _short_hash="false"
+  if [[ $# > 1 ]]; then
+    _short_hash=${1}
+  fi
+  local _long_hash=$(bes_git_call "${_root_dir}" rev-list -n 1 ${_ref})
+  if [[ ${_short_hash} == "true" ]]; then
+    _hash=$(bes_git_short_hash "${_root_dir}" ${_long_hash})
+  else
+    _hash=${_long_hash}
+  fi
+  echo ${_hash}
+  return 0
+}  
+
 # return the commit hash to which the submodule points
 function bes_git_submodule_revision()
 {
