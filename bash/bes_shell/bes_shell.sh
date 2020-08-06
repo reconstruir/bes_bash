@@ -1156,4 +1156,17 @@ function bes_str_starts_with()
   return 1
 }
 
+# Remove head from str
+function bes_str_remove_head()
+{
+  if [[ $# < 1 ]]; then
+    bes_message "usage: bes_str_remove_head str head"
+    return 1
+  fi
+  local _str="${1}"
+  local _head="${2}"
+  echo ${_str#${_head}}
+  return 0
+}
+
 _bes_trace_file "end"

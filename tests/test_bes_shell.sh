@@ -427,4 +427,12 @@ function test_bes_str_starts_with()
   bes_assert "[[ $(bes_testing_call_function bes_str_starts_with foo/bar food ) == 1 ]]"
 }
 
+function test_bes_str_remove_head()
+{
+  bes_assert "[ $(bes_str_remove_head /rel/fruit/1.2.3 /rel/fruit/) = 1.2.3 ]"
+  bes_assert "[ $(bes_str_remove_head /rel/fruit/1.2.3 /rel/fruit) = /1.2.3 ]"
+  bes_assert "[ $(bes_str_remove_head /rel/fruit/1.2.3 /rel/cheese) = /rel/fruit/1.2.3 ]"
+  bes_assert "[ $(bes_str_remove_head /rel/fruit/1.2.3 '') = /rel/fruit/1.2.3 ]"
+}
+
 bes_testing_run_unit_tests
