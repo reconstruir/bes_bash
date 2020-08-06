@@ -292,6 +292,9 @@ function test_bes_git_tag()
   bes_git_tag "${_tmp_repo}" "1.2.4"
   bes_assert "[[ $(bes_git_greatest_remote_tag ${_tmp_repo} ) == 1.2.4 ]]"
   bes_assert "[[ $(bes_git_list_remote_tags ${_tmp_repo} | tr \\n _ ) == 1.2.3_1.2.4_ ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_git_has_remote_tag ${_tmp_repo} 1.2.3 ) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_git_has_remote_tag ${_tmp_repo} 1.2.4 ) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_git_has_remote_tag ${_tmp_repo} 1.2.5 ) == 1 ]]"
   rm -rf ${_tmp}
 }
 
