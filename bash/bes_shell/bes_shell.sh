@@ -1169,4 +1169,17 @@ function bes_str_remove_head()
   return 0
 }
 
+# Remove tail from str
+function bes_str_remove_tail()
+{
+  if [[ $# < 1 ]]; then
+    bes_message "usage: bes_str_remove_tail str tail"
+    return 1
+  fi
+  local _str="${1}"
+  local _tail="${2}"
+  echo ${_str%${_tail}}
+  return 0
+}
+
 _bes_trace_file "end"

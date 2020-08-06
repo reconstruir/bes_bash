@@ -433,6 +433,15 @@ function test_bes_str_remove_head()
   bes_assert "[ $(bes_str_remove_head /rel/fruit/1.2.3 /rel/fruit) = /1.2.3 ]"
   bes_assert "[ $(bes_str_remove_head /rel/fruit/1.2.3 /rel/cheese) = /rel/fruit/1.2.3 ]"
   bes_assert "[ $(bes_str_remove_head /rel/fruit/1.2.3 '') = /rel/fruit/1.2.3 ]"
+  bes_assert "[ $(bes_str_remove_head /rel/fruit/1.2.3 /rel/fruit/1.2.3) =  ]"
+}
+
+function test_bes_str_remove_tail()
+{
+  bes_assert "[ $(bes_str_remove_tail /rel/fruit/1.2.3 1.2.3) = /rel/fruit/ ]"
+  bes_assert "[ $(bes_str_remove_tail /rel/fruit/1.2.3 1.2.3.4) = /rel/fruit/1.2.3 ]"
+  bes_assert "[ $(bes_str_remove_tail /rel/fruit/1.2.3 '') = /rel/fruit/1.2.3 ]"
+  bes_assert "[ $(bes_str_remove_tail /rel/fruit/1.2.3 /rel/fruit/1.2.3) =  ]"
 }
 
 bes_testing_run_unit_tests
