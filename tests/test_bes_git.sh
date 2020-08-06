@@ -356,4 +356,22 @@ function test_bes_git_commit_for_ref_short()
   rm -rf ${_tmp}
 }
 
+function test_bes_git_repo_commit_for_ref()
+{
+  local _tmp=$(_bes_git_make_temp_repo test_bes_git_repo_commit_for_ref)
+  local _tmp_repo=${_tmp}/local
+
+  _bes_git_add_file "${_tmp_repo}" "kiwi.txt" kiwi.txt true
+  bes_git_tag "${_tmp_repo}" "rel/fruit/1.2.3"
+  local _commit_hash_kiwi=$(bes_git_call ${_tmp_repo} rev-list -n 1 rel/fruit/1.2.3)
+
+  _bes_git_add_file "${_tmp_repo}" "apple.txt" apple.txt true
+  bes_git_tag "${_tmp_repo}" "rel/fruit/1.2.4"
+  local _commit_hash_apple=$(bes_git_call ${_tmp_repo} rev-list -n 1 rel/fruit/1.2.4)
+
+  bes_assert "[[ $(bes_git_repo_commit_for_ref ${_tmp}/remote rel/fruit/1.2.3) == ${_commit_hash_kiwi} ]]"
+  bes_assert "[[ $(bes_git_repo_commit_for_ref ${_tmp}/remote rel/fruit/1.2.4) == ${_commit_hash_apple} ]]"
+  rm -rf ${_tmp}
+}
+
 bes_testing_run_unit_tests

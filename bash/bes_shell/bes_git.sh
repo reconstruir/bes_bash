@@ -599,27 +599,22 @@ function bes_git_greatest_remote_prefixed_tag()
   return 0
 }
 
-#function bes_git_bump_tag()
-#{
-#  if [[ $# != 1 ]]; then
-#    echo "usage: bes_git_bump_tag root_dir tag"
-#    return 1
-#  fi
-#  local _root_dir="${1}"
-#  local _tag="${2}"
-#  
-#  if ! bes_git_is_repo "${_root_dir}"; then
-#    bes_message "not a git repo: ${_root_dir}"
-#    return 1
-#  fi
-#  if bes_git_has_remote_tag "${_root_dir}" ${_tag}; then
-#    bes_message "tag already exists in remote: ${_tag}"
-#    return 1
-#  fi
-#  bes_git_call "${_root_dir}" tag ${_tag} >& "${_BES_GIT_LOG_FILE}"
-#  bes_git_call "${_root_dir}" push origin ${_tag} >& "${_BES_GIT_LOG_FILE}"
-#  bes_git_call "${_root_dir}" fetch --tags >& "${_BES_GIT_LOG_FILE}"
-#  return 0
-#}
+function bes_git_repo_commit_for_ref()
+{
+  if [[ $# != 2 ]]; then
+    bes_message "usage: bes_git_repo_commit_for_ref address ref"
+    return 1
+  fi
+  local _address=${1}
+  local _ref=${2}
+  local _tmp=/tmp/bes_git_repo_commit_for_ref_$$
+  rm -rf "${_tmp}"
+  mkdir -p "${_tmp}"
+  ${BES_GIT_EXE:-git} clone ${_address} "${_tmp}" >& "${_BES_GIT_LOG_FILE}"
+  local _commit_hash=$(bes_git_commit_for_ref "${_tmp}" ${_ref})
+  rm -rf "${_tmp}"
+  echo ${_commit_hash}
+  return 0
+}
 
 _bes_trace_file "end"
