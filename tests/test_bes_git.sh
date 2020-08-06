@@ -316,4 +316,21 @@ function test_bes_git_list_remote_prefixed_tags()
   rm -rf ${_tmp}
 }
 
+function test_bes_git_greatest_remote_prefixed_tag()
+{
+  local _tmp=$(_bes_git_make_temp_repo bes_git_greatest_remote_prefixed_tag)
+  local _tmp_repo=${_tmp}/local
+  _bes_git_add_file "${_tmp_repo}" "kiwi.txt" kiwi.txt true
+  bes_git_tag "${_tmp_repo}" "rel/fruit/1.2.3"
+  _bes_git_add_file "${_tmp_repo}" "apple.txt" apple.txt true
+  bes_git_tag "${_tmp_repo}" "rel/fruit/1.2.4"
+  _bes_git_add_file "${_tmp_repo}" "brie.txt" brie.txt true
+  bes_git_tag "${_tmp_repo}" "rel/cheese/1.0.0"
+
+  bes_assert "[[ $(bes_git_greatest_remote_prefixed_tag ${_tmp_repo} rel/fruit/ ) == rel/fruit/1.2.4 ]]"
+  bes_assert "[[ $(bes_git_greatest_remote_prefixed_tag ${_tmp_repo} rel/cheese/ ) == rel/cheese/1.0.0 ]]"
+  bes_assert "[[ $(bes_git_greatest_remote_prefixed_tag ${_tmp_repo} rel/wine/ ) ==  ]]"
+  rm -rf ${_tmp}
+}
+
 bes_testing_run_unit_tests

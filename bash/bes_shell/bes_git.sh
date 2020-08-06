@@ -555,6 +555,25 @@ function bes_git_list_remote_prefixed_tags()
   return 0
 }
 
+function bes_git_greatest_remote_prefixed_tag()
+{
+  if [[ $# != 2 ]]; then
+    echo "usage: bes_git_greatest_remote_prefixed_tag root_dir prefix"
+    return 1
+  fi
+  local _root_dir="${1}"
+  local _prefix="${2}"
+  
+  if ! bes_git_is_repo "${_root_dir}"; then
+    bes_message "not a git repo: ${_root_dir}"
+    return 1
+  fi
+  
+  bes_git_list_remote_prefixed_tags "${_root_dir}" ${_prefix} | tail -1
+  
+  return 0
+}
+
 #function bes_git_bump_tag()
 #{
 #  if [[ $# != 1 ]]; then
