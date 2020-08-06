@@ -496,12 +496,12 @@ function bes_git_greatest_remote_tag()
 function bes_git_has_remote_tag()
 {
   if [[ $# != 2 ]]; then
-    echo "usage: bes_git_has_remote_tag root_dir tag_name"
+    echo "usage: bes_git_has_remote_tag root_dir tag"
     return 1
   fi
   local _root_dir="${1}"
-  local _tag_name="${2}"
-  if bes_git_list_remote_tags "${_root_dir}" | grep ${_tag_name} >& "${_BES_GIT_LOG_FILE}"; then
+  local _tag="${2}"
+  if bes_git_list_remote_tags "${_root_dir}" | grep ${_tag} >& "${_BES_GIT_LOG_FILE}"; then
     return 0
   fi
   return 1
@@ -510,24 +510,47 @@ function bes_git_has_remote_tag()
 function bes_git_tag()
 {
   if [[ $# != 2 ]]; then
-    echo "usage: bes_git_tag root_dir tag_name"
+    echo "usage: bes_git_tag root_dir tag"
     return 1
   fi
   local _root_dir="${1}"
-  local _tag_name="${2}"
+  local _tag="${2}"
   
   if ! bes_git_is_repo "${_root_dir}"; then
     bes_message "not a git repo: ${_root_dir}"
     return 1
   fi
-  if bes_git_has_remote_tag "${_root_dir}" ${_tag_name}; then
-    bes_message "tag already exists in remote: ${_tag_name}"
+  if bes_git_has_remote_tag "${_root_dir}" ${_tag}; then
+    bes_message "tag already exists in remote: ${_tag}"
     return 1
   fi
-  bes_git_call "${_root_dir}" tag ${_tag_name} >& "${_BES_GIT_LOG_FILE}"
-  bes_git_call "${_root_dir}" push origin ${_tag_name} >& "${_BES_GIT_LOG_FILE}"
+  bes_git_call "${_root_dir}" tag ${_tag} >& "${_BES_GIT_LOG_FILE}"
+  bes_git_call "${_root_dir}" push origin ${_tag} >& "${_BES_GIT_LOG_FILE}"
   bes_git_call "${_root_dir}" fetch --tags >& "${_BES_GIT_LOG_FILE}"
   return 0
 }
+
+#function bes_git_bump_tag()
+#{
+#  if [[ $# != 1 ]]; then
+#    echo "usage: bes_git_bump_tag root_dir tag"
+#    return 1
+#  fi
+#  local _root_dir="${1}"
+#  local _tag="${2}"
+#  
+#  if ! bes_git_is_repo "${_root_dir}"; then
+#    bes_message "not a git repo: ${_root_dir}"
+#    return 1
+#  fi
+#  if bes_git_has_remote_tag "${_root_dir}" ${_tag}; then
+#    bes_message "tag already exists in remote: ${_tag}"
+#    return 1
+#  fi
+#  bes_git_call "${_root_dir}" tag ${_tag} >& "${_BES_GIT_LOG_FILE}"
+#  bes_git_call "${_root_dir}" push origin ${_tag} >& "${_BES_GIT_LOG_FILE}"
+#  bes_git_call "${_root_dir}" fetch --tags >& "${_BES_GIT_LOG_FILE}"
+#  return 0
+#}
 
 _bes_trace_file "end"
