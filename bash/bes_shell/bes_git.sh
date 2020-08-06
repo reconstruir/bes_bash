@@ -226,7 +226,7 @@ function bes_git_remote_is_added()
 function bes_git_remote_remove()
 {
   if [[ $# != 2 ]]; then
-    bes_message "usage: bes_git_has_remote root remote_name"
+    bes_message "usage: bes_git_remote_remove root remote_name"
     return 1
   fi
   local _root="${1}"
@@ -454,6 +454,77 @@ function bes_git_lfs_file_needs_pull()
   if [[ ${_status} == "*" ]]; then
     return 1
   fi
+  return 0
+}
+
+# Return all the remote tags ordered bu software version
+function bes_git_list_remote_tags()
+{
+  if [[ $# != 1 ]]; then
+    echo "usage: bes_git_list_remote_tags root_dir"
+    return 1
+  fi
+  local _root_dir="${1}"
+  if ! bes_git_is_repo "${_root_dir}"; then
+    bes_message "not a git repo: ${_root_dir}"
+    return 1
+  fi
+  bes_git_call "${_root_dir}" \
+    ls-remote --tags --sort=version:refname 2> /dev/null | \
+    awk '{ print $2; }' | \
+    sed 's/refs\/tags\///'
+  return 0
+}
+
+function bes_git_greatest_remote_tag()
+{
+  if [[ $# != 1 ]]; then
+    echo "usage: bes_git_greatest_remote_tag root_dir"
+    return 1
+  fi
+  local _root_dir="${1}"
+  if ! bes_git_is_repo "${_root_dir}"; then
+    bes_message "not a git repo: ${_root_dir}"
+    return 1
+  fi
+  bes_git_list_remote_tags "${_root_dir}" | tail -1
+  return 0
+}
+
+function bes_git_has_remote_tag()
+{
+  if [[ $# != 2 ]]; then
+    echo "usage: bes_git_has_remote_tag root_dir tag_name"
+    return 1
+  fi
+  local _root_dir="${1}"
+  local _tag_name="${2}"
+  if bes_git_list_remote_tags "${_root_dir}" | grep ${_tag_name} >& /dev/null; then
+    return 0
+  fi
+  return 1
+}
+
+function bes_git_tag()
+{
+  if [[ $# != 3 ]]; then
+    echo "usage: bes_git_tag root_dir tag_name message"
+    return 1
+  fi
+  local _root_dir="${1}"
+  local _tag_name="${2}"
+  local _message="${3}"
+  
+  if ! bes_git_is_repo "${_root_dir}"; then
+    bes_message "not a git repo: ${_root_dir}"
+    return 1
+  fi
+  if bes_git_has_remote_tag "${_root_dir}" ${_tag_name}; then
+    bes_message "tag already exists in remote: ${_tag_name}"
+    return 1
+  fi
+  bes_git_call "${_root_dir}" tag --annotate --message="${_message}" ${_tag_name}
+  bes_git_call "${_root_dir}" push origin ${_tag_name}
   return 0
 }
 
