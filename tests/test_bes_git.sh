@@ -16,6 +16,7 @@ function _test_bes_git_this_dir()
 source $(_test_bes_git_this_dir)/../bash/bes_shell/bes_shell.sh
 source $(_test_bes_git_this_dir)/../bash/bes_shell/bes_git.sh
 source $(_test_bes_git_this_dir)/../bash/bes_shell/bes_git_unit_test.sh
+source $(_test_bes_git_this_dir)/../bash/bes_shell/bes_version.sh
 
 function test_bes_git_is_bare_repo_true()
 {
@@ -331,6 +332,15 @@ function test_bes_git_greatest_remote_prefixed_tag()
   bes_assert "[[ $(bes_git_greatest_remote_prefixed_tag ${_tmp_repo} rel/cheese/ ) == rel/cheese/1.0.0 ]]"
   bes_assert "[[ $(bes_git_greatest_remote_prefixed_tag ${_tmp_repo} rel/wine/ ) ==  ]]"
   rm -rf ${_tmp}
+}
+
+function test_bes_git_bump_prefixed_tag()
+{
+  bes_assert "[[ $(bes_git_bump_prefixed_tag rel/fruit/1.2.3 rel/fruit/ ) == rel/fruit/1.2.4 ]]"
+  bes_assert "[[ $(bes_git_bump_prefixed_tag rel/fruit/0.0.0 rel/fruit/ ) == rel/fruit/0.0.1 ]]"
+  bes_assert "[[ $(bes_git_bump_prefixed_tag rel/fruit/1.2.3 rel/fruit/ major ) == rel/fruit/2.2.3 ]]"
+  bes_assert "[[ $(bes_git_bump_prefixed_tag rel/fruit/1.2.3 rel/fruit/ minor ) == rel/fruit/1.3.3 ]]"
+  bes_assert "[[ $(bes_git_bump_prefixed_tag rel/fruit/1.2.3 rel/fruit/ revision ) == rel/fruit/1.2.4 ]]"
 }
 
 bes_testing_run_unit_tests
