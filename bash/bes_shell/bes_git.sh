@@ -2,6 +2,8 @@
 
 _bes_trace_file "begin"
 
+_BES_GIT_LOG_FILE=${BES_GIT_LOG_FILE:-/dev/null}
+
 # Return 0 if ${1} (or pwd if not given) is a bare git repo
 function bes_git_is_bare_repo()
 {
@@ -189,7 +191,7 @@ function bes_git_local_branch_exists()
   fi
   local _root="${1}"
   local _branch_name="${2}"
-  if bes_git_call "${_root}" branch | sed -E 's/^\*/ /' | awk '{ print $1; }' | grep -w ${_branch_name} >& /dev/null; then
+  if bes_git_call "${_root}" branch | sed -E 's/^\*/ /' | awk '{ print $1; }' | grep -w ${_branch_name} >& "${_BES_GIT_LOG_FILE}"; then
     return 0
   fi
   return 1
@@ -217,7 +219,7 @@ function bes_git_remote_is_added()
   fi
   local _root="${1}"
   local _remote_name=${2}
-  if bes_git_call "${_root}" ls-remote --exit-code ${_remote_name} >& /dev/null; then
+  if bes_git_call "${_root}" ls-remote --exit-code ${_remote_name} >& "${_BES_GIT_LOG_FILE}"; then
     return 0
   fi
   return 1
@@ -470,7 +472,7 @@ function bes_git_list_remote_tags()
     return 1
   fi
   bes_git_call "${_root_dir}" \
-    ls-remote --tags --sort=version:refname 2> /dev/null | \
+    ls-remote --tags --sort=version:refname 2> "${_BES_GIT_LOG_FILE}" | \
     awk '{ print $2; }' | \
     sed 's/refs\/tags\///'
   return 0
@@ -499,7 +501,7 @@ function bes_git_has_remote_tag()
   fi
   local _root_dir="${1}"
   local _tag_name="${2}"
-  if bes_git_list_remote_tags "${_root_dir}" | grep ${_tag_name} >& /dev/null; then
+  if bes_git_list_remote_tags "${_root_dir}" | grep ${_tag_name} >& "${_BES_GIT_LOG_FILE}"; then
     return 0
   fi
   return 1
@@ -507,13 +509,12 @@ function bes_git_has_remote_tag()
 
 function bes_git_tag()
 {
-  if [[ $# != 3 ]]; then
-    echo "usage: bes_git_tag root_dir tag_name message"
+  if [[ $# != 2 ]]; then
+    echo "usage: bes_git_tag root_dir tag_name"
     return 1
   fi
   local _root_dir="${1}"
   local _tag_name="${2}"
-  local _message="${3}"
   
   if ! bes_git_is_repo "${_root_dir}"; then
     bes_message "not a git repo: ${_root_dir}"
@@ -523,8 +524,8 @@ function bes_git_tag()
     bes_message "tag already exists in remote: ${_tag_name}"
     return 1
   fi
-  bes_git_call "${_root_dir}" tag --annotate --message="${_message}" ${_tag_name}
-  bes_git_call "${_root_dir}" push origin ${_tag_name}
+  bes_git_call "${_root_dir}" tag ${_tag_name} >& "${_BES_GIT_LOG_FILE}"
+  bes_git_call "${_root_dir}" push origin ${_tag_name} >& "${_BES_GIT_LOG_FILE}"
   return 0
 }
 

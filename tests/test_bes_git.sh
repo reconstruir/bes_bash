@@ -280,4 +280,14 @@ EOF
   rm -rf ${_tmp}
 }
 
+function test_bes_git_tag()
+{
+  local _tmp=$(_bes_git_make_temp_repo test_bes_git_tag)
+  local _tmp_repo=${_tmp}/local
+  _bes_git_add_file "${_tmp_repo}" "foo.txt" foo.txt true
+  bes_git_tag "${_tmp_repo}" "1.2.3"
+  bes_assert "[[ $(bes_git_greatest_remote_tag ${_tmp_repo} ) == 1.2.3 ]]"
+  rm -rf ${_tmp}
+}
+
 bes_testing_run_unit_tests
