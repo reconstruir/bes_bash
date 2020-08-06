@@ -2,6 +2,8 @@
 
 _bes_trace_file "begin"
 
+_BES_GIT_LOG_FILE=${BES_GIT_LOG_FILE:-/dev/null}
+
 # Add a file to repo with filename and content and optional push (false by default)
 function _bes_git_add_file()
 {
@@ -27,7 +29,7 @@ function _bes_git_add_file()
     ${BES_GIT_EXE:-git} add ${_filename} && \
     ${BES_GIT_EXE:-git} commit -m"add ${_filename}" ${_filename} && \
     if [[ "${_push}" == "true" ]]; then ${BES_GIT_EXE:-git} push origin master; fi
-  ) >& /dev/null
+  ) >& "${_BES_GIT_LOG_FILE}"
 
   return 0
 }
@@ -51,7 +53,7 @@ function _bes_git_add_lfs_file()
       echo "${_content}" > "${_filename}" && \
       ${BES_GIT_EXE:-git} add "${_filename}" && \
       ${BES_GIT_EXE:-git} commit -m"add ${_filename}" "${_filename}"
-  ) >& /dev/null
+  ) >& "${_BES_GIT_LOG_FILE}"
 }
 
 function _bes_git_make_temp_repo()
@@ -64,9 +66,9 @@ function _bes_git_make_temp_repo()
   local _tmp=/tmp/temp_git_repo_${_name}_$$
   local _tmp_remote_repo=${_tmp}/remote
   mkdir -p ${_tmp_remote_repo}
-  ( bes_git_call "${_tmp_remote_repo}" init --bare --shared ) >& /dev/null
+  ( bes_git_call "${_tmp_remote_repo}" init --bare --shared ) >& "${_BES_GIT_LOG_FILE}"
   local _tmp_local_repo=${_tmp}/local
-  ( bes_git_call "${_tmp}" clone ${_tmp_remote_repo} local ) >& /dev/null
+  ( bes_git_call "${_tmp}" clone ${_tmp_remote_repo} local ) >& "${_BES_GIT_LOG_FILE}"
   _bes_git_add_file ${_tmp_local_repo} readme.txt "this is readme.txt\n" true
   echo ${_tmp}
   return 0
@@ -103,7 +105,7 @@ function _bes_git_test_clone()
   local _address=${1}
   local _name=$(_bes_git_test_address_name ${_address})
   local _tmp=/tmp/temp_git_repo_${_name}_$$
-  ${BES_GIT_EXE:-git} clone ${_address} ${_tmp} >& /dev/null
+  ${BES_GIT_EXE:-git} clone ${_address} ${_tmp} >& "${_BES_GIT_LOG_FILE}"
   echo ${_tmp}
   return 0
 }
