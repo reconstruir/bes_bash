@@ -409,4 +409,13 @@ function test_bes_str_split()
   bes_assert "[ $(bes_str_split a\ :b:c : | tr ' ' '_') = 'a__b_c' ]"
 }
 
+function test_bes_str_is_integer()
+{
+  bes_assert "[[ $(bes_testing_call_function bes_str_is_integer 0 ) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_str_is_integer 1 ) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_str_is_integer foo ) == 1 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_str_is_integer 1.0 ) == 1 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_str_is_integer 1a ) == 1 ]]"
+}
+
 bes_testing_run_unit_tests

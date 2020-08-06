@@ -1125,4 +1125,19 @@ function bes_file_extension()
   return 0
 }
 
+# return 0 if str is an integer
+function bes_str_is_integer()
+{
+  if [[ $# < 1 ]]; then
+    bes_message "usage: bes_str_is_integer str"
+    return 1
+  fi
+  local _str="${1}"
+  local _pattern='^[0-9]+$'
+  if [[ ${_str} =~ ${_pattern} ]]; then
+    return 0
+  fi
+  return 1
+}
+
 _bes_trace_file "end"
