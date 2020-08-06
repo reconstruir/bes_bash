@@ -526,6 +526,7 @@ function bes_git_tag()
   fi
   bes_git_call "${_root_dir}" tag ${_tag_name} >& "${_BES_GIT_LOG_FILE}"
   bes_git_call "${_root_dir}" push origin ${_tag_name} >& "${_BES_GIT_LOG_FILE}"
+  bes_git_call "${_root_dir}" fetch --tags >& "${_BES_GIT_LOG_FILE}"
   return 0
 }
 

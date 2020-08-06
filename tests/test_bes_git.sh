@@ -287,6 +287,11 @@ function test_bes_git_tag()
   _bes_git_add_file "${_tmp_repo}" "foo.txt" foo.txt true
   bes_git_tag "${_tmp_repo}" "1.2.3"
   bes_assert "[[ $(bes_git_greatest_remote_tag ${_tmp_repo} ) == 1.2.3 ]]"
+  _bes_git_add_file "${_tmp_repo}" "bar.txt" bar.txt true
+  bes_assert "[[ $(bes_git_greatest_remote_tag ${_tmp_repo} ) == 1.2.3 ]]"
+  bes_git_tag "${_tmp_repo}" "1.2.4"
+  bes_assert "[[ $(bes_git_greatest_remote_tag ${_tmp_repo} ) == 1.2.4 ]]"
+  bes_assert "[[ $(bes_git_list_remote_tags ${_tmp_repo} | tr \\n _ ) == 1.2.3_1.2.4_ ]]"
   rm -rf ${_tmp}
 }
 
