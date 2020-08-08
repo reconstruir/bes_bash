@@ -161,11 +161,6 @@ function _bes_version_part_compare()
   local _p1=${1}
   local _p2=${2}
 
-  if (( ${_p1} == ${_p2} )); then
-    echo eq
-    return 0
-  fi
-
   if (( ${_p1} < ${_p2} )); then
     echo lt
     return 0
@@ -175,6 +170,7 @@ function _bes_version_part_compare()
     echo gt
     return 0
   fi
+  echo eq
   return 0
 }
 
@@ -207,31 +203,31 @@ function bes_version_compare()
   local _v2_revision=$(bes_version_get_part ${_v2} revision)
 
   local _cmp_major=$(_bes_version_part_compare ${_v1_major} ${_v2_major})
-  if (( ${_cmp_major} == lt )); then
+  if [[ ${_cmp_major} == lt ]]; then
     echo lt
     return 0
   fi
-  if (( ${_cmp_major} == gt )); then
+  if [[ ${_cmp_major} == gt ]]; then
     echo gt
     return 0
   fi
 
   local _cmp_minor=$(_bes_version_part_compare ${_v1_minor} ${_v2_minor})
-  if (( ${_cmp_minor} == lt )); then
+  if [[ ${_cmp_minor} == lt ]]; then
     echo lt
     return 0
   fi
-  if (( ${_cmp_minor} == gt )); then
+  if [[ ${_cmp_minor} == gt ]]; then
     echo gt
     return 0
   fi
 
   local _cmp_revision=$(_bes_version_part_compare ${_v1_revision} ${_v2_revision})
-  if (( ${_cmp_revision} == lt )); then
+  if [[ ${_cmp_revision} == lt ]]; then
     echo lt
     return 0
   fi
-  if (( ${_cmp_revision} == gt )); then
+  if [[ ${_cmp_revision} == gt ]]; then
     echo gt
     return 0
   fi
