@@ -35,11 +35,22 @@ function test_bes_version_part_name_is_valid()
   bes_assert "[[ $(bes_testing_call_function bes_version_part_name_is_valid foo ) == 1 ]]"
 }
 
-function test__bes_version_part_index_part()
+function test__bes_version_part_index()
 {
-  bes_assert "[[ $(_bes_version_part_index_part major ) == 0 ]]"
-  bes_assert "[[ $(_bes_version_part_index_part minor ) == 1 ]]"
-  bes_assert "[[ $(_bes_version_part_index_part revision ) == 2 ]]"
+  bes_assert "[[ $(_bes_version_part_index major ) == 0 ]]"
+  bes_assert "[[ $(_bes_version_part_index minor ) == 1 ]]"
+  bes_assert "[[ $(_bes_version_part_index revision ) == 2 ]]"
+}
+
+function test__bes_version_part_compare()
+{
+  bes_assert "[[ $(_bes_version_part_compare 0 1 ) == lt ]]"
+  bes_assert "[[ $(_bes_version_part_compare 1 0 ) == gt ]]"
+  bes_assert "[[ $(_bes_version_part_compare 0 0 ) == eq ]]"
+
+  bes_assert "[[ $(_bes_version_part_compare 9 10 ) == lt ]]"
+  bes_assert "[[ $(_bes_version_part_compare 10 9 ) == gt ]]"
+  bes_assert "[[ $(_bes_version_part_compare 10 10 ) == eq ]]"
 }
 
 function test_bes_version_get_part()
@@ -63,6 +74,14 @@ function test_bes_version_bump_prefixed()
   bes_assert "[[ $(bes_version_bump_prefixed rel/fruit/1.2.3 rel/fruit/ major ) == rel/fruit/2.2.3 ]]"
   bes_assert "[[ $(bes_version_bump_prefixed rel/fruit/1.2.3 rel/fruit/ minor ) == rel/fruit/1.3.3 ]]"
   bes_assert "[[ $(bes_version_bump_prefixed rel/fruit/1.2.3 rel/fruit/ revision ) == rel/fruit/1.2.4 ]]"
+}
+
+function test_bes_version_compare()
+{
+  bes_assert "[[ $(bes_version_compare 1.0.0 1.0.1 ) == lt ]]"
+  bes_assert "[[ $(bes_version_compare 1.0.1 1.0.0 ) == gt ]]"
+  bes_assert "[[ $(bes_version_compare 1.0.0 1.0.0 ) == eq ]]"
+  bes_assert "[[ $(bes_version_compare 1.0.9 1.0.10 ) == lt ]]"
 }
 
 bes_testing_run_unit_tests
