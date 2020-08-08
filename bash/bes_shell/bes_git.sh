@@ -534,23 +534,29 @@ function bes_git_has_remote_tag()
 
 function bes_git_tag()
 {
-  if [[ $# != 2 ]]; then
-    echo "usage: bes_git_tag root_dir tag"
+  if [[ $# < 2 ]]; then
+    echo "usage: bes_git_tag root_dir tag_name <commit>"
     return 1
   fi
   local _root_dir="${1}"
-  local _tag="${2}"
+  shift
+  local _tag_name="${1}"
+  shift
+  local _commit=
+  if [[ $# > 1 ]]; then
+    _commit=${1}
+  fi
   
   if ! bes_git_is_repo "${_root_dir}"; then
     bes_message "not a git repo: ${_root_dir}"
     return 1
   fi
-  if bes_git_has_remote_tag "${_root_dir}" ${_tag}; then
-    bes_message "tag already exists in remote: ${_tag}"
+  if bes_git_has_remote_tag "${_root_dir}" ${_tag_name}; then
+    bes_message "tag already exists in remote: ${_tag_name}"
     return 1
   fi
-  bes_git_call "${_root_dir}" tag ${_tag} >& "${_BES_GIT_LOG_FILE}"
-  bes_git_call "${_root_dir}" push origin ${_tag} >& "${_BES_GIT_LOG_FILE}"
+  bes_git_call "${_root_dir}" tag ${_tag_name} ${_commit} >& "${_BES_GIT_LOG_FILE}"
+  bes_git_call "${_root_dir}" push origin ${_tag_name} >& "${_BES_GIT_LOG_FILE}"
   bes_git_call "${_root_dir}" fetch --tags >& "${_BES_GIT_LOG_FILE}"
   return 0
 }
@@ -614,6 +620,20 @@ function bes_git_repo_commit_for_ref()
   local _commit_hash=$(bes_git_commit_for_ref "${_tmp}" ${_ref})
   rm -rf "${_tmp}"
   echo ${_commit_hash}
+  return 0
+}
+
+# Print the message for commit
+function bes_git_commit_message()
+{
+  if [[ $# != 2 ]]; then
+    echo "usage: bes_git_commit_message root_dir ref"
+    return 1
+  fi
+  local _root_dir="${1}"
+  local _commit="${2}"
+  local _message=$(bes_git_call "${_root_dir}" log -n 1 --pretty=format:%s ${_commit})
+  echo ${_message}
   return 0
 }
 
