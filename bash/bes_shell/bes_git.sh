@@ -623,6 +623,20 @@ function bes_git_repo_commit_for_ref()
   return 0
 }
 
+# Print the date for commit
+function bes_git_commit_date()
+{
+  if [[ $# != 2 ]]; then
+    echo "usage: bes_git_commit_message root_dir ref"
+    return 1
+  fi
+  local _root_dir="${1}"
+  local _commit="${2}"
+  local _message=$(bes_git_call "${_root_dir}" log -n 1 --format=%ai ${_commit})
+  echo ${_message}
+  return 0
+}
+
 # Print the message for commit
 function bes_git_commit_message()
 {
@@ -636,5 +650,7 @@ function bes_git_commit_message()
   echo ${_message}
   return 0
 }
+
+
 
 _bes_trace_file "end"
