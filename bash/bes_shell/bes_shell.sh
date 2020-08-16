@@ -286,6 +286,12 @@ function bes_system()
     Darwin)
       _result="macos"
       ;;
+    MINGW64_NT*) # git bash
+      _result="windows"
+      ;;
+    MSYS_NT*) # msys2
+      _result="windows"
+      ;;
     *)
       _result="unknown"
       ;;
