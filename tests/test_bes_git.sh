@@ -381,7 +381,7 @@ function test_bes_git_repo_latest_tag()
 
   _bes_git_add_file "${_tmp_repo}" "kiwi.txt" kiwi.txt true
   bes_git_tag "${_tmp_repo}" "1.0.0"
-  bes_assert "[[ $(bes_git_repo_latest_tag ${_tmp}/remote) == 1.0.1 ]]"
+  bes_assert "[[ $(bes_git_repo_latest_tag ${_tmp}/remote) == 1.0.0 ]]"
 
   _bes_git_add_file "${_tmp_repo}" "apple.txt" apple.txt true
   bes_git_tag "${_tmp_repo}" "1.0.1"
