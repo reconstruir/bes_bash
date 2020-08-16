@@ -16,7 +16,6 @@ function _test_bes_git_this_dir()
 source $(_test_bes_git_this_dir)/../bash/bes_shell/bes_shell.sh
 source $(_test_bes_git_this_dir)/../bash/bes_shell/bes_git.sh
 source $(_test_bes_git_this_dir)/../bash/bes_shell/bes_git_unit_test.sh
-source $(_test_bes_git_this_dir)/../bash/bes_shell/bes_version.sh
 
 function test_bes_git_is_bare_repo_true()
 {
