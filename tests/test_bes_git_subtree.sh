@@ -32,7 +32,6 @@ function test_bes_git_subtree_basic()
 
   _bes_git_add_file "${_dst}" "something/apple.txt" apple.txt true
 
-  echo before
   bes_git_subtree_update \
     "${_dst}" \
     master \
@@ -42,7 +41,6 @@ function test_bes_git_subtree_basic()
     "foo/bar" \
     "subtree" \
     false
-  echo after
 
   bes_assert "[[ $(bes_testing_call_function test -f ${_dst}/something/apple.txt) == 0 ]]"
   bes_assert "[[ $(bes_testing_call_function test -f ${_dst}/subtree/kiwi.txt) == 0 ]]"
