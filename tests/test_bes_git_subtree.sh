@@ -27,9 +27,10 @@ function test_bes_git_subtree_basic()
   local _dst=${_tmp_dst_repo}/local
 
   _bes_git_add_file "${_src}" "foo/bar/kiwi.txt" kiwi.txt true
+  _bes_git_add_file "${_src}" "foo/bar/lemon.txt" lemon.txt true
   bes_git_tag "${_src}" "1.2.3"
 
-#  _bes_git_add_file "${_dst}" "something/apple.txt" apple.txt true
+  _bes_git_add_file "${_dst}" "something/apple.txt" apple.txt true
 
   echo before
   bes_git_subtree_update \
@@ -43,10 +44,9 @@ function test_bes_git_subtree_basic()
     false
   echo after
 
-  ( cd ${_dst} && git cherry -v )
-  
   bes_assert "[[ $(bes_testing_call_function test -f ${_dst}/something/apple.txt) == 0 ]]"
   bes_assert "[[ $(bes_testing_call_function test -f ${_dst}/subtree/kiwi.txt) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function test -f ${_dst}/subtree/lemon.txt) == 0 ]]"
   
   rm -rf ${_tmp_src_repo} ${_tmp_dst_repo}
 }

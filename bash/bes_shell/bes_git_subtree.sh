@@ -52,7 +52,7 @@ function bes_git_subtree_update()
   bes_message "pulling origin ${_local_branch} to make sure up to date."
   bes_git_call "${_root_dir}" pull origin ${_local_branch} >& ${_BES_GIT_LOG_FILE}
 
-  trap "_bes_subtree_at_exit_cleanup ${_remote_name} ${_root_dir} ${_tmp_branch_name}" EXIT
+  trap "_bes_subtree_at_exit_cleanup ${_root_dir} ${_remote_name} ${_tmp_branch_name}" EXIT
 
   if _bes_git_subtree_doit "${_root_dir}" ${_local_branch} ${_remote_address} ${_remote_branch} ${_remote_revision} ${_remote_commit_hash} ${_src_dir} ${_dst_dir} ${_remote_name} ${_tmp_branch_name}; then
     bes_message "succeed without having to delete ${_dst_dir} first"
@@ -127,13 +127,19 @@ function _bes_subtree_at_exit_cleanup()
 {
   local _actual_exit_code=$?
   if [[ $# != 3 ]]; then
-    bes_message "usage: _bes_subtree_at_exit_cleanup remote_name root tmp_branch_name"
+    bes_message "usage: _bes_subtree_at_exit_cleanup root_dir remote_name tmp_branch_name"
     return 1
   fi
-  local _remote_name=${1}
-  local _root_dir=${2}
+  local _root_dir=${1}
+  local _remote_name=${2}
   local _tmp_branch_name=${3}
-  bes_message "_bes_subtree_at_exit_cleanup: _actual_exit_code=${_actual_exit_code} _remote_name=${_remote_name} _root_dir=${_root_dir} _tmp_branch_name=${_tmp_branch_name}"
+  bes_message "_bes_subtree_at_exit_cleanup: _actual_exit_code=${_actual_exit_code} _root_dir=${_root_dir} _remote_name=${_remote_name} _tmp_branch_name=${_tmp_branch_name}"
+
+  if [[ ! -d "${_root_dir}" ]]; then
+    bes_message "skipping cleanup cause _root_dir does not exist: ${_root_dir}"
+    return ${_actual_exit_code}
+  fi
+  
   bes_git_remote_remove "${_root_dir}" ${_remote_name}
   _bes_subtree_at_exit_delete_tmp_branch "${_root_dir}" ${_tmp_branch_name}
   if [[ ${_actual_exit_code} == 0 ]]; then
