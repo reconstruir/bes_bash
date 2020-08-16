@@ -22,6 +22,11 @@ function main()
 
   bes_message "updating ${_dst_dir} with ${_remote_address}/${_src_dir}@${_remote_revision}"
 
+  if [[ ${_remote_revision} == "@latest@" ]]; then
+    _remote_revision=$(bes_git_repo_latest_tag ${_remote_address})
+    bes_message "using latest tag for ${_remote_address} is ${_remote_revision}"
+  fi
+  
   local _remote_commit_hash=$(_repo_ref_to_commit_hash ${_remote_address} ${_remote_revision})
   bes_message "using ${_remote_commit_hash} for ${_remote_revision}"
   
