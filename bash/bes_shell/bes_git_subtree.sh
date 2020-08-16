@@ -2,27 +2,29 @@
 
 _bes_trace_file "begin"
 
-function bes_git_subtree_graft()
+function bes_git_subtree_update()
 {
-  if [[ $# != 7 ]]; then
-    bes_message "usage: bes_git_subtree_graft local_branch address remote_branch revision src_dir dst_dir retry_with_delete"
+  if [[ $# != 8 ]]; then
+    bes_message "usage: bes_git_subtree_update root_dir local_branch address remote_branch revision src_dir dst_dir retry_with_delete"
     return 2
   fi
-  local _local_branch=${1}
-  local _remote_address=${2}
-  local _remote_branch=${3}
-  local _remote_revision=${4}
-  local _src_dir=${5}
-  local _dst_dir=${6}
-  local _retry_with_delete=${7}
+  local _root_dir="${1}"
+  local _local_branch=${2}
+  local _remote_address=${3}
+  local _remote_branch=${4}
+  local _remote_revision=${5}
+  local _src_dir="${6}"
+  local _dst_dir="${7}"
+  local _retry_with_delete=${8}
   local _remote_name=$(basename ${_remote_address} | sed 's/.git//')
-  local _root_dir="$(pwd)"
   local _tmp_branch_name=tmp-split-branch-${_remote_name}
 
   if ! bes_git_is_repo "${_root_dir}"; then
     bes_message "not a git repo: ${_root_dir}"
     return 1
   fi
+
+  # We need a clean tree with no changes
   if bes_git_repo_has_uncommitted_changes "${_root_dir}"; then
     bes_message "not clean - uncommitted changes: ${_root_dir}"
     return 1
@@ -38,23 +40,17 @@ function bes_git_subtree_graft()
   local _remote_commit_hash=$(bes_git_repo_commit_for_ref ${_remote_address} ${_remote_revision})
   bes_message "using ${_remote_commit_hash} for ${_remote_revision}"
   
-  local _current_branch=$(git branch | awk '{ print $2; }')
+  local _current_branch=$(bes_git_call "${_root_dir}" branch | awk '{ print $2; }')
   if [[ ${_current_branch} != ${_local_branch} ]]; then
     if bes_git_repo_has_uncommitted_changes; then
       bes_message "The current branch is not ${_local_branch} and it has changes."
       return 1
     fi
-    git checkout ${_local_branch}
-  fi
-
-  # We need a clean tree with no changes
-  if bes_git_repo_has_uncommitted_changes; then
-    bes_message "The git tree needs to be clean with no uncommitted changes."
-    return 1
+    bes_git_call "${_root_dir}" checkout ${_local_branch}
   fi
 
   bes_message "pulling origin ${_local_branch} to make sure up to date."
-  git pull origin ${_local_branch} >& ${_BES_GIT_LOG_FILE}
+  bes_git_call "${_root_dir}" pull origin ${_local_branch} >& ${_BES_GIT_LOG_FILE}
 
   trap "_bes_subtree_at_exit_cleanup ${_remote_name} ${_root_dir} ${_tmp_branch_name}" EXIT
 
@@ -65,13 +61,13 @@ function bes_git_subtree_graft()
   
   bes_message "subtree failed because of conflicts.  Hard resetting to the HEAD"
 
-  git reset --hard HEAD
+  bes_git_call "${_root_dir}" reset --hard HEAD
 
   if [[ ${_retry_with_delete} == "true" ]]; then
     bes_message "retrying with deleting ${_dst_dir} first"
-    git rm -rf ${_dst_dir}
-    git commit ${_dst_dir} -m"remove ${_dst_dir} so subtree can replace it without conflicts."
-    if _bes_git_subtree_doit "${_root_dir}" ${_local_branch} ${_remote_address} ${_remote_branch} ${_remote_revision} ${_remote_commit_hash} ${_src_dir} ${_dst_dir} ${_remote_name} ${_tmp_branch_name}; then
+    bes_git_call "${_root_dir}" rm -rf ${_dst_dir}
+    bes_git_call "${_root_dir}" commit ${_dst_dir} -m"remove ${_dst_dir} so subtree can replace it without conflicts."
+    if _bes_git_subtree_doit "${_root_dir}" ${_local_branch} ${_remote_address} ${_remote_branch} ${_remote_revision} ${_remote_commit_hash} "${_src_dir}" "${_dst_dir}" ${_remote_name} ${_tmp_branch_name}; then
         bes_message "succeed with deleting ${_dst_dir} first"
         return 0
     fi
@@ -83,31 +79,31 @@ function bes_git_subtree_graft()
 
 function _bes_git_subtree_doit()
 {
-  local _root_dir=${1}
+  local _root_dir="${1}"
   local _local_branch=${2}
   local _remote_address=${3}
   local _remote_branch=${4}
   local _remote_revision=${5}
   local _remote_commit_hash=${6}
-  local _src_dir=${7}
-  local _dst_dir=${8}
+  local _src_dir="${7}"
+  local _dst_dir="${8}"
   local _remote_name=${9}
   local _tmp_branch_name=${10}
 
   bes_git_remote_remove "${_root_dir}" ${_remote_name}
   
-  git checkout ${_local_branch} >& ${_BES_GIT_LOG_FILE}
-  git remote add -f ${_remote_name} ${_remote_address} -t ${_remote_branch} >& ${_BES_GIT_LOG_FILE} # --no-tags
+  bes_git_call "${_root_dir}" checkout ${_local_branch} >& ${_BES_GIT_LOG_FILE}
+  bes_git_call "${_root_dir}" remote add -f ${_remote_name} ${_remote_address} -t ${_remote_branch} >& ${_BES_GIT_LOG_FILE} # --no-tags
   bes_message "checking out ${_remote_name}/${_remote_branch}"
-  git checkout ${_remote_name}/${_remote_branch} >& ${_BES_GIT_LOG_FILE}
+  bes_git_call "${_root_dir}" checkout ${_remote_name}/${_remote_branch} >& ${_BES_GIT_LOG_FILE}
   bes_message "checking out ${_remote_commit_hash}"
-  git checkout ${_remote_commit_hash} >& ${_BES_GIT_LOG_FILE}
+  bes_git_call "${_root_dir}" checkout ${_remote_commit_hash} >& ${_BES_GIT_LOG_FILE}
   bes_message "trying subtree split -P ${_src_dir} -b ${_tmp_branch_name}"
-  git subtree split -P ${_src_dir} -b ${_tmp_branch_name} >& ${_BES_GIT_LOG_FILE}
+  bes_git_call "${_root_dir}" subtree split -P "${_src_dir}" -b ${_tmp_branch_name} >& ${_BES_GIT_LOG_FILE}
   bes_message "trying checkout ${_local_branch}"
-  git checkout ${_local_branch} >& ${_BES_GIT_LOG_FILE}
+  bes_git_call "${_root_dir}" checkout ${_local_branch} >& ${_BES_GIT_LOG_FILE}
 
-  if [[ -d ${_dst_dir} ]]; then
+  if [[ -d "${_dst_dir}" ]]; then
     # Merge existing subtree
     command="merge"
     message="Merging ${_remote_address} ${_remote_revision} ${_src_dir} into ${_dst_dir}"
@@ -118,7 +114,7 @@ function _bes_git_subtree_doit()
   fi
 
   bes_message "trying subtree subtree ${command} --squash -P ${_dst_dir}"
-  if ! git subtree ${command} --squash -P ${_dst_dir} ${_tmp_branch_name} -m "${message}" >& ${_BES_GIT_LOG_FILE}; then
+  if ! bes_git_call "${_root_dir}" subtree ${command} --squash -P "${_dst_dir}" ${_tmp_branch_name} -m "${message}" >& ${_BES_GIT_LOG_FILE}; then
     bes_message "FAILED: subtree subtree ${command} --squash -P ${_dst_dir}"
     _bes_subtree_at_exit_delete_tmp_branch "${_root_dir}" ${_tmp_branch_name}
     return 1
@@ -160,7 +156,7 @@ function _bes_subtree_at_exit_delete_tmp_branch()
     bes_message "no ${_tmp_branch_name} branch found to delete"
     return 0
   fi
-  ( cd "${_root_dir}" && git branch -D ${_tmp_branch_name} ) >& ${_BES_GIT_LOG_FILE}
+  bes_git_call "${_root_dir}" branch -D ${_tmp_branch_name} >& ${_BES_GIT_LOG_FILE}
   bes_message "deleted ${_tmp_branch_name} branch"
   return 0
 }

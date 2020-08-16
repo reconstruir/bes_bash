@@ -20,26 +20,35 @@ source $(_test_bes_git_subtree_this_dir)/../bash/bes_shell/bes_git_unit_test.sh
 
 function test_bes_git_subtree_basic()
 {
-  local _tmp_repo1=$(_bes_git_make_temp_repo test_bes_git_subtree_basic1)
-  local _r1=${_tmp_repo1}/local
+  local _tmp_src_repo=$(_bes_git_make_temp_repo test_bes_git_subtree_basic1)
+  local _src=${_tmp_src_repo}/local
 
-  local _tmp_repo2=$(_bes_git_make_temp_repo test_bes_git_subtree_basic2)
-  local _r2=${_tmp_repo2}/local
+  local _tmp_dst_repo=$(_bes_git_make_temp_repo test_bes_git_subtree_basic2)
+  local _dst=${_tmp_dst_repo}/local
 
-  _bes_git_add_file "${_r1}" "foo/bar/kiwi.txt" kiwi.txt true
-  bes_git_tag "${_r1}" "1.2.3"
+  _bes_git_add_file "${_src}" "foo/bar/kiwi.txt" kiwi.txt true
+  bes_git_tag "${_src}" "1.2.3"
 
-  #local _commit_hash_kiwi=$(bes_git_call ${_tmp_repo} rev-list -n 1 rel/fruit/1.2.3)
-  #local _kiwi_message=$(bes_git_commit_message ${_tmp_repo} ${_commit_hash_kiwi} | tr ' ' '_')
-  #bes_assert "[[ ${_kiwi_message} == add_kiwi.txt ]]"
+#  _bes_git_add_file "${_dst}" "something/apple.txt" apple.txt true
 
-  #_bes_git_add_file "${_tmp_repo}" "apple.txt" apple.txt true
-  #bes_git_tag "${_tmp_repo}" "rel/fruit/1.2.4"
-  #local _commit_hash_apple=$(bes_git_call ${_tmp_repo} rev-list -n 1 rel/fruit/1.2.4)
-  #local _apple_message=$(bes_git_commit_message ${_tmp_repo} ${_commit_hash_apple} | tr ' ' '_')
-  #bes_assert "[[ ${_apple_message} == add_apple.txt ]]"
+  echo before
+  bes_git_subtree_update \
+    "${_dst}" \
+    master \
+    ${_tmp_src_repo}/remote \
+    master \
+    master \
+    "foo/bar" \
+    "subtree" \
+    false
+  echo after
+
+  ( cd ${_dst} && git cherry -v )
   
-  rm -rf ${_tmp_repo1} ${_tmp_repo2}
+  bes_assert "[[ $(bes_testing_call_function test -f ${_dst}/something/apple.txt) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function test -f ${_dst}/subtree/kiwi.txt) == 0 ]]"
+  
+  rm -rf ${_tmp_src_repo} ${_tmp_dst_repo}
 }
 
 bes_testing_run_unit_tests
