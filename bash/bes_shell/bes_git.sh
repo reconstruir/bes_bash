@@ -623,6 +623,24 @@ function bes_git_repo_commit_for_ref()
   return 0
 }
 
+# print the latest tag in a repo by address
+function bes_git_repo_latest_tag()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "usage: bes_git_repo_latest_tag address"
+    return 1
+  fi
+  local _address=${1}
+  local _tmp=/tmp/bes_git_repo_latest_tag_$$
+  rm -rf "${_tmp}"
+  mkdir -p "${_tmp}"
+  git clone ${_address} "${_tmp}" >& /dev/null
+  local _latest_tag=$(cd "${_tmp}" && git tag -l --sort=version:refname | tail -1)
+  rm -rf "${_tmp}"
+  echo ${_latest_tag}
+  return 0
+}
+
 # Print the date for commit
 function bes_git_commit_date()
 {
@@ -650,7 +668,5 @@ function bes_git_commit_message()
   echo ${_message}
   return 0
 }
-
-
 
 _bes_trace_file "end"
