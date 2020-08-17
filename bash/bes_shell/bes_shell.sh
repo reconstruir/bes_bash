@@ -7,7 +7,7 @@ function _bes_trace_file() ( _bes_trace "file: ${BASH_SOURCE}: $*" )
 _bes_trace_file "begin"
 
 # A basic UNIX path that is guranteed to find common exeutables on both linux and macos
-_BES_BASIC_PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin
+_BES_BASIC_PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin:/c/Windows/System32
 
 # Which is in the same place on both linux and macos
 _BES_WHICH_EXE=/usr/bin/which
@@ -269,34 +269,6 @@ function bes_env_path_print()
   local _var_name=$(bes_variable_map $1)
   local _value=$(bes_var_get $_var_name)
   bes_path_print $_value
-  return 0
-}
-
-# Return system host name.  linux or macos same as bes_shell/system/host.py
-function bes_system()
-{
-  _bes_trace_function $*
-  local _uname_exe=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} uname)
-  local _uname=$(${_uname_exe})
-  local _result
-  case "${_uname}" in
-    Linux)
-      _result="linux"
-      ;;
-    Darwin)
-      _result="macos"
-      ;;
-    MINGW64_NT*) # git bash
-      _result="windows"
-      ;;
-    MSYS_NT*) # msys2
-      _result="windows"
-      ;;
-    *)
-      _result="unknown"
-      ;;
-  esac
-  echo "${_result}"
   return 0
 }
 
@@ -599,6 +571,13 @@ function bes_assert()
   fi
 }
 
+function _bes_windows_version()
+{
+  local _version=$(cmd /c ver | grep "Microsoft Windows \[Version" | tr '[' ' ' | tr ']' ' ' | awk '{ print $4; }')
+  echo ${_version}
+  return 0
+}
+
 function bes_system_info()
 {
   local _uname_exe=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} uname)
@@ -610,7 +589,7 @@ function bes_system_info()
   local _minor=
   local _path=
   local _version=
-  case ${_uname} in
+  case "${_uname}" in
     Darwin)
       _system='macos'
       _version=$(/usr/bin/sw_vers -productVersion)
@@ -626,7 +605,23 @@ function bes_system_info()
       _distro=$(${_BES_CAT_EXE} /etc/os-release | ${_BES_GREP_EXE} -e '^ID=' | ${_BES_AWK_EXE} -F"=" '{ print $2; }')
       _path=${_system}-${_distro}-${_major}/${_arch}
       ;;
+    MINGW64_NT*) # git bash
+      _system="windows"
+      _distro="mingw64"
+      ;;
+    MSYS_NT*) # msys2
+      _system="windows"
+      _distro="msys2"
+      ;;
 	esac
+
+  if [[ ${_system} == "windows" ]]; then
+    local _powershell=/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe
+    local _version=$(${_powershell} [System.Environment]::OSVersion | ${_BES_GREP_EXE} Win32NT | ${_BES_AWK_EXE} '{ print $2; }')
+    local _major=$(echo ${_version} | ${_BES_AWK_EXE} -F'.' '{ print $1 }')
+    local _minor=$(echo ${_version} | ${_BES_AWK_EXE} -F'.' '{ print $2 }')
+    _path=${_system}-${_major}/${_arch}
+  fi
   echo ${_system}:${_distro}:${_major}:${_minor}:${_arch}:${_path}
   return 0
 }
@@ -845,7 +840,7 @@ function bes_checksum_file()
   local _result
   local _rv
   case "${_system}" in
-    linux)
+    linux|windows)
       _result=$(_bes_checksum_file_linux ${_algorithm}  "${_filename}")
       _rv=$?
       ;;
@@ -875,7 +870,7 @@ function bes_checksum_text()
   local _result
   local _rv
   case "${_system}" in
-    linux)
+    linux|windows)
       _result=$(_bes_checksum_text_linux ${_algorithm}  "${_text}")
       _rv=$?
       ;;
