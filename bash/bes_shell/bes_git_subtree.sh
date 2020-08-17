@@ -145,7 +145,7 @@ function _bes_subtree_at_exit_cleanup()
   if [[ ${_actual_exit_code} == 0 ]]; then
     bes_debug_message "success"
   else
-    bes_debug_message "failed"
+    bes_message "failed"
   fi
   return ${_actual_exit_code}
 }
