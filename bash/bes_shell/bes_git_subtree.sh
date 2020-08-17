@@ -61,12 +61,12 @@ function bes_git_subtree_update()
   
   bes_message "subtree failed because of conflicts.  Hard resetting to the HEAD"
 
-  bes_git_call "${_root_dir}" reset --hard HEAD
+  bes_git_call "${_root_dir}" reset --hard HEAD >& ${_BES_GIT_LOG_FILE}
 
   if [[ ${_retry_with_delete} == "true" ]]; then
     bes_debug_message "retrying with deleting ${_dst_dir} first"
-    bes_git_call "${_root_dir}" rm -rf ${_dst_dir}
-    bes_git_call "${_root_dir}" commit ${_dst_dir} -m"remove ${_dst_dir} so subtree can replace it without conflicts."
+    bes_git_call "${_root_dir}" rm -rf ${_dst_dir} >& ${_BES_GIT_LOG_FILE}
+    bes_git_call "${_root_dir}" commit ${_dst_dir} -m"remove ${_dst_dir} so subtree can replace it without conflicts." >& ${_BES_GIT_LOG_FILE}
     if _bes_git_subtree_doit "${_root_dir}" ${_local_branch} ${_remote_address} ${_remote_branch} ${_remote_revision} ${_remote_commit_hash} "${_src_dir}" "${_dst_dir}" ${_remote_name} ${_tmp_branch_name}; then
         bes_message "Updated ${_root_dir} with ${_remote_address}/${_src_dir}@${_remote_revision}.  Had to delete first."
         return 0
@@ -113,9 +113,9 @@ function _bes_git_subtree_doit()
     message="Adding ${_remote_address} ${_remote_revision} ${_src_dir} into ${_dst_dir}"
   fi
 
-  bes_debug_message "trying subtree subtree ${command} --squash -P ${_dst_dir}"
+  bes_debug_message "trying subtree ${command} --squash -P ${_dst_dir}"
   if ! bes_git_call "${_root_dir}" subtree ${command} --squash -P "${_dst_dir}" ${_tmp_branch_name} -m "${message}" >& ${_BES_GIT_LOG_FILE}; then
-    bes_message "FAILED: subtree subtree ${command} --squash -P ${_dst_dir}"
+    bes_message "FAILED: subtree ${command} --squash -P ${_dst_dir}"
     _bes_subtree_at_exit_delete_tmp_branch "${_root_dir}" ${_tmp_branch_name}
     return 1
   fi
