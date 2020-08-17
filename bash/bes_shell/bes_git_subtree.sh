@@ -36,7 +36,7 @@ function bes_git_subtree_update()
     _remote_revision=$(bes_git_repo_latest_tag ${_remote_address})
     bes_debug_message "using latest tag for ${_remote_address} is ${_remote_revision}"
   fi
-  
+
   local _remote_commit_hash=$(bes_git_repo_commit_for_ref ${_remote_address} ${_remote_revision})
   bes_debug_message "using ${_remote_commit_hash} for ${_remote_revision}"
   
@@ -46,7 +46,7 @@ function bes_git_subtree_update()
       bes_message "The current branch is not ${_local_branch} and it has changes."
       return 1
     fi
-    bes_git_call "${_root_dir}" checkout ${_local_branch}
+    bes_git_call "${_root_dir}" checkout ${_local_branch} >& ${_BES_GIT_LOG_FILE}
   fi
 
   bes_debug_message "pulling origin ${_local_branch} to make sure up to date."
@@ -55,7 +55,7 @@ function bes_git_subtree_update()
   trap "_bes_subtree_at_exit_cleanup ${_root_dir} ${_remote_name} ${_tmp_branch_name}" EXIT
 
   if _bes_git_subtree_doit "${_root_dir}" ${_local_branch} ${_remote_address} ${_remote_branch} ${_remote_revision} ${_remote_commit_hash} ${_src_dir} ${_dst_dir} ${_remote_name} ${_tmp_branch_name}; then
-    bes_debug_message "succeed without having to delete ${_dst_dir} first"
+    bes_message "Updated ${_root_dir} with ${_remote_address}/${_src_dir}@${_remote_revision}"
     return 0
   fi
   
@@ -68,7 +68,7 @@ function bes_git_subtree_update()
     bes_git_call "${_root_dir}" rm -rf ${_dst_dir}
     bes_git_call "${_root_dir}" commit ${_dst_dir} -m"remove ${_dst_dir} so subtree can replace it without conflicts."
     if _bes_git_subtree_doit "${_root_dir}" ${_local_branch} ${_remote_address} ${_remote_branch} ${_remote_revision} ${_remote_commit_hash} "${_src_dir}" "${_dst_dir}" ${_remote_name} ${_tmp_branch_name}; then
-        bes_debug_message "succeed with deleting ${_dst_dir} first"
+        bes_message "Updated ${_root_dir} with ${_remote_address}/${_src_dir}@${_remote_revision}.  Had to delete first."
         return 0
     fi
     bes_message "both subtree attempts failed.  something is very screwy"
