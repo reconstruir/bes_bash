@@ -9,7 +9,7 @@ function _test_bes_git_this_dir()
   if [ "${_test_bes_git_this_dir}" == "${_this_file}" ]; then
     _test_bes_git_this_dir=.
   fi
-  echo $(command cd -P "${_test_bes_git_this_dir}" > ${_BES_GIT_LOG_FILE} && command pwd -P )
+  echo $(command cd -P "${_test_bes_git_this_dir}" > /dev/null && command pwd -P )
   return 0
 }
 
