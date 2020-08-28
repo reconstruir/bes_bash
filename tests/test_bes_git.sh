@@ -298,6 +298,34 @@ function test_bes_git_tag()
   rm -rf ${_tmp}
 }
 
+function test_bes_git_list_remote_tags()
+{
+  local _tmp=$(_bes_git_make_temp_repo test_bes_git_list_remote_tags)
+  local _tmp_repo=${_tmp}/local
+
+  _bes_git_add_file "${_tmp_repo}" "kiwi.txt" kiwi.txt true
+  bes_git_tag "${_tmp_repo}" "x/fruit/1.0.0"
+  
+  _bes_git_add_file "${_tmp_repo}" "apple.txt" apple.txt true
+  bes_git_tag "${_tmp_repo}" "x/fruit/1.0.1"
+  
+  _bes_git_add_file "${_tmp_repo}" "cherry.txt" cherry.txt true
+  bes_git_tag "${_tmp_repo}" "x/fruit/1.0.8"
+  
+  _bes_git_add_file "${_tmp_repo}" "lemon.txt" lemon.txt true
+  bes_git_tag "${_tmp_repo}" "x/fruit/1.0.9"
+  
+  _bes_git_add_file "${_tmp_repo}" "orange.txt" orange.txt true
+  bes_git_tag "${_tmp_repo}" "x/fruit/1.0.10"
+
+  _bes_git_add_file "${_tmp_repo}" "apple.txt" apple.txt true
+  bes_git_tag "${_tmp_repo}" "x/fruit/1.0.11"
+
+  bes_assert "[[ $(bes_git_list_remote_tags ${_tmp_repo} | tr \\n _ ) == x/fruit/1.0.0_x/fruit/1.0.1_x/fruit/1.0.8_x/fruit/1.0.9_x/fruit/1.0.10_x/fruit/1.0.11_ ]]"
+  
+  rm -rf ${_tmp}
+}
+
 function test_bes_git_list_remote_prefixed_tags()
 {
   local _tmp=$(_bes_git_make_temp_repo bes_git_list_remote_prefixed_tags)

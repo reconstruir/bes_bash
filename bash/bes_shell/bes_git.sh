@@ -501,7 +501,6 @@ function bes_git_list_remote_tags()
     awk '{ print $2; }' | \
     sed 's/refs\/tags\///' | \
     sed 's/\^{}//' | \
-    sort | \
     uniq
   return 0
 }
