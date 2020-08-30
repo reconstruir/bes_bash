@@ -4,8 +4,7 @@
 
 _bes_trace_file "begin"
 
-# Download a url to a file with optional username and password.
-# uses curl or wget dependning on which one is found
+# Return 0 if the python version given is found
 function bes_has_python()
 {
   if [[ $# != 1 ]]; then
@@ -18,6 +17,50 @@ function bes_has_python()
     return 0
   fi
   return 1
+}
+
+# Install the given python version or do nothing if already installed
+function bes_python_install()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "Usage: bes_python_install version"
+    return 1
+  fi
+  local _version=${1}
+  if bes_has_python ${_version}; then
+    return 0
+  local _system=$(bes_system)
+  case ${_system} in
+    macos)
+      _rv=$(_bes_variable_map_macos ${_var_name})
+      ;;
+    *)
+      bes_message "Unsupported system: ${_system}"
+      ;;
+  esac
+    
+  fi
+}
+
+function _bes_python_macos_install()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "Usage: _bes_python_install_macos version"
+    return 1
+  fi
+  local _version=${1}
+  local _url=https://www.python.org/ftp/python/${_version}/python-${_version}-macosx10.9.pkg
+}
+
+# Return 0 if the given python executable is the sytem python that comes with macos
+function _bes_python_macos_is_system_python()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "Usage: _bes_python_macos_is_system_python exe"
+    return 1
+  fi
+  local _exe=${1}
+  local _url=https://www.python.org/ftp/python/${_version}/python-${_version}-macosx10.9.pkg
 }
 
 _bes_trace_file "end"
