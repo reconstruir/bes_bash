@@ -29,14 +29,22 @@ function bes_download()
   local _dirname="$(dirname ${_filename})"
   mkdir -p ${_dirname}
   local _rv
+
   if $(bes_has_program curl); then
     _bes_download_curl "${_url}" "${_filename}" "${_username}" "${_password}"
     _rv=$?
-  else
+    return ${_rv}
+  fi
+  
+  if $(bes_has_program wget); then
     _bes_download_wget "${_url}" "${_filename}" "${_username}" "${_password}"
     _rv=$?
+    return ${_rv}
   fi
-  return ${_rv}
+
+  bes_message "bes_download: no curl or wget found."
+  
+  return 1
 }
 
 function _bes_download_curl()

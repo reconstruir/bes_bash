@@ -32,9 +32,9 @@ function test_download_failure()
   rm -f "${_tmp}"
 }
 
-function test_download_302()
+function test_download_302_redirection()
 {
-  local _tmp=/tmp/test_download_302_$$.tgz
+  local _tmp=/tmp/test_download_302_redirection_$$.tgz
   bes_assert "[[ $(bes_download https://github.com/git-lfs/git-lfs/releases/download/v2.9.1/git-lfs-darwin-amd64-v2.9.1.tar.gz ${_tmp} ; echo $? ) == 0 ]]"
   bes_assert "[[ $(bes_checksum_file sha256 ${_tmp}) == 973b6acb2735016265008b74c2f677ed5c086d2abfef4e77925f00efa4751205 ]]"
   rm -f "${_tmp}"
