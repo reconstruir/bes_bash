@@ -1144,13 +1144,29 @@ function bes_str_is_integer()
 # return 0 if str starts with head
 function bes_str_starts_with()
 {
-  if [[ $# < 1 ]]; then
+  if [[ $# != 2 ]]; then
     bes_message "usage: bes_str_starts_with str head"
     return 1
   fi
   local _str="${1}"
   local _head="${2}"
-  local _pattern="^${_head}.*"
+  local _pattern="^${_head}.*$"
+  if [[ "${_str}" =~ ${_pattern} ]]; then
+    return 0
+  fi
+  return 1
+}
+
+# return 0 if str ends with tail
+function bes_str_ends_with()
+{
+  if [[ $# != 2 ]]; then
+    bes_message "usage: bes_str_ends_with str tail"
+    return 1
+  fi
+  local _str="${1}"
+  local _tail="${2}"
+  local _pattern="^.*${_tail}$"
   if [[ "${_str}" =~ ${_pattern} ]]; then
     return 0
   fi
@@ -1160,7 +1176,7 @@ function bes_str_starts_with()
 # Remove head from str
 function bes_str_remove_head()
 {
-  if [[ $# < 1 ]]; then
+  if [[ $# != 2 ]]; then
     bes_message "usage: bes_str_remove_head str head"
     return 1
   fi
@@ -1173,7 +1189,7 @@ function bes_str_remove_head()
 # Remove tail from str
 function bes_str_remove_tail()
 {
-  if [[ $# < 1 ]]; then
+  if [[ $# != 2 ]]; then
     bes_message "usage: bes_str_remove_tail str tail"
     return 1
   fi

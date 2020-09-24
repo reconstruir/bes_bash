@@ -427,6 +427,18 @@ function test_bes_str_starts_with()
   bes_assert "[[ $(bes_testing_call_function bes_str_starts_with foo/bar food ) == 1 ]]"
 }
 
+function test_bes_str_ends_with()
+{
+  bes_assert "[[ $(bes_testing_call_function bes_str_ends_with foo/bar foo ) == 1 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_str_ends_with foo/bar bar ) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_str_ends_with foo/bar foo/bar ) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_str_ends_with foo/bar r ) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_str_ends_with foo/bar /bar ) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_str_ends_with foo/bar bart ) == 1 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_str_ends_with foo.o \\.o ) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_str_ends_with foo.so \\.o ) == 1 ]]"
+}
+
 function test_bes_str_remove_head()
 {
   bes_assert "[ $(bes_str_remove_head /rel/fruit/1.2.3 /rel/fruit/) = 1.2.3 ]"
