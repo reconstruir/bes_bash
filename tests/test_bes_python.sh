@@ -55,4 +55,28 @@ EOF
   rm -rf ${_tmp}
 }
 
+function test__bes_python_macos_is_system_python()
+{
+  if [[ $(bes_system) != "macos" ]]; then
+    return 0
+  fi
+  local _tmp=/tmp/test__bes_python_macos_is_system_python_$$
+  mkdir -p ${_tmp}
+  local _fake_python=${_tmp}/fake_python.sh
+  cat > ${_fake_python} << EOF
+#!/bin/bash
+echo Python 2.7.666 1>&2
+exit 0
+EOF
+  chmod 755 ${_fake_python}
+
+  bes_assert "[[ $(bes_testing_call_function _bes_python_macos_is_system_python /usr/bin/python ) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function _bes_python_macos_is_system_python /usr/bin/python2.7 ) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function _bes_python_macos_is_system_python ${_fake_python} ) == 1 ]]"
+
+  rm -rf ${_tmp}
+}
+
+_bes_python_macos_is_system_python
+
 bes_testing_run_unit_tests

@@ -86,8 +86,20 @@ function _bes_python_macos_is_system_python()
     bes_message "Usage: _bes_python_macos_is_system_python exe"
     return 1
   fi
-  local _exe=${1}
-  local _url=https://www.python.org/ftp/python/${_version}/python-${_version}-macosx10.9.pkg
+  local _system=$(bes_system)
+  if [[ ${_system} != "macos" ]]; then
+    bes_message "_bes_python_macos_is_system_python: this only works on macos"
+    return 1
+  fi
+  local _exe="${1}"
+  if ! bes_path_is_abs "${_exe}"; then
+    bes_message "_bes_python_macos_is_system_python: exe needs to be an absolute path"
+    return 1
+  fi
+  if bes_str_starts_with "${_exe}" /usr/bin/python; then
+    return 0
+  fi
+  return 1
 }
 
 # Return 0 if the given python executable is from brew
@@ -99,6 +111,20 @@ function _bes_python_macos_is_from_brew()
   fi
   local _exe=${1}
   local _url=https://www.python.org/ftp/python/${_version}/python-${_version}-macosx10.9.pkg
+}
+
+# Return 0 if this macos has brew
+function _bes_macos_has_brew()
+{
+  local _system=$(bes_system)
+  if [[ ${_system} != "macos" ]]; then
+    bes_message "_bes_macos_has_brew: this only works on macos"
+    return 1
+  fi
+  if bes_has_program brew; then
+    return 0
+  fi
+  return 1
 }
 
 _bes_trace_file "end"
