@@ -464,4 +464,15 @@ function test_bes_path_is_abs()
   bes_assert "[[ $(bes_testing_call_function bes_path_is_abs foo/ ) == 1 ]]"
 }
 
+function test_bes_path_is_symlink()
+{
+  local _tmp=/tmp/test_bes_path_is_symlink_$$
+  mkdir -p ${_tmp}
+  echo foo > ${_tmp}/file
+  ( cd ${_tmp} && ln -s file link )
+  bes_assert "[[ $(bes_testing_call_function bes_path_is_symlink ${_tmp}/file ) == 1 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_path_is_symlink ${_tmp}/link ) == 0 ]]"
+  rm -rf ${_tmp}
+}
+
 bes_testing_run_unit_tests

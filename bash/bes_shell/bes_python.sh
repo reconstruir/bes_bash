@@ -80,20 +80,20 @@ function _bes_python_macos_install()
 }
 
 # Return 0 if the given python executable is the sytem python that comes with macos
-function _bes_python_macos_is_system_python()
+function _bes_python_macos_is_builtin()
 {
   if [[ $# != 1 ]]; then
-    bes_message "Usage: _bes_python_macos_is_system_python exe"
+    bes_message "Usage: _bes_python_macos_is_builtin exe"
     return 1
   fi
   local _system=$(bes_system)
   if [[ ${_system} != "macos" ]]; then
-    bes_message "_bes_python_macos_is_system_python: this only works on macos"
+    bes_message "_bes_python_macos_is_builtin: this only works on macos"
     return 1
   fi
   local _exe="${1}"
   if ! bes_path_is_abs "${_exe}"; then
-    bes_message "_bes_python_macos_is_system_python: exe needs to be an absolute path"
+    bes_message "_bes_python_macos_is_builtin: exe needs to be an absolute path"
     return 1
   fi
   if bes_str_starts_with "${_exe}" /usr/bin/python; then
@@ -106,11 +106,29 @@ function _bes_python_macos_is_system_python()
 function _bes_python_macos_is_from_brew()
 {
   if [[ $# != 1 ]]; then
-    bes_message "Usage: _bes_python_macos_is_system_python exe"
+    bes_message "Usage: _bes_python_macos_is_from_brew exe"
     return 1
   fi
-  local _exe=${1}
-  local _url=https://www.python.org/ftp/python/${_version}/python-${_version}-macosx10.9.pkg
+  local _system=$(bes_system)
+  if [[ ${_system} != "macos" ]]; then
+    bes_message "_bes_python_macos_is_from_brew: this only works on macos"
+    return 1
+  fi
+  local _exe="${1}"
+  if ! bes_path_is_abs "${_exe}"; then
+    bes_message "_bes_python_macos_is_from_brew: exe needs to be an absolute path"
+    return 1
+  fi
+  local _real_exe
+  if bes_path_is_symlink "${_exe}"; then
+    _real_exe="$(readlink "${_exe}")"
+  else
+    _real_exe="${_exe}"
+  fi
+  if echo "${_real_exe}" | grep -i "cellar" >& /dev/null; then
+    return 0
+  fi
+  return 1
 }
 
 # Return 0 if this macos has brew
