@@ -10,19 +10,26 @@ function main()
   local _temp_home=/tmp/run_test_temp_home_$$
   mkdir -p "${_temp_home}"
 
+  local _pwd=$(pwd)
+
+  local _failed_tests=()
+  declare -a _failed_tests
+  
   if [[ $# > 0 ]]; then
     _tests=${1+"$@"}
   else
     _tests="${_test_dir}/test*.sh"
   fi
   for _test_file in ${_tests}; do
+    local _test_file_rel=${_test_file#${_pwd}/}
     HOME="${_temp_home}" ${_test_file}
     local _rv=$?
     if [[ ${_rv} != 0 ]]; then
-      echo "FAILED: ${_test_file}"
+      echo "FAILED: ${_test_file_rel}"
+      _failed_tests+=( ${_test_file_rel} )
       _result=1
     else
-      echo "PASSED: ${_test_file}"
+      echo "PASSED: ${_test_file_rel}"
     fi
   done
   local _side_effect
@@ -37,6 +44,10 @@ function main()
     echo "PASSED: all tests passed"
   else
     echo "FAILED: some tests failed"
+    local _next_failed_test
+    for _failed_test in ${_failed_tests[@]}; do
+      echo "FAILED: ${_failed_test}"
+    done
   fi
   
   return ${_result}

@@ -13,7 +13,7 @@ function _test_bes_shell_this_dir()
   return 0
 }
 
-source $(_test_bes_shell_this_dir)/../bash/bes_shell/bes_shell.sh
+source "$(_test_bes_shell_this_dir)"/../bash/bes_shell/bes_shell.sh
 
 function test_bes_var_set()
 {

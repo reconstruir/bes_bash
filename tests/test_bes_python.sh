@@ -13,8 +13,8 @@ function _test_bes_python_this_dir()
   return 0
 }
 
-source $(_test_bes_python_this_dir)/../bash/bes_shell/bes_shell.sh
-source $(_test_bes_python_this_dir)/../bash/bes_shell/bes_python.sh
+source "$(_test_bes_python_this_dir)"/../bash/bes_shell/bes_shell.sh
+source "$(_test_bes_python_this_dir)"/../bash/bes_shell/bes_python.sh
 
 function test_bes_has_python()
 {
