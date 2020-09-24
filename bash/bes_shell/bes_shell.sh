@@ -1244,4 +1244,19 @@ function bes_path_is_abs()
   return 1
 }
 
+# Return 0 if the given path is a symlink
+function bes_path_is_symlink()
+{
+  if [[ $# != 1 ]]; then
+    echo "usage: bes_path_is_symlink path"
+    return 1
+  fi
+  local _path="${1}"
+
+  if test -h "${_path}"; then
+    return 0
+  fi
+  return 1
+}
+
 _bes_trace_file "end"
