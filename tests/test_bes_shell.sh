@@ -456,4 +456,12 @@ function test_bes_str_remove_tail()
   bes_assert "[ $(bes_str_remove_tail /rel/fruit/1.2.3 /rel/fruit/1.2.3) =  ]"
 }
 
+function test_bes_path_is_abs()
+{
+  bes_assert "[[ $(bes_testing_call_function bes_path_is_abs foo ) == 1 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_path_is_abs /foo ) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_path_is_abs //foo ) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_path_is_abs foo/ ) == 1 ]]"
+}
+
 bes_testing_run_unit_tests

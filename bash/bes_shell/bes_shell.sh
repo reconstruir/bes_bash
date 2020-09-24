@@ -1202,7 +1202,7 @@ function bes_str_remove_tail()
 function bes_question_yes_no()
 {
   if [[ $# != 2 ]]; then
-    echo "usage: _question_yes_no var_name message"
+    echo "usage: bes_question_yes_no var_name message"
     return 1
   fi
   local _CHOICES="[y]es [n]o"
@@ -1227,6 +1227,21 @@ function bes_question_yes_no()
   done
   eval ${_var_name}=${_result}
   return 0
+}
+
+# Return 0 if the given path is absolute
+function bes_path_is_abs()
+{
+  if [[ $# != 1 ]]; then
+    echo "usage: bes_path_is_abs path"
+    return 1
+  fi
+  local _path="${1}"
+
+  if [[ "${_path}" =~ ^\/.* ]]; then
+    return 0
+  fi
+  return 1
 }
 
 _bes_trace_file "end"
