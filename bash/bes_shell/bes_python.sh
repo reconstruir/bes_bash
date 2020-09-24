@@ -90,4 +90,15 @@ function _bes_python_macos_is_system_python()
   local _url=https://www.python.org/ftp/python/${_version}/python-${_version}-macosx10.9.pkg
 }
 
+# Return 0 if the given python executable is from brew
+function _bes_python_macos_is_from_brew()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "Usage: _bes_python_macos_is_system_python exe"
+    return 1
+  fi
+  local _exe=${1}
+  local _url=https://www.python.org/ftp/python/${_version}/python-${_version}-macosx10.9.pkg
+}
+
 _bes_trace_file "end"
