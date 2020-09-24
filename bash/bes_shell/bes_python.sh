@@ -19,7 +19,20 @@ function bes_has_python()
   return 1
 }
 
-# Print the complete version of the given python executable
+# Print the full version $major.$minor.$revision of a python executable
+function bes_python_exe_full_version()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "Usage: bes_python_exe_full_version exe"
+    return 1
+  fi
+  local _exe="${1}"
+  local _full_version=$(${_exe} --version 2>&1 | ${_BES_AWK_EXE} '{ print $2; }')
+  echo "${_full_version}"
+  return 0
+}
+
+# Print the $major.$minor version of a python executable
 function bes_python_exe_version()
 {
   if [[ $# != 1 ]]; then
@@ -27,7 +40,8 @@ function bes_python_exe_version()
     return 1
   fi
   local _exe="${1}"
-  local _version=$(${_exe} --version 2>&1 | awk '{ print $2; }')
+  local _full_version=$(bes_python_exe_full_version "${_exe}")
+  local _version=$(echo ${_full_version} | ${_BES_AWK_EXE} -F'.' '{ printf("%s.%s\n", $1, $2); }')
   echo "${_version}"
   return 0
 }

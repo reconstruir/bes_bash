@@ -21,6 +21,23 @@ function test_bes_has_python()
   bes_assert "[[ $(bes_testing_call_function bes_has_python bad ) == 1 ]]"
 }
 
+function test_bes_python_exe_full_version()
+{
+  local _tmp=/tmp/test_bes_python_exe_full_version_$$
+  mkdir -p ${_tmp}
+  local _fake_python=${_tmp}/fake_python.sh
+  cat > ${_fake_python} << EOF
+#!/bin/bash
+echo Python 2.7.666 1>&2
+exit 0
+EOF
+  chmod 755 ${_fake_python}
+
+  bes_assert "[[ $(bes_python_exe_full_version ${_fake_python}) == 2.7.666 ]]"
+
+  rm -rf ${_tmp}
+}
+
 function test_bes_python_exe_version()
 {
   local _tmp=/tmp/test_bes_python_exe_version_$$
@@ -33,7 +50,7 @@ exit 0
 EOF
   chmod 755 ${_fake_python}
 
-  bes_assert "[[ $(bes_python_exe_version ${_fake_python}) == 2.7.666 ]]"
+  bes_assert "[[ $(bes_python_exe_version ${_fake_python}) == 2.7 ]]"
 
   rm -rf ${_tmp}
 }
