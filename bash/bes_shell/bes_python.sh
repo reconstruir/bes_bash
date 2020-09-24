@@ -19,6 +19,19 @@ function bes_has_python()
   return 1
 }
 
+# Print the complete version of the given python executable
+function bes_python_exe_version()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "Usage: bes_python_exe_version exe"
+    return 1
+  fi
+  local _exe="${1}"
+  local _version=$(${_exe} --version 2>&1 | awk '{ print $2; }')
+  echo "${_version}"
+  return 0
+}
+
 # Install the given python version or do nothing if already installed
 function bes_python_install()
 {
