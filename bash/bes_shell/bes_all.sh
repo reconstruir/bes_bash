@@ -12,3 +12,4 @@ source $(_bes_all_this_dir)/bes_git_subtree.sh
 source $(_bes_all_this_dir)/bes_download.sh
 source $(_bes_all_this_dir)/bes_bfg.sh
 source $(_bes_all_this_dir)/bes_version.sh
+source $(_bes_all_this_dir)/bes_python.sh
