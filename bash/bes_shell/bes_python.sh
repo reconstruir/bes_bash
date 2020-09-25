@@ -56,17 +56,19 @@ function bes_python_install()
   local _version=${1}
   if bes_has_python ${_version}; then
     return 0
+  fi
   local _system=$(bes_system)
+  local _rv=1
   case ${_system} in
     macos)
-      _rv=$(_bes_variable_map_macos ${_var_name})
+      _bes_python_macos_install ${_version}
+      _rv=$?
       ;;
     *)
       bes_message "Unsupported system: ${_system}"
       ;;
   esac
-    
-  fi
+  return $_rv
 }
 
 function _bes_python_macos_install()
@@ -76,7 +78,18 @@ function _bes_python_macos_install()
     return 1
   fi
   local _version=${1}
-  local _url=https://www.python.org/ftp/python/${_version}/python-${_version}-macosx10.9.pkg
+  local _url="https://www.python.org/ftp/python/${_version}/python-${_version}-macosx10.9.pkg"
+  local _tmp=/tmp/_bes_python_macos_install_download_$$.pkg
+  if ! bes_download ${_url} "${_tmp}"; then
+    bes_message "_bes_python_macos_install: failed to download ${_url}"
+    cat ${_tmp}
+    rm -f ${_tmp}
+    return 1
+  fi
+  local _rv=$?
+  echo rv ${_rv}
+  echo ${_tmp}
+  return 0
 }
 
 # Return 0 if the given python executable is the sytem python that comes with macos
