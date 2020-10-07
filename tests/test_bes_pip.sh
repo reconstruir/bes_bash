@@ -127,4 +127,53 @@ function test_bes_pip_ensure()
   rm -rf ${_tmp}
 }
 
+function test_bes_pip_update()
+{
+  local _builtin_python="$(bes_python_find_builtin_python)"
+  if [[ ! -x ${_builtin_python} ]]; then
+    bes_message "test_bes_pip_update: skipping because no builtin python found"
+    return 0
+  fi
+  if bes_pip_has_pip ${_builtin_python}; then
+    bes_message "test_bes_pip_update: skipping because pip already found"
+    return 0
+  fi
+
+  local _tmp=/tmp/test_bes_pip_update$$
+
+  bes_assert "[[ $(bes_testing_call_function bes_pip_has_pip ${_builtin_python} ) == 1 ]]"
+
+  local _PIP_VERSION1=20.2.2
+  
+  export PYTHONUSERBASE="${_tmp}"
+  bes_pip_ensure ${_builtin_python} ${_PIP_VERSION1}
+  local _ensure_rv=$?
+  
+  bes_assert "[[ ${_ensure_rv} == 0 ]]"
+
+  bes_assert "[[ $(bes_testing_call_function bes_pip_has_pip ${_builtin_python} ) == 0 ]]"
+
+  local _new_pip_exe=$(bes_pip_exe ${_builtin_python})
+  
+  bes_assert "[[ $(bes_pip_exe_version ${_new_pip_exe}) == ${_PIP_VERSION1} ]]"
+
+  local _PIP_VERSION2=20.2.1
+  bes_pip_update ${_builtin_python} ${_PIP_VERSION2}
+  local _ensure_rv=$?
+  
+  bes_assert "[[ ${_ensure_rv} == 0 ]]"
+
+  bes_assert "[[ $(bes_testing_call_function bes_pip_has_pip ${_builtin_python} ) == 0 ]]"
+
+  local _new_pip_exe=$(bes_pip_exe ${_builtin_python})
+  
+  bes_assert "[[ $(bes_pip_exe_version ${_new_pip_exe}) == ${_PIP_VERSION2} ]]"
+  
+
+  
+  unset PYTHONUSERBASE
+  
+  rm -rf ${_tmp}
+}
+
 bes_testing_run_unit_tests
