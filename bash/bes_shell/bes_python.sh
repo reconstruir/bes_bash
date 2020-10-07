@@ -161,6 +161,7 @@ function _bes_macos_has_brew()
 # Print the "user-base" directory for a python executable
 # on macos: ~/Library/Python/$major.$minor
 # on linux: ~/.local
+# Can also be controlled with PYTHONUSERBASE
 function bes_python_user_base_dir()
 {
   if [[ $# != 1 ]]; then
@@ -170,6 +171,10 @@ function bes_python_user_base_dir()
   local _exe="${1}"
   if ! bes_path_is_abs "${_exe}"; then
     bes_message "bes_python_user_base: exe needs to be an absolute path"
+    return 1
+  fi
+  if [[ ! -x "${_exe}" ]] ;then
+    echo ""
     return 1
   fi
   local _user_base_dir="$(PYTHONPATH= PATH= ${_exe} -m site --user-base)"
@@ -191,8 +196,29 @@ function bes_python_user_site_dir()
     bes_message "bes_python_user_site: exe needs to be an absolute path"
     return 1
   fi
+  if [[ ! -x "${_exe}" ]] ;then
+    echo ""
+    return 1
+  fi
   local _user_site_dir="$(PYTHONPATH= PATH= ${_exe} -m site --user-site)"
   echo "${_user_site_dir}"
+  return 0
+}
+
+# Print the "user-base" bin directory for a python executable
+# on macos: ~/Library/Python/$major.$minor/bin
+# on linux: ~/.local/bin
+# Can also be controlled with PYTHONUSERBASE
+function bes_python_user_base_bin_dir()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "Usage: bes_python_user_base_bin_dir exe"
+    return 1
+  fi
+  local _exe="${1}"
+  local _user_base_dir="$(bes_python_user_base_dir "${_exe}")"
+  local _user_base_bin_dir="${_user_base_dir}/bin"
+  echo "${_user_base_bin_dir}"
   return 0
 }
 

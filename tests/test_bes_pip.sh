@@ -15,13 +15,15 @@ function _test_bes_pip_this_dir()
 
 source "$(_test_bes_pip_this_dir)"/../bash/bes_shell/bes_shell.sh
 source "$(_test_bes_pip_this_dir)"/../bash/bes_shell/bes_python.sh
+source "$(_test_bes_pip_this_dir)"/../bash/bes_shell/bes_download.sh
 source "$(_test_bes_pip_this_dir)"/../bash/bes_shell/bes_pip.sh
 source "$(_test_bes_pip_this_dir)"/../bash/bes_shell/_bes_python_testing.sh
 
 function test_bes_pip_exe()
 {
   local _tmp=/tmp/test_bes_pip_exe$$
-  local _fake_python="$(_bes_python_testing_make_testing_python_exe "${_tmp}" fake_python.sh 2.7.666)"
+  local _fake_python="$(_bes_python_testing_make_testing_python_exe "${_tmp}" python2.7 2.7.666)"
+  local _fake_pip=$(_bes_python_testing_make_testing_pip_exe "${_fake_python}" 666.1.2)
   
   bes_assert "[[ $(bes_pip_exe ${_fake_python}) == ${_tmp}/pip2.7 ]]"
 

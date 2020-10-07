@@ -8,19 +8,66 @@ _bes_trace_file "begin"
 function bes_pip_exe()
 {
   if [[ $# != 1 ]]; then
-    bes_message "Usage: bes_pip_exe exe"
+    bes_message "Usage: bes_pip_exe python_exe"
     return 1
   fi
-  local _exe="${1}"
-  if ! bes_path_is_abs "${_exe}"; then
-    bes_message "bes_pip_exe: exe needs to be an absolute path"
+  local _python_exe="${1}"
+  if ! bes_path_is_abs "${_python_exe}"; then
+    bes_message "bes_pip_exe: python_exe needs to be an absolute path"
     return 1
   fi
-  local _version=$(bes_python_exe_version "${_exe}")
+  local _version=$(bes_python_exe_version "${_python_exe}")
   local _pip_basename=pip${_version}
-  local _python_dir="$(dirname "${_exe}")"
-  local _pip_abs="${_python_dir}/${_pip_basename}"
-  echo "${_pip_abs}"
+  # Check the python builtin bin dir for pip
+  local _builtin_python_bin_dir="$(bes_python_bin_dir "${_python_exe}")"
+  local _builtin_pip_abs="${_builtin_python_bin_dir}/${_pip_basename}"
+  if [[ -x "${_builtin_pip_abs}" ]]; then
+    echo "${_builtin_pip_abs}"
+    return 0
+  fi
+  # Check the python user base bin dir for pip
+  local _user_base_python_bin_dir="$(bes_python_user_base_bin_dir "${_python_exe}")"
+  local _user_base_pip_abs="${_user_base_python_bin_dir}/${_pip_basename}"
+  if [[ -x "${_user_base_pip_abs}" ]]; then
+    echo "${_user_base_pip_abs}"
+    return 0
+  fi
+  echo ""
+  return 1
+}
+
+# Install pip for a given python exe
+function bes_pip_install()
+{
+  if [[ $# != 1 ]]; then
+    echo "usage: bes_pip_install python_exe"
+    return 1
+  fi
+  local _python_exe="${1}"
+  if ! bes_path_is_abs "${_python_exe}"; then
+    bes_message "bes_pip_install: python_exe needs to be an absolute path"
+    return 1
+  fi
+  local _version=$(bes_python_exe_version "${_python_exe}")
+  
+  local _GET_PIP_URL="https://bootstrap.pypa.io/get-pip.py"
+  local _python_exe="${1}"
+  local _python_version="${2}"
+  local _tmp_get_pip=/tmp/tmp_get_pip_$$.py
+  rm -f "${_tmp_get_pip}"
+  echo "${_tmp_get_pip}"
+  local _python_user_base_dir="$(bes_python_user_base_dir "${_python_exe}")"
+  echo ${_python_user_base_dir}
+  if ! bes_download "${_GET_PIP_URL}" "${_tmp_get_pip}"; then
+    bes_message "Failed to download ${_GET_PIP_URL}"
+    return 1
+  fi
+  bes_message "Installed pip for ${_python_exe}"
+  local _pip_exe_basename=pip${_python_version}
+  if ! bes_has_program ${_pip_exe_basename}; then
+    bes_message "fuck"
+    return 1
+  fi
   return 0
 }
 
