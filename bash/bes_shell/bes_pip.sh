@@ -16,31 +16,35 @@ function bes_pip_exe()
     bes_message "bes_pip_exe: python_exe needs to be an absolute path"
     return 1
   fi
-  local _version=$(bes_python_exe_version "${_python_exe}")
-  local _pip_basename=pip${_version}
-  # Check the python builtin bin dir for pip
-  local _builtin_python_bin_dir="$(bes_python_bin_dir "${_python_exe}")"
-  local _builtin_pip_abs="${_builtin_python_bin_dir}/${_pip_basename}"
-  if [[ -x "${_builtin_pip_abs}" ]]; then
-    echo "${_builtin_pip_abs}"
-    return 0
-  fi
-  # Check the python user base bin dir for pip
+  local _python_version=$(bes_python_exe_version "${_python_exe}")
+  local _pip_basename=pip${_python_version}
+
+  # First check the python user specific base bin dir for pip
   local _user_base_python_bin_dir="$(bes_python_user_base_bin_dir "${_python_exe}")"
   local _user_base_pip_abs="${_user_base_python_bin_dir}/${_pip_basename}"
   if [[ -x "${_user_base_pip_abs}" ]]; then
     echo "${_user_base_pip_abs}"
     return 0
   fi
+
+  # Check the python builtin bin dir for pip
+  local _builtin_python_bin_dir="$(bes_python_bin_dir "${_python_exe}")"
+  local _builtin_pip_abs="${_builtin_python_bin_dir}/${_pip_basename}"
+
+  if [[ -x "${_builtin_pip_abs}" ]]; then
+    echo "${_builtin_pip_abs}"
+    return 0
+  fi
+
   echo ""
   return 1
 }
 
 # Print the full version of pip
-function bes_pip_exe_full_version()
+function bes_pip_exe_version()
 {
   if [[ $# != 1 ]]; then
-    bes_message "Usage: bes_pip_exe_full_version exe"
+    bes_message "Usage: bes_pip_exe_version exe"
     return 1
   fi
   local _exe="${1}"
@@ -49,11 +53,31 @@ function bes_pip_exe_full_version()
   return 0
 }
 
+# Return 0 if pip matching the version of the given python exe is found
+function bes_pip_has_pip()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "Usage: bes_pip_has_pip python_exe"
+    return 1
+  fi
+  local _python_exe="${1}"
+  if ! bes_path_is_abs "${_python_exe}"; then
+    bes_message "bes_pip_has_pip: python_exe needs to be an absolute path"
+    return 1
+  fi
+  local _pip_exe="$(bes_pip_exe "${_python_exe}")"
+  if [[ -x "${_pip_exe}" ]]; then
+    return 0
+  fi
+  return 1
+}
+
+
 # Install pip for a given python exe
 function bes_pip_install()
 {
-  if [[ $# != 1 ]]; then
-    echo "usage: bes_pip_install python_exe"
+  if [[ $# != 2 ]]; then
+    echo "usage: bes_pip_install python_exe pip_version"
     return 1
   fi
   local _python_exe="${1}"
@@ -61,63 +85,72 @@ function bes_pip_install()
     bes_message "bes_pip_install: python_exe needs to be an absolute path"
     return 1
   fi
-  local _version=$(bes_python_exe_version "${_python_exe}")
+  
+  if bes_pip_has_pip "${_python_exe}"; then
+    local _pip_exe="$(bes_pip_exe "${_python_exe}")"
+    bes_message "pip already installed: ${_pip_exe}"
+    return 1
+  fi
+
+  local _pip_version="${2}"
   
   local _GET_PIP_URL="https://bootstrap.pypa.io/get-pip.py"
-  local _python_exe="${1}"
-  local _python_version="${2}"
-  local _tmp_get_pip=/tmp/tmp_get_pip_$$.py
-  rm -f "${_tmp_get_pip}"
-  echo "${_tmp_get_pip}"
-  local _python_user_base_dir="$(bes_python_user_base_dir "${_python_exe}")"
-  echo ${_python_user_base_dir}
-  if ! bes_download "${_GET_PIP_URL}" "${_tmp_get_pip}"; then
-    bes_message "Failed to download ${_GET_PIP_URL}"
+  local _tmp_get_pip_dot_py=/tmp/tmp_bes_pip_install_get_pip_$$.py
+  local _tmp_log=/tmp/tmp_bes_pip_install_log_$$.log
+  rm -f "${_tmp_get_pip_dot_py}" "${_tmp_log}"
+  if ! bes_download "${_GET_PIP_URL}" "${_tmp_get_pip_dot_py}"; then
+    rm -f "${_tmp_get_pip_dot_py}"
+    bes_message "Failed to download ${_GET_PIP_URL} to ${_tmp_get_pip_dot_py}"
     return 1
   fi
-  bes_message "Installed pip for ${_python_exe}"
-  local _pip_exe_basename=pip${_python_version}
-  if ! bes_has_program ${_pip_exe_basename}; then
-    bes_message "fuck"
+  if ! "${_python_exe}" ${_tmp_get_pip_dot_py} >& "${_tmp_log}"; then
+    bes_message "Failed to install pip"
+    cat "${_tmp_log}"
+    rm -f "${_tmp_get_pip_dot_py}" "${_tmp_log}"
     return 1
   fi
+  rm -f "${_tmp_get_pip_dot_py}" "${_tmp_log}"
+
+  if ! bes_pip_has_pip "${_python_exe}"; then
+    bes_message "pip install succeeded but failing to find pip afterwards"
+    return 1
+  fi
+
+  local _pip_exe="$(bes_pip_exe "${_python_exe}")"
+  local _installed_pip_version="$(bes_pip_exe_version "${_pip_exe}")"
+
+  if [[ ${_pip_version} != ${_installed_pip_version} ]]; then
+    if ! "${_pip_exe}" install pip==${_pip_version} >& "${_tmp_log}"; then
+      bes_message "Failed to install pip version ${_pip_version}"
+      cat "${_tmp_log}"
+      rm -f "${_tmp_log}"
+      return 1
+    fi
+    rm -f "${_tmp_log}"
+  fi
+
+  _installed_pip_version="$(bes_pip_exe_version "${_pip_exe}")"
+  
+  bes_message "pip ${_installed_pip_version} installed: ${_pip_exe}"
+  
   return 0
 }
 
-# Return 0 if pip matching the version of the given python exe is found
-function bes_pip_has_pip()
-{
-  if [[ $# != 1 ]]; then
-    bes_message "Usage: bes_pip_has_pip exe"
-    return 1
-  fi
-  local _exe="${1}"
-  if ! bes_path_is_abs "${_exe}"; then
-    bes_message "bes_pip_has_pip: exe needs to be an absolute path"
-    return 1
-  fi
-  local _pip_exe="$(bes_pip_exe "${_exe}")"
-  if [[ -x "${_pip_exe}" ]]; then
-    return 0
-  fi
-  return 1
-}
-
-# Call pipenv within the current devenv.  Need to source devenv/py{2.7,3.7,3.8}/enable.bash first"
-function eca_pipenv()
-{
-  local _this_dir="$(_eca_this_dir_devenv_setup_dot_bash)"
-  if [[ -z "${EGO_DEVENV_VERSION}" ]]; then
-    echo "EGO_DEVENV_VERSION not set.  source ${_this_dir}/py{2.7,3.7,3.8}/enable.bash first"
-    return 1
-  fi
-  local _root_dir="$(bes_abs_path ${_this_dir}/..)"
-  local _work_dir=${_root_dir}/devenv/py${EGO_DEVENV_VERSION}
-  pushd ${_work_dir} >& /dev/null
-  python${EGO_DEVENV_VERSION} $(which pipenv) ${1+"$@"}
-  local _rv=$?
-  popd >& /dev/null
-  return ${_rv}
-}
+##### # Call pipenv within the current devenv.  Need to source devenv/py{2.7,3.7,3.8}/enable.bash first"
+##### function eca_pipenv()
+##### {
+#####   local _this_dir="$(_eca_this_dir_devenv_setup_dot_bash)"
+#####   if [[ -z "${EGO_DEVENV_VERSION}" ]]; then
+#####     echo "EGO_DEVENV_VERSION not set.  source ${_this_dir}/py{2.7,3.7,3.8}/enable.bash first"
+#####     return 1
+#####   fi
+#####   local _root_dir="$(bes_abs_path ${_this_dir}/..)"
+#####   local _work_dir=${_root_dir}/devenv/py${EGO_DEVENV_VERSION}
+#####   pushd ${_work_dir} >& /dev/null
+#####   python${EGO_DEVENV_VERSION} $(which pipenv) ${1+"$@"}
+#####   local _rv=$?
+#####   popd >& /dev/null
+#####   return ${_rv}
+##### }
 
 _bes_trace_file "end"

@@ -27,6 +27,10 @@ function bes_python_exe_full_version()
     return 1
   fi
   local _exe="${1}"
+  if [[ ! -x ${_exe} ]]; then
+    bes_message "bes_python_exe_full_version: problem executing python: ${_exe}"
+    return 1
+  fi
   local _full_version=$(${_exe} --version 2>&1 | ${_BES_AWK_EXE} '{ print $2; }')
   echo "${_full_version}"
   return 0
@@ -40,6 +44,10 @@ function bes_python_exe_version()
     return 1
   fi
   local _exe="${1}"
+  if [[ ! -x ${_exe} ]]; then
+    bes_message "bes_python_exe_version: problem executing python: ${_exe}"
+    return 1
+  fi
   local _full_version=$(bes_python_exe_full_version "${_exe}")
   local _version=$(echo ${_full_version} | ${_BES_AWK_EXE} -F'.' '{ printf("%s.%s\n", $1, $2); }')
   echo "${_version}"
@@ -293,6 +301,20 @@ function eca_pipenv()
   local _rv=$?
   popd >& /dev/null
   return ${_rv}
+}
+
+# Find a builtin python usually in /usr
+function bes_python_find_builtin_python()
+{
+  local _possible_python
+  for _possible_python in python3.7 python3.8 python2.7; do
+    local _exe=/usr/bin/${_possible_python}
+    if [[ -x "${_exe}" ]]; then
+      echo "${_exe}"
+      return 0
+    fi
+  done
+  return 1
 }
 
 _bes_trace_file "end"
