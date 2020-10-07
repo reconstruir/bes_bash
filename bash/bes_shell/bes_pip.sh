@@ -36,6 +36,19 @@ function bes_pip_exe()
   return 1
 }
 
+# Print the full version of pip
+function bes_pip_exe_full_version()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "Usage: bes_pip_exe_full_version exe"
+    return 1
+  fi
+  local _exe="${1}"
+  local _full_version=$(${_exe} --version | ${_BES_AWK_EXE} '{ print $2; }')
+  echo "${_full_version}"
+  return 0
+}
+
 # Install pip for a given python exe
 function bes_pip_install()
 {
