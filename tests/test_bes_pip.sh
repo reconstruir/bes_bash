@@ -36,8 +36,6 @@ function test_bes_pip_has_pip()
   local _fake_python="$(_bes_python_testing_make_testing_python_exe "${_tmp}" python2.7 2.7.667)"
   local _fake_pip=$(_bes_python_testing_make_testing_pip_exe "${_fake_python}" 666.1.2)
   
-  #bes_assert "[[ $(bes_testing_call_function bes_pip_has_pip /notthere/foo ) == 1 ]]"
-  
   local _save_path="${PATH}"
   PATH="${_tmp}":${PATH}
   bes_assert "[[ $(bes_testing_call_function bes_pip_has_pip ${_fake_python} ) == 0 ]]"
@@ -169,7 +167,61 @@ function test_bes_pip_update()
   
   bes_assert "[[ $(bes_pip_exe_version ${_new_pip_exe}) == ${_PIP_VERSION2} ]]"
   
+  unset PYTHONUSERBASE
+  
+  rm -rf ${_tmp}
+}
 
+function test_bes_pip_install_package()
+{
+  local _builtin_python="$(bes_python_find_builtin_python)"
+  if [[ ! -x ${_builtin_python} ]]; then
+    bes_message "test_bes_pip_install_package: skipping because no builtin python found"
+    return 0
+  fi
+  if bes_pip_has_pip ${_builtin_python}; then
+    bes_message "test_bes_pip_install_package: skipping because pip already found"
+    return 0
+  fi
+
+  local _tmp=/tmp/test_bes_pip_install_package$$
+
+  local _PIP_VERSION=20.2.2
+  
+  export PYTHONUSERBASE="${_tmp}"
+  bes_pip_ensure ${_builtin_python} ${_PIP_VERSION}
+
+  local _pip_exe=$(bes_pip_exe ${_builtin_python})
+
+  local _test_pip_dot_py=${_tmp}/fake_git.sh
+  cat > ${_test_pip_dot_py} << EOF
+try:
+  import requests
+  print(requests.__file__)
+  raise SystemExit(0)
+except Exception as ex:
+  raise SystemExit(1)
+EOF
+
+  local _tmp_test_output=${_tmp}/test_output.txt
+  
+  ${_builtin_python} ${_test_pip_dot_py} >& "${_tmp_test_output}"
+  local _test_rv=$?
+
+  bes_assert "[[ ${_test_rv} == 1 ]]"
+
+  bes_pip_install_package "${_pip_exe}" requests
+  local _install_rv=$?
+  bes_assert "[[ ${_install_rv} == 0 ]]"
+
+  ${_builtin_python} ${_test_pip_dot_py} >& "${_tmp_test_output}"
+  local _test_rv=$?
+
+  bes_assert "[[ ${_test_rv} == 0 ]]"
+  local _output=$(cat "${_tmp_test_output}")
+  local _user_site_dir="$(bes_python_user_site_dir "${_builtin_python}")"
+
+  bes_assert "[[ $(bes_testing_call_function bes_str_starts_with ${_output} ${_user_site_dir} ) == 0 ]]"
   
   unset PYTHONUSERBASE
   

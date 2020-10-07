@@ -185,21 +185,40 @@ function bes_pip_ensure()
   return ${_rv}
 }
 
-##### # Call pipenv within the current devenv.  Need to source devenv/py{2.7,3.7,3.8}/enable.bash first"
-##### function eca_pipenv()
-##### {
-#####   local _this_dir="$(_eca_this_dir_devenv_setup_dot_bash)"
-#####   if [[ -z "${EGO_DEVENV_VERSION}" ]]; then
-#####     echo "EGO_DEVENV_VERSION not set.  source ${_this_dir}/py{2.7,3.7,3.8}/enable.bash first"
-#####     return 1
-#####   fi
-#####   local _root_dir="$(bes_abs_path ${_this_dir}/..)"
-#####   local _work_dir=${_root_dir}/devenv/py${EGO_DEVENV_VERSION}
-#####   pushd ${_work_dir} >& /dev/null
-#####   python${EGO_DEVENV_VERSION} $(which pipenv) ${1+"$@"}
-#####   local _rv=$?
-#####   popd >& /dev/null
-#####   return ${_rv}
-##### }
+# Use pip to install a package
+function bes_pip_install_package()
+{
+  if [[ $# < 2 ]]; then
+    echo "usage: bes_pip_install_package pip_exe package_name package_version"
+    return 1
+  fi
+  local _pip_exe="${1}"
+  shift
+  if [[ ! -x "${_pip_exe}" ]]; then
+    bes_message "bes_pip_install_package: cannot execute pip: ${_pip_exe}"
+    return 1
+  fi
+  local _package_name=${1}
+  shift
+  local _package_version=
+  local _install_arg=
+  if [[ $# > 0 ]]; then
+    _package_version=${1}
+    _install_arg=${_package_name}==${_package_version}
+  else
+    _package_version=
+    _install_arg=${_package_name}
+  fi
+
+  local _tmp_log=/tmp/tmp_bes_pip_install_package_$$.log
+  rm -f "${_tmp_log}"
+  if ! "${_pip_exe}" install ${_install_arg} >& "${_tmp_log}"; then
+    bes_message "Failed to install ${_install_arg} with ${_pip_exe}"
+    cat "${_tmp_log}"
+    rm -f "${_tmp_log}"
+    return 1
+  fi
+  return 0
+}
 
 _bes_trace_file "end"
