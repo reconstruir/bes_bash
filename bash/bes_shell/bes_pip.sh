@@ -72,7 +72,6 @@ function bes_pip_has_pip()
   return 1
 }
 
-
 # Install pip for a given python exe
 function bes_pip_install()
 {
@@ -96,7 +95,7 @@ function bes_pip_install()
   
   local _GET_PIP_URL="https://bootstrap.pypa.io/get-pip.py"
   local _tmp_get_pip_dot_py=/tmp/tmp_bes_pip_install_get_pip_$$.py
-  local _tmp_log=/tmp/tmp_bes_pip_install_log_$$.log
+  local _tmp_log=/tmp/tmp_bes_pip_install_$$.log
   rm -f "${_tmp_get_pip_dot_py}" "${_tmp_log}"
   if ! bes_download "${_GET_PIP_URL}" "${_tmp_get_pip_dot_py}"; then
     rm -f "${_tmp_get_pip_dot_py}"
@@ -116,24 +115,74 @@ function bes_pip_install()
     return 1
   fi
 
-  local _pip_exe="$(bes_pip_exe "${_python_exe}")"
-  local _installed_pip_version="$(bes_pip_exe_version "${_pip_exe}")"
-
-  if [[ ${_pip_version} != ${_installed_pip_version} ]]; then
-    if ! "${_pip_exe}" install pip==${_pip_version} >& "${_tmp_log}"; then
-      bes_message "Failed to install pip version ${_pip_version}"
-      cat "${_tmp_log}"
-      rm -f "${_tmp_log}"
-      return 1
-    fi
-    rm -f "${_tmp_log}"
-  fi
-
-  _installed_pip_version="$(bes_pip_exe_version "${_pip_exe}")"
-  
-  bes_message "pip ${_installed_pip_version} installed: ${_pip_exe}"
+  bes_pip_update "${_python_exe}" ${_pip_version}
   
   return 0
+}
+
+# Update pip to specific version
+function bes_pip_update()
+{
+  if [[ $# != 2 ]]; then
+    echo "usage: bes_pip_update python_exe pip_version"
+    return 1
+  fi
+  local _python_exe="${1}"
+  local _pip_version="${2}"
+
+  if ! bes_pip_has_pip "${_python_exe}"; then
+    bes_message "pip is not installed: ${_python_exe}"
+    return 1
+  fi
+
+  local _pip_exe=$(bes_pip_exe "${_python_exe}")
+  local _current_pip_version=$(bes_pip_exe_version ${_pip_exe})
+
+  if [[ ${_current_pip_version} == ${_pip_version} ]]; then
+    return 0
+  fi
+  
+  local _tmp_log=/tmp/tmp_bes_pip_update_$$.log
+  if ! "${_pip_exe}" install pip==${_pip_version} >& "${_tmp_log}"; then
+    bes_message "Failed to update pip from ${_pip_current_version} to ${_pip_version}"
+    cat "${_tmp_log}"
+    rm -f "${_tmp_log}"
+    return 1
+  fi
+
+  local _new_current_pip_version=$(bes_pip_exe_version ${_pip_exe})
+  if [[ ${_new_current_pip_version} != ${_pip_version} ]]; then
+    bes_message "Failed to update pip from ${_pip_current_version} to ${_pip_version}"
+    return 1
+  fi
+  
+  return 0
+}
+
+# Ensure that pip is installed and at the given version
+function bes_pip_ensure()
+{
+  if [[ $# != 2 ]]; then
+    echo "usage: bes_pip_ensure python_exe pip_version"
+    return 1
+  fi
+  local _python_exe="${1}"
+  if ! bes_path_is_abs "${_python_exe}"; then
+    bes_message "bes_pip_ensure: python_exe needs to be an absolute path"
+    return 1
+  fi
+  
+  local _pip_version="${2}"
+
+  if ! bes_pip_has_pip "${_python_exe}"; then
+    if ! bes_pip_install "${_python_exe}" ${_pip_version}; then
+      return 1
+    fi
+  fi
+
+  bes_pip_update "${_python_exe}" ${_pip_version}
+  local _rv=$?
+  return ${_rv}
 }
 
 ##### # Call pipenv within the current devenv.  Need to source devenv/py{2.7,3.7,3.8}/enable.bash first"
