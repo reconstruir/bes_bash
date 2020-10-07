@@ -28,4 +28,22 @@ function test_bes_pip_exe()
   rm -rf ${_tmp}
 }
 
+function test_bes_pip_has_pip()
+{
+  local _tmp=/tmp/test_bes_pip_has_pip$$
+  local _fake_python="$(_bes_python_testing_make_testing_python_exe "${_tmp}" python2.7 2.7.666)"
+  local _fake_pip=$(_bes_python_testing_make_testing_pip_exe "${_fake_python}" 666.1.2)
+  
+  bes_assert "[[ $(bes_pip_exe ${_fake_python}) == ${_tmp}/pip2.7 ]]"
+
+  bes_assert "[[ $(bes_testing_call_function bes_pip_has_pip /notthere/foo ) == 1 ]]"
+  
+  local _save_path="${PATH}"
+  PATH="${_tmp}":${PATH}
+  bes_assert "[[ $(bes_testing_call_function bes_pip_has_pip ${_fake_python} ) == 0 ]]"
+  PATH="${_save_path}"
+
+  rm -rf ${_tmp}
+}
+
 bes_testing_run_unit_tests
