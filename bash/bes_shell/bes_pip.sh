@@ -16,27 +16,60 @@ function bes_pip_exe()
     bes_message "bes_pip_exe: python_exe needs to be an absolute path"
     return 1
   fi
-  local _python_version=$(bes_python_exe_version "${_python_exe}")
-  local _pip_basename=pip${_python_version}
 
-  # First check the python user specific base bin dir for pip
-  local _user_base_python_bin_dir="$(bes_python_user_base_bin_dir "${_python_exe}")"
-  local _user_base_pip_abs="${_user_base_python_bin_dir}/${_pip_basename}"
-  if [[ -x "${_user_base_pip_abs}" ]]; then
-    echo "${_user_base_pip_abs}"
+  local _user_pip_exe="$(bes_user_pip_exe "${_python_exe}")"
+  if [[ -x "${_user_pip_exe}" ]]; then
+    echo "${_user_pip_exe}"
     return 0
   fi
 
-  # Check the python builtin bin dir for pip
-  local _builtin_python_bin_dir="$(bes_python_bin_dir "${_python_exe}")"
-  local _builtin_pip_abs="${_builtin_python_bin_dir}/${_pip_basename}"
-
-  if [[ -x "${_builtin_pip_abs}" ]]; then
-    echo "${_builtin_pip_abs}"
+  local _system_pip_exe="$(bes_system_pip_exe "${_python_exe}")"
+  if [[ -x "${_system_pip_exe}" ]]; then
+    echo "${_system_pip_exe}"
     return 0
   fi
 
   echo ""
+  return 1
+}
+
+# Print the absolute path to the user pip exe that corresponds to the given python exe
+function bes_system_pip_exe()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "Usage: bes_system_pip_exe python_exe"
+    return 1
+  fi
+  local _python_exe="${1}"
+  if ! bes_path_is_abs "${_python_exe}"; then
+    bes_message "bes_system_pip_exe: python_exe needs to be an absolute path"
+    return 1
+  fi
+  local _python_version=$(bes_python_exe_version "${_python_exe}")
+  local _pip_basename=pip${_python_version}
+  local _system_python_bin_dir="$(bes_python_bin_dir "${_python_exe}")"
+  local _system_pip_abs="${_system_python_bin_dir}/${_pip_basename}"
+  echo "${_system_pip_abs}"
+  return 1
+}
+
+# Print the absolute path to the user pip exe that corresponds to the given python exe
+function bes_user_pip_exe()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "Usage: bes_user_pip_exe python_exe"
+    return 1
+  fi
+  local _python_exe="${1}"
+  if ! bes_path_is_abs "${_python_exe}"; then
+    bes_message "bes_user_pip_exe: python_exe needs to be an absolute path"
+    return 1
+  fi
+  local _python_version=$(bes_python_exe_version "${_python_exe}")
+  local _pip_basename=pip${_python_version}
+  local _user_base_python_bin_dir="$(bes_python_user_base_bin_dir "${_python_exe}")"
+  local _user_base_pip_abs="${_user_base_python_bin_dir}/${_pip_basename}"
+  echo ${_user_base_pip_abs}
   return 1
 }
 
@@ -171,6 +204,8 @@ function bes_pip_ensure()
     bes_message "bes_pip_ensure: python_exe needs to be an absolute path"
     return 1
   fi
+
+  bes_debug_message "bes_pip_ensure: _python_exe: ${_python_exe}"
   
   local _pip_version="${2}"
 
@@ -212,12 +247,57 @@ function bes_pip_install_package()
 
   local _tmp_log=/tmp/tmp_bes_pip_install_package_$$.log
   rm -f "${_tmp_log}"
-  if ! "${_pip_exe}" install ${_install_arg} >& "${_tmp_log}"; then
+  if ! "${_pip_exe}" install --user ${_install_arg} >& "${_tmp_log}"; then
     bes_message "Failed to install ${_install_arg} with ${_pip_exe}"
     cat "${_tmp_log}"
     rm -f "${_tmp_log}"
     return 1
   fi
+  return 0
+}
+
+# Ensure that a system pip exists or install it
+function bes_system_pip_ensure()
+{
+  if [[ $# != 1 ]]; then
+    echo "usage: bes_system_pip_ensure python_exe"
+    return 1
+  fi
+  local _python_exe="${1}"
+  if ! bes_path_is_abs "${_python_exe}"; then
+    bes_message "bes_pip_install: python_exe needs to be an absolute path"
+    return 1
+  fi
+
+  local _system_pip_exe="$(bes_system_pip_exe "${_python_exe}")"
+  if [[ -x "${_system_pip_exe}" ]]; then
+    return 0
+  fi
+
+  local _GET_PIP_URL="https://bootstrap.pypa.io/get-pip.py"
+  local _tmp_get_pip_dot_py=/tmp/tmp_bes_pip_install_get_pip_$$.py
+  local _tmp_log=/tmp/tmp_bes_pip_install_$$.log
+  rm -f "${_tmp_get_pip_dot_py}" "${_tmp_log}"
+  if ! bes_download "${_GET_PIP_URL}" "${_tmp_get_pip_dot_py}"; then
+    rm -f "${_tmp_get_pip_dot_py}"
+    bes_message "Failed to download ${_GET_PIP_URL} to ${_tmp_get_pip_dot_py}"
+    return 1
+  fi
+  if ! "${_python_exe}" ${_tmp_get_pip_dot_py} >& "${_tmp_log}"; then
+    bes_message "Failed to install pip"
+    cat "${_tmp_log}"
+    rm -f "${_tmp_get_pip_dot_py}" "${_tmp_log}"
+    return 1
+  fi
+  rm -f "${_tmp_get_pip_dot_py}" "${_tmp_log}"
+
+  if ! bes_pip_has_pip "${_python_exe}"; then
+    bes_message "pip install succeeded but failing to find pip afterwards"
+    return 1
+  fi
+
+  bes_pip_update "${_python_exe}" ${_pip_version}
+  
   return 0
 }
 
