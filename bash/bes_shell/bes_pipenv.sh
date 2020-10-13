@@ -8,14 +8,20 @@ _bes_trace_file "begin"
 function bes_pipenv_call()
 {
   if [[ $# < 1 ]]; then
-    echo "usage: bes_pipenv_call project_dir <args>"
+    echo "usage: bes_pipenv_call python_exe project_dir <args>"
     return 1
   fi
+  local _python_exe="${1}"
+  shift
+  bes_python_check_python_exe bes_pipenv_call "${_python_exe}"
+
   local _project_dir="${1}"
   shift
+  local _user_base_dir="${_project_dir}"/.py-user-base
+
   local _tmp_log=/tmp/tmp_bes_pipenv_call_$$.log
   rm -f "${_tmp_log}"
-  ( cd "${_project_dir}" && pipenv ${1+"$@"} >& "${_tmp_log}" )
+  ( cd "${_project_dir}" && bes_pip_call_program "${_python_exe}" "${_user_base_dir}" pipenv ${1+"$@"} >& "${_tmp_log}" )
   local _pipenv_rv=$?
   if [[ ${_pipenv_rv} != 0 ]]; then
     bes_message "failed to call: pipenv "${1+"$@"}
@@ -30,8 +36,8 @@ function bes_pipenv_call()
 # Print the absolute path to the pipenv exe that corresponds to the given python exe
 function bes_pipenv_exe()
 {
-  if [[ $# != 1 ]]; then
-    bes_message "Usage: bes_pipenv_exe python_exe"
+  if [[ $# != 2 ]]; then
+    bes_message "Usage: bes_pipenv_exe python_exe project_dir"
     return 1
   fi
   local _python_exe="${1}"
@@ -39,18 +45,8 @@ function bes_pipenv_exe()
     bes_message "bes_pipenv_exe: python_exe needs to be an absolute path"
     return 1
   fi
-  if ! bes_pip_has_pip "${_python_exe}"; then
-    bes_message "pip not installed for ${_python_exe}"
-    return 1
-  fi
-  local _user_base_python_bin_dir="$(bes_python_user_base_bin_dir "${_python_exe}")"
-  local _pipenv_exe="${_user_base_python_bin_dir}/pipenv"
-  
-  if [[ ! -x "${_pipenv_exe}" ]]; then
-    echo ""
-    return 1
-  fi
-
+  local _user_base_dir="${_project_dir}"/.py-user-base
+  local _pipenv_exe="${_user_base_dir}/pipenv"
   echo "${_pipenv_exe}"
   return 0
 }
@@ -58,16 +54,17 @@ function bes_pipenv_exe()
 # Retrun 0 if pipenv is found for the given python exe
 function bes_pipenv_has_pipenv()
 {
-  if [[ $# != 1 ]]; then
-    bes_message "Usage: bes_pipenv_has_pipenv python_exe"
+  if [[ $# != 2 ]]; then
+    bes_message "Usage: bes_pipenv_has_pipenv python_exe project_dir"
     return 1
   fi
   local _python_exe="${1}"
+  local _project_dir="${2}"
   if ! bes_path_is_abs "${_python_exe}"; then
     bes_message "bes_pipenv_exe: python_exe needs to be an absolute path"
     return 1
   fi
-  local _pipenv_exe="$(bes_pipenv_exe "${_python_exe}")"
+  local _pipenv_exe="$(bes_pipenv_exe "${_python_exe}" "${_project_dir}")"
   if [[ ! -x "${_pipenv_exe}" ]]; then
     return 1
   fi
@@ -94,43 +91,41 @@ function bes_pipenv_version()
 # Ensure pipenv is installed
 function bes_pipenv_ensure()
 {
-  if [[ $# != 2 ]]; then
-    bes_message "Usage: bes_pipenv_ensure python_exe pipenv_version"
+  if [[ $# != 4 ]]; then
+    bes_message "Usage: bes_pipenv_ensure python_exe project_dir pip_version pipenv_version"
     return 1
   fi
   local _python_exe="${1}"
-  local _pipenv_version=${2}
+  local _project_dir="${2}"
+  local _pip_version=${3}
+  local _pipenv_version=${4}
   if ! bes_path_is_abs "${_python_exe}"; then
     bes_message "bes_pipenv_exe: python_exe needs to be an absolute path"
     return 1
   fi
-  if ! bes_pip_has_pip "${_python_exe}"; then
-    bes_message "pip not installed for ${_python_exe}"
+
+  local _user_base_dir="${_project_dir}"/.py-user-base
+
+  if ! bes_pip_ensure "${_python_exe}" "${_user_base_dir}" ${_pip_version}; then
     return 1
   fi
-  local _pip_exe="$(bes_pip_exe "${_python_exe}")"
-  if ! bes_pipenv_has_pipenv "${_python_exe}"; then
-    local _tmp_log=/tmp/tmp_bes_pipenv_ensure_install_$$.log
-    if ! ${_pip_exe} install pipenv==${_pipenv_version} >& "${_tmp_log}"; then
-      bes_message "failed to install pipenv for pip ${_pip_exe}"
-      cat "${_tmp_log}"
-      rm -f "${_tmp_log}"
+
+  local _pip_exe="$(bes_pip_exe "${_python_exe}" "${_user_base_dir}")"
+  if ! bes_pipenv_has_pipenv "${_python_exe}" "${_project_dir}"; then
+    if ! bes_pip_install_package "${_python_exe}" "${_pip_exe}" pipenv ${_pipenv_version}; then
       return 1
     fi
   fi
 
-  if bes_pipenv_has_pipenv "${_python_exe}"; then
-    local _pipenv_exe="$(bes_pipenv_exe "${_python_exe}")"
-    local _current_pipenv_version="$(bes_pipenv_version "${_pipenv_exe}")"
-    if [[ ${_current_pipenv_version} == ${_pipenv_version} ]]; then
-      return 0
-    fi
+  local _pipenv_exe="$(bes_pipenv_exe "${_python_exe}" "${_project_dir}")"
+  local _current_pipenv_version="$(bes_pipenv_version "${_pipenv_exe}")"
+  if [[ ${_current_pipenv_version} == ${_pipenv_version} ]]; then
+    return 0
   fi
   
-  if ! bes_pip_install_package "${_pip_exe}" pipenv ${_pip_version}; then
+  if ! bes_pip_install_package "${_python_exe}" "${_pip_exe}" pipenv ${_pipenv_version}; then
     return 1
   fi
-  
   return 0
 }
 

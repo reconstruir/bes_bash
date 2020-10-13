@@ -27,7 +27,7 @@ function test_bes_pip_exe_version()
     return 0
   fi
   local _tmp=/tmp/test_bes_pip_exe_version_$$
-  local _fake_python="$(_bes_python_testing_make_testing_python_exe "${_tmp}" python2.7 2.7.668)"
+  local _fake_python="$(_bes_python_testing_make_testing_python_exe "${_tmp}/bin" python2.7 2.7.668)"
   local _fake_pip=$(_bes_python_testing_make_testing_pip_exe "${_fake_python}" 666.1.2)
   
   bes_assert "[[ $(bes_pip_exe_version ${_builtin_python} ${_fake_pip}) == 666.1.2 ]]"
@@ -169,6 +169,26 @@ EOF
   local _output=$(cat "${_tmp_test_output}")
 
   bes_assert "[[ $(bes_testing_call_function bes_str_starts_with ${_output} ${_user_site_dir} ) == 0 ]]"
+  
+  rm -rf ${_tmp}
+}
+
+function test_bes_pip_call_program()
+{
+  local _builtin_python="$(bes_python_find_builtin_python)"
+  if [[ ! -x ${_builtin_python} ]]; then
+    bes_message "test_bes_pip_call_program: skipping because no builtin python found"
+    return 0
+  fi
+
+  local _tmp=/tmp/test_bes_pip_call_program_$$
+  
+  bes_pip_ensure "${_builtin_python}" "${_tmp}" 20.2.3
+  local _pip_exe=$(bes_pip_exe ${_builtin_python} "${_tmp}")
+  bes_pip_install_package "${_builtin_python}" "${_pip_exe}" pipenv 2020.8.13
+
+  local _pipenv_version=$(bes_pip_call_program "${_builtin_python}" "${_tmp}" pipenv --version | awk '{ print $3; }')
+  bes_assert "[[ ${_pipenv_version} == 2020.8.13 ]]"
   
   rm -rf ${_tmp}
 }

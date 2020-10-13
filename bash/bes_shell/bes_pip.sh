@@ -4,49 +4,50 @@
 
 _bes_trace_file "begin"
 
-# Call pip
-function bes_pip_call()
+# Call program from the pip userbase
+function bes_pip_call_program()
 {
-  if [[ $# < 2 ]]; then
-    bes_message "Usage: bes_pip_call python_exe user_pip_exe"
+  if [[ $# < 3 ]]; then
+    bes_message "Usage: bes_pip_call_program python_exe user_base_dir program"
     return 1
   fi
   
   local _python_exe="${1}"
   shift
-  if ! bes_path_is_abs "${_python_exe}"; then
-    bes_message "bes_pip_call: python_exe needs to be an absolute path"
-    return 1
-  fi
-  if [[ ! -e "${_python_exe}" ]]; then
-    bes_message "bes_pip_call: not found: ${_python_exe}"
-    return 1
-  fi
-  if [[ ! -x "${_python_exe}" ]]; then
-    bes_message "bes_pip_call: not executable: ${_python_exe}"
-    return 1
-  fi
-  
-  local _user_pip_exe="${1}"
-  shift
-  if ! bes_path_is_abs "${_user_pip_exe}"; then
-    bes_message "bes_pip_call: user_pip_exe needs to be an absolute path"
-    return 1
-  fi
-  if [[ ! -e "${_user_pip_exe}" ]]; then
-    bes_message "bes_pip_call: not found: ${_user_pip_exe}"
-    return 1
-  fi
-  if [[ ! -x "${_user_pip_exe}" ]]; then
-    bes_message "bes_pip_call: not executable: ${_user_pip_exe}"
-    return 1
-  fi
+  bes_python_check_python_exe "bes_pip_call_program" "${_python_exe}"
 
-  local _user_pip_dir="$(dirname "${_user_pip_exe}")"
-  local _user_pip_bin_dir="$(bes_abs_dir "${_user_pip_dir}")"
-  local _user_base_dir="$(bes_abs_dir "${_user_pip_dir}"/..)"
+  local _user_base_dir="${1}"
+  shift
+
+  local _program="${1}"
+  shift
+  
+  local _user_base_bin_dir="$(bes_abs_dir "${_user_base_dir}/bin")"
+  local _program_abs="$(bes_abs_file "${_user_base_bin_dir}/${_program}")"
   local _user_site_dir="${_user_base_dir}/lib/python/site-packages"
-  PYTHONUSERBASE="${_user_base_dir}" PATH="${_user_pip_bin_dir}":"${PATH}" PYTHONPATH="${_user_site_dir}":"${PYTHONPATH}" "${_python_exe}" "${_user_pip_exe}" ${1+"$@"}
+  PYTHONUSERBASE="${_user_base_dir}" PATH="${_user_base_bin_dir}":"${PATH}" PYTHONPATH="${_user_site_dir}":"${PYTHONPATH}" "${_python_exe}" "${_program_abs}" ${1+"$@"}
+  local _program_rv=$?
+  return ${_program_rv}
+}
+
+# Call pip
+function bes_pip_call()
+{
+  if [[ $# < 2 ]]; then
+    bes_message "Usage: bes_pip_call python_exe user_base_dir"
+    return 1
+  fi
+  local _python_exe="${1}"
+  shift
+  bes_python_check_python_exe "bes_pip_call_program" "${_python_exe}"
+
+  local _user_base_dir="${1}"
+  shift
+
+  local _python_version=$(bes_python_exe_version "${_python_exe}")
+  local _pip_basename=pip${_python_version}
+
+  bes_pip_call_program "${_python_exe}" "${_user_base_dir}" ${_pip_basename} ${1+"$@"}
   local _pip_rv=$?
   return ${_pip_rv}
 }
@@ -61,7 +62,15 @@ function bes_pip_exe_version()
   local _python_exe="${1}"
   local _pip_exe="${2}"
 
-  local _full_version=$(bes_pip_call "${_python_exe}" "${_pip_exe}" --version | ${_BES_AWK_EXE} '{ print $2; }')
+#  echo caca _pip_exe $_pip_exe >& $(tty)
+  
+  local _pip_dir="$(dirname "${_pip_exe}")"
+  local _user_base_dir="$(bes_abs_dir "${_pip_dir}"/..)"
+
+#  echo caca _pip_dir $_pip_dir >& $(tty)
+#  echo caca _user_base_dir $_user_base_dir >& $(tty)
+  
+  local _full_version=$(bes_pip_call "${_python_exe}" "${_user_base_dir}" --version | ${_BES_AWK_EXE} '{ print $2; }')
   echo "${_full_version}"
   return 0
 }
@@ -99,8 +108,8 @@ function bes_pip_has_pip()
     return 1
   fi
   local _user_base_dir="${2}"
-  local _user_pip_exe="$(bes_pip_exe "${_python_exe}" "${_user_base_dir}")"
-  if [[ -x "${_user_pip_exe}" ]]; then
+  local _pip_exe="$(bes_pip_exe "${_python_exe}" "${_user_base_dir}")"
+  if [[ -x "${_pip_exe}" ]]; then
     return 0
   fi
   return 1
@@ -148,10 +157,10 @@ function bes_pip_install()
     return 1
   fi
 
-  local _user_pip_exe="$(bes_pip_exe "${_python_exe}" "${_user_base_dir}")"
+  local _pip_exe="$(bes_pip_exe "${_python_exe}" "${_user_base_dir}")"
   
-  if [[ ! -x "${_user_pip_exe}" ]]; then
-    bes_message "pip install succeeded but failing execute: ${_user_pip_exe}"
+  if [[ ! -x "${_pip_exe}" ]]; then
+    bes_message "pip install succeeded but failing execute: ${_pip_exe}"
     return 1
   fi
   return 0
@@ -173,23 +182,24 @@ function bes_pip_update()
     return 1
   fi
 
-  local _user_pip_exe="$(bes_pip_exe "${_python_exe}" "${_user_base_dir}")"
-  local _current_pip_version=$(bes_pip_exe_version "${_python_exe}" "${_user_pip_exe}")
-
+  local _pip_exe="$(bes_pip_exe "${_python_exe}" "${_user_base_dir}")"
+  local _current_pip_version=$(bes_pip_exe_version "${_python_exe}" "${_pip_exe}")
+  
   if [[ ${_current_pip_version} == ${_pip_version} ]]; then
     return 0
   fi
 
   #FIXME: make a backup in case the upgrade fails out and leaves things inconsistent
   local _tmp_log=/tmp/tmp_bes_pip_update_$$.log
-  if ! PYTHONUSERBASE="${_user_base_dir}" "${_user_pip_exe}" install --user pip==${_pip_version} >& "${_tmp_log}"; then
+  if ! bes_pip_call "${_python_exe}" "${_user_base_dir}" install --user pip==${_pip_version} >& "${_tmp_log}"; then
     bes_message "1 Failed to update pip from ${_current_pip_version} to ${_pip_version}"
     cat "${_tmp_log}"
     rm -f "${_tmp_log}"
     return 1
   fi
-
-  local _new_current_pip_version=$(bes_pip_exe_version "${_python_exe}" "${_user_pip_exe}")
+  rm -f "${_tmp_log}"
+    
+  local _new_current_pip_version=$(bes_pip_exe_version "${_python_exe}" "${_pip_exe}")
   if [[ ${_new_current_pip_version} != ${_pip_version} ]]; then
     bes_message "2 Failed to update pip from ${_current_pip_version} to ${_pip_version}"
     return 1
@@ -262,12 +272,16 @@ function bes_pip_install_package()
   local _tmp_log=/tmp/tmp_bes_pip_install_package_$$.log
   rm -f "${_tmp_log}"
 
-  if ! bes_pip_call "${_python_exe}" "${_pip_exe}" install --user ${_install_arg} >& "${_tmp_log}"; then
+  local _pip_dir="$(dirname "${_pip_exe}")"
+  local _user_base_dir="$(bes_abs_dir "${_pip_dir}"/..)"
+
+  if ! bes_pip_call "${_python_exe}" "${_user_base_dir}" install --user ${_install_arg} >& "${_tmp_log}"; then
     bes_message "Failed to install ${_install_arg} with ${_pip_exe}"
     cat "${_tmp_log}"
     rm -f "${_tmp_log}"
     return 1
   fi
+  rm -f "${_tmp_log}"
   return 0
 }
 

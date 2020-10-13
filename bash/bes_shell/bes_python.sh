@@ -317,4 +317,27 @@ function bes_python_find_builtin_python()
   return 1
 }
 
+function bes_python_check_python_exe()
+{
+  if [[ $# != 2 ]]; then
+    bes_message "Usage: bes_python_check_python_exe label python_exe"
+    return 1
+  fi
+  local _label="${1}"
+  local _python_exe="${2}"
+  if ! bes_path_is_abs "${_python_exe}"; then
+    bes_message "${_label}: not an absolute path: ${_python_exe}"
+    exit 1
+  fi
+  if [[ ! -e "${_python_exe}" ]]; then
+    bes_message "${_label}: not found: ${_python_exe}"
+    exit 1
+  fi
+  if ! [[ -x "${_python_exe}" ]]; then
+    bes_message "${_label}: not executable: ${_python_exe}"
+    exit 1
+  fi
+  return 0
+}
+
 _bes_trace_file "end"
