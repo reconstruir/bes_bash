@@ -37,9 +37,9 @@ function _bes_python_testing_make_testing_pip_exe()
   local _pip_exe="${_where}/${_pip_basename}"
 
   cat > "${_pip_exe}" << EOF
-#!/bin/bash
-echo "pip ${_full_version} from /doesnt/matter (python ${_python_version})"
-exit 0
+#!/usr/bin/env python
+print('"pip ${_full_version} from /doesnt/matter (python ${_python_version})"')
+raise SystemExit(0)
 EOF
   chmod 755 ${_pip_exe}
   echo "${_pip_exe}"

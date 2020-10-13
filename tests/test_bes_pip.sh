@@ -19,155 +19,111 @@ source "$(_test_bes_pip_this_dir)"/../bash/bes_shell/bes_download.sh
 source "$(_test_bes_pip_this_dir)"/../bash/bes_shell/bes_pip.sh
 source "$(_test_bes_pip_this_dir)"/../bash/bes_shell/_bes_python_testing.sh
 
-function test_bes_pip_exe()
-{
-  local _tmp=/tmp/test_bes_pip_exe$$
-  local _fake_python="$(_bes_python_testing_make_testing_python_exe "${_tmp}" python2.7 2.7.666)"
-  local _fake_pip=$(_bes_python_testing_make_testing_pip_exe "${_fake_python}" 666.1.2)
-  
-  bes_assert "[[ $(bes_pip_exe ${_fake_python}) == ${_tmp}/pip2.7 ]]"
-
-  rm -rf ${_tmp}
-}
-
-function test_bes_pip_has_pip()
-{
-  local _tmp=/tmp/test_bes_pip_has_pip$$
-  local _fake_python="$(_bes_python_testing_make_testing_python_exe "${_tmp}" python2.7 2.7.667)"
-  local _fake_pip=$(_bes_python_testing_make_testing_pip_exe "${_fake_python}" 666.1.2)
-  
-  local _save_path="${PATH}"
-  PATH="${_tmp}":${PATH}
-  bes_assert "[[ $(bes_testing_call_function bes_pip_has_pip ${_fake_python} ) == 0 ]]"
-  PATH="${_save_path}"
-
-  rm -rf ${_tmp}
-}
-
 function test_bes_pip_exe_version()
 {
-  local _tmp=/tmp/test_bes_pip_exe_version$$
+  local _builtin_python="$(bes_python_find_builtin_python)"
+  if [[ ! -x ${_builtin_python} ]]; then
+    bes_message "test_bes_pip_exe_version: skipping because no builtin python found"
+    return 0
+  fi
+  local _tmp=/tmp/test_bes_pip_exe_version_$$
   local _fake_python="$(_bes_python_testing_make_testing_python_exe "${_tmp}" python2.7 2.7.668)"
   local _fake_pip=$(_bes_python_testing_make_testing_pip_exe "${_fake_python}" 666.1.2)
   
-  bes_assert "[[ $(bes_pip_exe_version ${_fake_pip}) == 666.1.2 ]]"
+  bes_assert "[[ $(bes_pip_exe_version ${_builtin_python} ${_fake_pip}) == 666.1.2 ]]"
 
   rm -rf ${_tmp}
 }
 
-function test_bes_pip_install()
+function test_bes_pip_user_exe()
+{
+  local _tmp=/tmp/test_bes_pip_user_exe_$$
+  local _fake_python="$(_bes_python_testing_make_testing_python_exe "${_tmp}/bin" python2.7 2.7.666)"
+  local _fake_pip=$(_bes_python_testing_make_testing_pip_exe "${_fake_python}" 666.1.3)
+  
+  bes_assert "[[ $(bes_pip_user_exe ${_fake_python} ${_tmp}) == ${_tmp}/bin/pip2.7 ]]"
+
+  rm -rf ${_tmp}
+}
+
+function test_bes_pip_user_has_pip()
+{
+  local _tmp=/tmp/test_bes_pip_user_has_pip_$$
+  local _fake_python="$(_bes_python_testing_make_testing_python_exe "${_tmp}/bin" python2.7 2.7.666)"
+  local _fake_pip=$(_bes_python_testing_make_testing_pip_exe "${_fake_python}" 666.1.4)
+  
+  bes_assert "[[ $(bes_testing_call_function bes_pip_user_has_pip ${_fake_python} ${_tmp} ) == 0 ]]"
+
+  rm -rf ${_tmp}
+}
+
+function test_bes_pip_user_install()
 {
   local _builtin_python="$(bes_python_find_builtin_python)"
   if [[ ! -x ${_builtin_python} ]]; then
     bes_message "test_bes_pip_install: skipping because no builtin python found"
     return 0
   fi
-  if bes_pip_has_pip ${_builtin_python}; then
-    bes_message "test_bes_pip_install: skipping because pip already found"
-    return 0
-  fi
 
-  local _tmp=/tmp/test_bes_pip_install$$
+  local _tmp=/tmp/test_bes_pip_user_install_$$
 
-  bes_assert "[[ $(bes_testing_call_function bes_pip_has_pip ${_builtin_python} ) == 1 ]]"
-
-  local _PIP_VERSION=20.2.2
-  
-  export PYTHONUSERBASE="${_tmp}"
-  bes_pip_install ${_builtin_python} ${_PIP_VERSION}
+  bes_pip_user_install "${_builtin_python}" "${_tmp}"
   local _install_rv=$?
   
   bes_assert "[[ ${_install_rv} == 0 ]]"
-
-  bes_assert "[[ $(bes_testing_call_function bes_pip_has_pip ${_builtin_python} ) == 0 ]]"
-
-  local _new_pip_exe=$(bes_pip_exe ${_builtin_python})
-  
-  bes_assert "[[ $(bes_pip_exe_version ${_new_pip_exe}) == ${_PIP_VERSION} ]]"
-
-  unset PYTHONUSERBASE
   
   rm -rf ${_tmp}
 }
 
-function test_bes_pip_ensure()
+function test_bes_user_pip_update()
 {
   local _builtin_python="$(bes_python_find_builtin_python)"
   if [[ ! -x ${_builtin_python} ]]; then
-    bes_message "test_bes_pip_ensure: skipping because no builtin python found"
-    return 0
-  fi
-  if bes_pip_has_pip ${_builtin_python}; then
-    bes_message "test_bes_pip_ensure: skipping because pip already found"
+    bes_message "test_bes_pip_install: skipping because no builtin python found"
     return 0
   fi
 
-  local _tmp=/tmp/test_bes_pip_ensure$$
+  local _tmp=/tmp/test_bes_user_pip_update_$$
 
-  bes_assert "[[ $(bes_testing_call_function bes_pip_has_pip ${_builtin_python} ) == 1 ]]"
+  bes_pip_user_install "${_builtin_python}" "${_tmp}"
+  local _install_rv=$?
+  bes_assert "[[ ${_install_rv} == 0 ]]"
 
-  local _PIP_VERSION=20.2.2
-  
-  export PYTHONUSERBASE="${_tmp}"
-  bes_pip_ensure ${_builtin_python} ${_PIP_VERSION}
-  local _ensure_rv=$?
-  
-  bes_assert "[[ ${_ensure_rv} == 0 ]]"
+  bes_user_pip_update "${_builtin_python}" "${_tmp}" 20.2.1
+  local _update_rv=$?
+  bes_assert "[[ ${_update_rv} == 0 ]]"
 
-  bes_assert "[[ $(bes_testing_call_function bes_pip_has_pip ${_builtin_python} ) == 0 ]]"
+  local _new_pip_exe="$(bes_pip_user_exe ${_builtin_python} "${_tmp}")"
+  bes_assert "[[ $(bes_pip_exe_version ${_builtin_python} ${_new_pip_exe}) == 20.2.1 ]]"
 
-  local _new_pip_exe=$(bes_pip_exe ${_builtin_python})
-  
-  bes_assert "[[ $(bes_pip_exe_version ${_new_pip_exe}) == ${_PIP_VERSION} ]]"
-
-  unset PYTHONUSERBASE
+  bes_user_pip_update "${_builtin_python}" "${_tmp}" 20.2.2
+  _update_rv=$?
+  bes_assert "[[ ${_update_rv} == 0 ]]"
+  bes_assert "[[ $(bes_pip_exe_version ${_builtin_python} ${_new_pip_exe}) == 20.2.2 ]]"
   
   rm -rf ${_tmp}
 }
 
-function test_bes_pip_update()
+function test_bes_pip_user_ensure()
 {
   local _builtin_python="$(bes_python_find_builtin_python)"
   if [[ ! -x ${_builtin_python} ]]; then
-    bes_message "test_bes_pip_update: skipping because no builtin python found"
-    return 0
-  fi
-  if bes_pip_has_pip ${_builtin_python}; then
-    bes_message "test_bes_pip_update: skipping because pip already found"
+    bes_message "test_bes_pip_install: skipping because no builtin python found"
     return 0
   fi
 
-  local _tmp=/tmp/test_bes_pip_update$$
+  local _tmp=/tmp/test_bes_pip_user_ensure_$$
 
-  bes_assert "[[ $(bes_testing_call_function bes_pip_has_pip ${_builtin_python} ) == 1 ]]"
-
-  local _PIP_VERSION1=20.2.2
-  
-  export PYTHONUSERBASE="${_tmp}"
-  bes_pip_ensure ${_builtin_python} ${_PIP_VERSION1}
+  bes_pip_user_ensure "${_builtin_python}" "${_tmp}" 20.2.1
   local _ensure_rv=$?
-  
   bes_assert "[[ ${_ensure_rv} == 0 ]]"
+  local _new_pip_exe="$(bes_pip_user_exe ${_builtin_python} "${_tmp}")"
+  bes_assert "[[ $(bes_pip_exe_version ${_builtin_python} ${_new_pip_exe}) == 20.2.1 ]]"
 
-  bes_assert "[[ $(bes_testing_call_function bes_pip_has_pip ${_builtin_python} ) == 0 ]]"
-
-  local _new_pip_exe=$(bes_pip_exe ${_builtin_python})
-  
-  bes_assert "[[ $(bes_pip_exe_version ${_new_pip_exe}) == ${_PIP_VERSION1} ]]"
-
-  local _PIP_VERSION2=20.2.1
-  bes_pip_update ${_builtin_python} ${_PIP_VERSION2}
-  local _ensure_rv=$?
-  
+  bes_pip_user_ensure "${_builtin_python}" "${_tmp}" 20.2.2
+  _ensure_rv=$?
   bes_assert "[[ ${_ensure_rv} == 0 ]]"
-
-  bes_assert "[[ $(bes_testing_call_function bes_pip_has_pip ${_builtin_python} ) == 0 ]]"
-
-  local _new_pip_exe=$(bes_pip_exe ${_builtin_python})
-  
-  bes_assert "[[ $(bes_pip_exe_version ${_new_pip_exe}) == ${_PIP_VERSION2} ]]"
-  
-  unset PYTHONUSERBASE
+  bes_assert "[[ $(bes_pip_exe_version ${_builtin_python} ${_new_pip_exe}) == 20.2.2 ]]"
   
   rm -rf ${_tmp}
 }
@@ -179,21 +135,14 @@ function test_bes_pip_install_package()
     bes_message "test_bes_pip_install_package: skipping because no builtin python found"
     return 0
   fi
-  if bes_pip_has_pip ${_builtin_python}; then
-    bes_message "test_bes_pip_install_package: skipping because pip already found"
-    return 0
-  fi
 
-  local _tmp=/tmp/test_bes_pip_install_package$$
-
-  local _PIP_VERSION=20.2.2
+  local _tmp=/tmp/test_bes_pip_install_package_$$
+  local _user_site_dir="${_tmp}/lib/python/site-packages"
   
-  export PYTHONUSERBASE="${_tmp}"
-  bes_pip_ensure ${_builtin_python} ${_PIP_VERSION}
-
-  local _pip_exe=$(bes_pip_exe ${_builtin_python})
-
-  local _test_pip_dot_py=${_tmp}/fake_git.sh
+  bes_pip_user_ensure "${_builtin_python}" "${_tmp}" 20.2.3
+  local _pip_exe=$(bes_pip_user_exe ${_builtin_python} "${_tmp}")
+  
+  local _test_pip_dot_py=${_tmp}/test_pip.py
   cat > ${_test_pip_dot_py} << EOF
 try:
   import requests
@@ -205,25 +154,21 @@ EOF
 
   local _tmp_test_output=${_tmp}/test_output.txt
   
-  ${_builtin_python} ${_test_pip_dot_py} >& "${_tmp_test_output}"
+  PYTHONPATH="${_user_site_dir}" ${_builtin_python} ${_test_pip_dot_py} >& "${_tmp_test_output}"
   local _test_rv=$?
-
   bes_assert "[[ ${_test_rv} == 1 ]]"
 
-  bes_pip_install_package "${_pip_exe}" requests
+  bes_pip_install_package "${_builtin_python}" "${_pip_exe}" requests
   local _install_rv=$?
   bes_assert "[[ ${_install_rv} == 0 ]]"
 
-  ${_builtin_python} ${_test_pip_dot_py} >& "${_tmp_test_output}"
+  PYTHONPATH="${_user_site_dir}" ${_builtin_python} ${_test_pip_dot_py} >& "${_tmp_test_output}"
   local _test_rv=$?
 
   bes_assert "[[ ${_test_rv} == 0 ]]"
   local _output=$(cat "${_tmp_test_output}")
-  local _user_site_dir="$(bes_python_user_site_dir "${_builtin_python}")"
 
   bes_assert "[[ $(bes_testing_call_function bes_str_starts_with ${_output} ${_user_site_dir} ) == 0 ]]"
-  
-  unset PYTHONUSERBASE
   
   rm -rf ${_tmp}
 }

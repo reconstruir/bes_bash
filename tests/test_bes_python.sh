@@ -56,4 +56,55 @@ function test__bes_python_macos_is_builtin()
   rm -rf ${_tmp}
 }
 
+function test_bes_python_user_base_dir()
+{
+  local _builtin_python="$(bes_python_find_builtin_python)"
+  if [[ ! -x ${_builtin_python} ]]; then
+    bes_message "test_bes_pip_ensure: skipping because no builtin python found"
+    return 0
+  fi
+
+  local _tmp=/tmp/test_bes_python_user_base_dir_$$
+
+  local _user_base_dir=$(PYTHONUSERBASE="${_tmp}" bes_python_user_base_dir "${_builtin_python}")
+
+  bes_assert "[[ ${_tmp} == ${_user_base_dir} ]]"
+
+  rm -rf ${_tmp}
+}
+
+function test_bes_python_user_site_dir()
+{
+  local _builtin_python="$(bes_python_find_builtin_python)"
+  if [[ ! -x ${_builtin_python} ]]; then
+    bes_message "test_bes_pip_ensure: skipping because no builtin python found"
+    return 0
+  fi
+
+  local _tmp=/tmp/test_bes_python_user_site_dir_$$
+
+  local _user_site_dir=$(PYTHONUSERBASE="${_tmp}" bes_python_user_site_dir "${_builtin_python}")
+
+  bes_assert "[[ ${_tmp}/lib/python/site-packages == ${_user_site_dir} ]]"
+
+  rm -rf ${_tmp}
+}
+
+function test_bes_python_user_base_bin_dir()
+{
+  local _builtin_python="$(bes_python_find_builtin_python)"
+  if [[ ! -x ${_builtin_python} ]]; then
+    bes_message "test_bes_pip_ensure: skipping because no builtin python found"
+    return 0
+  fi
+
+  local _tmp=/tmp/test_bes_python_user_base_bin_dir_$$
+
+  local _user_site_dir=$(PYTHONUSERBASE="${_tmp}" bes_python_user_base_bin_dir "${_builtin_python}")
+
+  bes_assert "[[ ${_tmp}/bin == ${_user_site_dir} ]]"
+
+  rm -rf ${_tmp}
+}
+
 bes_testing_run_unit_tests

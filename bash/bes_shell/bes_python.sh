@@ -178,7 +178,7 @@ function bes_python_user_base_dir()
   fi
   local _exe="${1}"
   if ! bes_path_is_abs "${_exe}"; then
-    bes_message "bes_python_user_base: exe needs to be an absolute path"
+    bes_message "bes_python_user_base_dir: exe needs to be an absolute path"
     return 1
   fi
   if [[ ! -x "${_exe}" ]] ;then
