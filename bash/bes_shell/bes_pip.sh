@@ -5,40 +5,40 @@
 _bes_trace_file "begin"
 
 # Call pip
-function bes_pip_user_call()
+function bes_pip_call()
 {
   if [[ $# < 2 ]]; then
-    bes_message "Usage: bes_pip_user_call python_exe user_pip_exe"
+    bes_message "Usage: bes_pip_call python_exe user_pip_exe"
     return 1
   fi
   
   local _python_exe="${1}"
   shift
   if ! bes_path_is_abs "${_python_exe}"; then
-    bes_message "bes_pip_user_call: python_exe needs to be an absolute path"
+    bes_message "bes_pip_call: python_exe needs to be an absolute path"
     return 1
   fi
   if [[ ! -e "${_python_exe}" ]]; then
-    bes_message "bes_pip_user_call: not found: ${_python_exe}"
+    bes_message "bes_pip_call: not found: ${_python_exe}"
     return 1
   fi
   if [[ ! -x "${_python_exe}" ]]; then
-    bes_message "bes_pip_user_call: not executable: ${_python_exe}"
+    bes_message "bes_pip_call: not executable: ${_python_exe}"
     return 1
   fi
   
   local _user_pip_exe="${1}"
   shift
   if ! bes_path_is_abs "${_user_pip_exe}"; then
-    bes_message "bes_pip_user_call: user_pip_exe needs to be an absolute path"
+    bes_message "bes_pip_call: user_pip_exe needs to be an absolute path"
     return 1
   fi
   if [[ ! -e "${_user_pip_exe}" ]]; then
-    bes_message "bes_pip_user_call: not found: ${_user_pip_exe}"
+    bes_message "bes_pip_call: not found: ${_user_pip_exe}"
     return 1
   fi
   if [[ ! -x "${_user_pip_exe}" ]]; then
-    bes_message "bes_pip_user_call: not executable: ${_user_pip_exe}"
+    bes_message "bes_pip_call: not executable: ${_user_pip_exe}"
     return 1
   fi
 
@@ -61,21 +61,21 @@ function bes_pip_exe_version()
   local _python_exe="${1}"
   local _pip_exe="${2}"
 
-  local _full_version=$(bes_pip_user_call "${_python_exe}" "${_pip_exe}" --version | ${_BES_AWK_EXE} '{ print $2; }')
+  local _full_version=$(bes_pip_call "${_python_exe}" "${_pip_exe}" --version | ${_BES_AWK_EXE} '{ print $2; }')
   echo "${_full_version}"
   return 0
 }
 
 # Print the absolute path to the user pip exe that corresponds to the given python exe
-function bes_pip_user_exe()
+function bes_pip_exe()
 {
   if [[ $# != 2 ]]; then
-    bes_message "Usage: bes_pip_user_exe python_exe user_base_dir"
+    bes_message "Usage: bes_pip_exe python_exe user_base_dir"
     return 1
   fi
   local _python_exe="${1}"
   if ! bes_path_is_abs "${_python_exe}"; then
-    bes_message "bes_pip_user_exe: python_exe needs to be an absolute path"
+    bes_message "bes_pip_exe: python_exe needs to be an absolute path"
     return 1
   fi
   local _user_base_dir="${2}"
@@ -87,19 +87,19 @@ function bes_pip_user_exe()
 }
 
 # Return 0 if there is a user pip
-function bes_pip_user_has_pip()
+function bes_pip_has_pip()
 {
   if [[ $# != 2 ]]; then
-    bes_message "Usage: bes_pip_user_has_pip python_exe user_base_dir"
+    bes_message "Usage: bes_pip_has_pip python_exe user_base_dir"
     return 1
   fi
   local _python_exe="${1}"
   if ! bes_path_is_abs "${_python_exe}"; then
-    bes_message "bes_pip_user_has_pip: python_exe needs to be an absolute path"
+    bes_message "bes_pip_has_pip: python_exe needs to be an absolute path"
     return 1
   fi
   local _user_base_dir="${2}"
-  local _user_pip_exe="$(bes_pip_user_exe "${_python_exe}" "${_user_base_dir}")"
+  local _user_pip_exe="$(bes_pip_exe "${_python_exe}" "${_user_base_dir}")"
   if [[ -x "${_user_pip_exe}" ]]; then
     return 0
   fi
@@ -107,20 +107,20 @@ function bes_pip_user_has_pip()
 }
 
 # Install pip for the first time
-function bes_pip_user_install()
+function bes_pip_install()
 {
   if [[ $# != 2 ]]; then
-    echo "usage: bes_pip_user_install python_exe user_base_dir"
+    echo "usage: bes_pip_install python_exe user_base_dir"
     return 1
   fi
   local _python_exe="${1}"
   if ! bes_path_is_abs "${_python_exe}"; then
-    bes_message "bes_pip_user_install: python_exe needs to be an absolute path"
+    bes_message "bes_pip_install: python_exe needs to be an absolute path"
     return 1
   fi
   local _user_base_dir="${2}"
   
-  if bes_pip_user_has_pip "${_python_exe}" "${_user_base_dir}"; then
+  if bes_pip_has_pip "${_python_exe}" "${_user_base_dir}"; then
     local _pip_exe="$(bes_pip_exe "${_python_exe}")"
     bes_message "pip already installed: ${_pip_exe}"
     return 1
@@ -143,12 +143,12 @@ function bes_pip_user_install()
   fi
   rm -f "${_tmp_get_pip_dot_py}" "${_tmp_log}"
 
-  if ! bes_pip_user_has_pip "${_python_exe}" "${_user_base_dir}"; then
+  if ! bes_pip_has_pip "${_python_exe}" "${_user_base_dir}"; then
     bes_message "pip install succeeded but failing to find pip afterwards"
     return 1
   fi
 
-  local _user_pip_exe="$(bes_pip_user_exe "${_python_exe}" "${_user_base_dir}")"
+  local _user_pip_exe="$(bes_pip_exe "${_python_exe}" "${_user_base_dir}")"
   
   if [[ ! -x "${_user_pip_exe}" ]]; then
     bes_message "pip install succeeded but failing execute: ${_user_pip_exe}"
@@ -158,22 +158,22 @@ function bes_pip_user_install()
 }
 
 # Update pip to specific version
-function bes_user_pip_update()
+function bes_pip_update()
 {
   if [[ $# != 3 ]]; then
-    echo "usage: bes_user_pip_update python_exe user_base_dir pip_version"
+    echo "usage: bes_pip_update python_exe user_base_dir pip_version"
     return 1
   fi
   local _python_exe="${1}"
   local _user_base_dir="${2}"
   local _pip_version=${3}
 
-  if ! bes_pip_user_has_pip "${_python_exe}" "${_user_base_dir}"; then
-    bes_message "bes_user_pip_update: pip is not installed in ${_user_base_dir}"
+  if ! bes_pip_has_pip "${_python_exe}" "${_user_base_dir}"; then
+    bes_message "bes_pip_update: pip is not installed in ${_user_base_dir}"
     return 1
   fi
 
-  local _user_pip_exe="$(bes_pip_user_exe "${_python_exe}" "${_user_base_dir}")"
+  local _user_pip_exe="$(bes_pip_exe "${_python_exe}" "${_user_base_dir}")"
   local _current_pip_version=$(bes_pip_exe_version "${_python_exe}" "${_user_pip_exe}")
 
   if [[ ${_current_pip_version} == ${_pip_version} ]]; then
@@ -181,7 +181,7 @@ function bes_user_pip_update()
   fi
 
   #FIXME: make a backup in case the upgrade fails out and leaves things inconsistent
-  local _tmp_log=/tmp/tmp_bes_user_pip_update_$$.log
+  local _tmp_log=/tmp/tmp_bes_pip_update_$$.log
   if ! PYTHONUSERBASE="${_user_base_dir}" "${_user_pip_exe}" install --user pip==${_pip_version} >& "${_tmp_log}"; then
     bes_message "1 Failed to update pip from ${_current_pip_version} to ${_pip_version}"
     cat "${_tmp_log}"
@@ -199,27 +199,27 @@ function bes_user_pip_update()
 }
 
 # Ensure that user pip is installed and at the given version
-function bes_pip_user_ensure()
+function bes_pip_ensure()
 {
   if [[ $# != 3 ]]; then
-    echo "usage: bes_pip_user_ensure python_exe user_base_dir pip_version"
+    echo "usage: bes_pip_ensure python_exe user_base_dir pip_version"
     return 1
   fi
   local _python_exe="${1}"
   if ! bes_path_is_abs "${_python_exe}"; then
-    bes_message "bes_pip_user_ensure: python_exe needs to be an absolute path"
+    bes_message "bes_pip_ensure: python_exe needs to be an absolute path"
     return 1
   fi
   local _user_base_dir="${2}"
   local _pip_version="${3}"
 
-  if ! bes_pip_user_has_pip "${_python_exe}" "${_user_base_dir}"; then
-    if ! bes_pip_user_install "${_python_exe}" "${_user_base_dir}"; then
+  if ! bes_pip_has_pip "${_python_exe}" "${_user_base_dir}"; then
+    if ! bes_pip_install "${_python_exe}" "${_user_base_dir}"; then
       return 1
     fi
   fi
   
-  bes_user_pip_update "${_python_exe}" "${_user_base_dir}" ${_pip_version}
+  bes_pip_update "${_python_exe}" "${_user_base_dir}" ${_pip_version}
   local _rv=$?
   return ${_rv}
 }
@@ -262,7 +262,7 @@ function bes_pip_install_package()
   local _tmp_log=/tmp/tmp_bes_pip_install_package_$$.log
   rm -f "${_tmp_log}"
 
-  if ! bes_pip_user_call "${_python_exe}" "${_pip_exe}" install --user ${_install_arg} >& "${_tmp_log}"; then
+  if ! bes_pip_call "${_python_exe}" "${_pip_exe}" install --user ${_install_arg} >& "${_tmp_log}"; then
     bes_message "Failed to install ${_install_arg} with ${_pip_exe}"
     cat "${_tmp_log}"
     rm -f "${_tmp_log}"
