@@ -84,8 +84,9 @@ function test_bes_python_user_site_dir()
   local _tmp=/tmp/test_bes_python_user_site_dir_$$
 
   local _user_site_dir=$(PYTHONUSERBASE="${_tmp}" bes_python_user_site_dir "${_builtin_python}")
+  local _user_site_dir_tail="$(bes_python_user_site_dir_tail "${_builtin_python}")"
 
-  bes_assert "[[ ${_tmp}/lib/python/site-packages == ${_user_site_dir} ]]"
+  bes_assert "[[ ${_tmp}/${_user_site_dir_tail} == ${_user_site_dir} ]]"
 
   rm -rf ${_tmp}
 }
