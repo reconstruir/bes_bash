@@ -137,11 +137,12 @@ function test_bes_pip_install_package()
   fi
 
   local _tmp=/tmp/test_bes_pip_install_package_$$
-  local _user_site_dir="${_tmp}/lib/python/site-packages"
+  local _user_site_dir_tail="$(bes_python_user_site_dir_tail "${_builtin_python}")"
+  local _user_site_dir="${_tmp}/${_user_site_dir_tail}"
   
   bes_pip_ensure "${_builtin_python}" "${_tmp}" 20.2.3
   local _pip_exe=$(bes_pip_exe ${_builtin_python} "${_tmp}")
-  
+
   local _test_pip_dot_py=${_tmp}/test_pip.py
   cat > ${_test_pip_dot_py} << EOF
 try:
@@ -154,7 +155,7 @@ EOF
 
   local _tmp_test_output=${_tmp}/test_output.txt
   
-  PYTHONPATH="${_user_site_dir}" ${_builtin_python} ${_test_pip_dot_py} >& "${_tmp_test_output}"
+  PYTHONPATH="${_user_site_dir}" ${_builtin_python} -S ${_test_pip_dot_py} >& "${_tmp_test_output}"
   local _test_rv=$?
   bes_assert "[[ ${_test_rv} == 1 ]]"
 
@@ -162,7 +163,7 @@ EOF
   local _install_rv=$?
   bes_assert "[[ ${_install_rv} == 0 ]]"
 
-  PYTHONPATH="${_user_site_dir}" ${_builtin_python} ${_test_pip_dot_py} >& "${_tmp_test_output}"
+  PYTHONPATH="${_user_site_dir}" ${_builtin_python} -S ${_test_pip_dot_py} >& "${_tmp_test_output}"
   local _test_rv=$?
 
   bes_assert "[[ ${_test_rv} == 0 ]]"
@@ -170,10 +171,10 @@ EOF
 
   bes_assert "[[ $(bes_testing_call_function bes_str_starts_with ${_output} ${_user_site_dir} ) == 0 ]]"
   
-  rm -rf ${_tmp}
+#  rm -rf ${_tmp}
 }
 
-function test_bes_pip_call_program()
+function xtest_bes_pip_call_program()
 {
   local _builtin_python="$(bes_python_find_builtin_python)"
   if [[ ! -x ${_builtin_python} ]]; then

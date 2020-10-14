@@ -24,8 +24,10 @@ function bes_pip_call_program()
   
   local _user_base_bin_dir="$(bes_abs_dir "${_user_base_dir}/bin")"
   local _program_abs="$(bes_abs_file "${_user_base_bin_dir}/${_program}")"
-  local _user_site_dir="${_user_base_dir}/lib/python/site-packages"
-  PYTHONUSERBASE="${_user_base_dir}" PATH="${_user_base_bin_dir}":"${PATH}" PYTHONPATH="${_user_site_dir}":"${PYTHONPATH}" "${_python_exe}" "${_program_abs}" ${1+"$@"}
+
+  local _user_site_dir_tail="$(bes_python_user_site_dir_tail "${_python_exe}")"
+  local _user_site_dir="${_user_base_dir}/${_user_site_dir_tail}"
+  PYTHONUSERBASE="${_user_base_dir}" PATH="${_user_base_bin_dir}":"${PATH}" PYTHONPATH="${_user_site_dir}":"${PYTHONPATH}" "${_python_exe}" -S "${_program_abs}" ${1+"$@"}
   local _program_rv=$?
   return ${_program_rv}
 }
@@ -62,14 +64,9 @@ function bes_pip_exe_version()
   local _python_exe="${1}"
   local _pip_exe="${2}"
 
-#  echo caca _pip_exe $_pip_exe >& $(tty)
-  
   local _pip_dir="$(dirname "${_pip_exe}")"
   local _user_base_dir="$(bes_abs_dir "${_pip_dir}"/..)"
 
-#  echo caca _pip_dir $_pip_dir >& $(tty)
-#  echo caca _user_base_dir $_user_base_dir >& $(tty)
-  
   local _full_version=$(bes_pip_call "${_python_exe}" "${_user_base_dir}" --version | ${_BES_AWK_EXE} '{ print $2; }')
   echo "${_full_version}"
   return 0
@@ -228,7 +225,7 @@ function bes_pip_ensure()
       return 1
     fi
   fi
-  
+
   bes_pip_update "${_python_exe}" "${_user_base_dir}" ${_pip_version}
   local _rv=$?
   return ${_rv}

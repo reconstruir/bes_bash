@@ -213,6 +213,27 @@ function bes_python_user_site_dir()
   return 0
 }
 
+# Print just the tail of "user-site" directory for a python executable
+# usually:
+#  lib/python/site-packages
+#  lib/python$major.$minor/site-packages
+function bes_python_user_site_dir_tail()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "Usage: bes_python_user_site_dir_tail python_exe"
+    return 1
+  fi
+  local _python_exe="${1}"
+
+  bes_python_check_python_exe ${FUNCNAME[1]} "${_python_exe}"
+
+  local _fake_prefix=/tmp/notthere/
+  local _user_site_dir="$(PYTHONUSERBASE=/tmp/notthere bes_python_user_site_dir "${_python_exe}")"
+  local _user_site_dir_tail="$(bes_str_remove_head "${_user_site_dir}" ${_fake_prefix})"
+  echo "${_user_site_dir_tail}"
+  return 0
+}
+
 # Print the "user-base" bin directory for a python executable
 # on macos: ~/Library/Python/$major.$minor/bin
 # on linux: ~/.local/bin
