@@ -14,6 +14,9 @@ function main()
 
   local _failed_tests=()
   declare -a _failed_tests
+
+  local _side_effects=()
+  declare -a _side_effects
   
   if [[ $# > 0 ]]; then
     _tests=${1+"$@"}
@@ -31,9 +34,12 @@ function main()
     else
       echo "PASSED: ${_test_file_rel}"
     fi
+    for _side_effect in $(find "${_temp_home}" -type f); do
+      _side_effects+=( "${_test_file_rel}:${_side_effect}" )
+    done
   done
   local _side_effect
-  for _side_effect in $(find "${_temp_home}" -type f); do
+  for _side_effect in ${_side_effects[@]}; do
     echo "SIDE_EFFECT: ${_side_effect}"
     _result=1
   done
