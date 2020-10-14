@@ -67,7 +67,7 @@ function test_bes_pip_install()
 
   local _tmp=/tmp/test_bes_pip_install_$$
 
-  bes_pip_install "${_builtin_python}" "${_tmp}"
+  BES_PIP_EXTRA_ARGS="--no-cache-dir" bes_pip_install "${_builtin_python}" "${_tmp}"
   local _install_rv=$?
   
   bes_assert "[[ ${_install_rv} == 0 ]]"
@@ -85,18 +85,18 @@ function test_bes_pip_update()
 
   local _tmp=/tmp/test_bes_pip_update_$$
 
-  bes_pip_install "${_builtin_python}" "${_tmp}"
+  BES_PIP_EXTRA_ARGS="--no-cache-dir" bes_pip_install "${_builtin_python}" "${_tmp}"
   local _install_rv=$?
   bes_assert "[[ ${_install_rv} == 0 ]]"
 
-  bes_pip_update "${_builtin_python}" "${_tmp}" 20.2.1
+  BES_PIP_EXTRA_ARGS="--no-cache-dir" bes_pip_update "${_builtin_python}" "${_tmp}" 20.2.1
   local _update_rv=$?
   bes_assert "[[ ${_update_rv} == 0 ]]"
 
   local _new_pip_exe="$(bes_pip_exe ${_builtin_python} "${_tmp}")"
   bes_assert "[[ $(bes_pip_exe_version ${_builtin_python} ${_new_pip_exe}) == 20.2.1 ]]"
 
-  bes_pip_update "${_builtin_python}" "${_tmp}" 20.2.2
+  BES_PIP_EXTRA_ARGS="--no-cache-dir" bes_pip_update "${_builtin_python}" "${_tmp}" 20.2.2
   _update_rv=$?
   bes_assert "[[ ${_update_rv} == 0 ]]"
   bes_assert "[[ $(bes_pip_exe_version ${_builtin_python} ${_new_pip_exe}) == 20.2.2 ]]"
@@ -114,13 +114,13 @@ function test_bes_pip_ensure()
 
   local _tmp=/tmp/test_bes_pip_ensure_$$
 
-  bes_pip_ensure "${_builtin_python}" "${_tmp}" 20.2.1
+  BES_PIP_EXTRA_ARGS="--no-cache-dir" bes_pip_ensure "${_builtin_python}" "${_tmp}" 20.2.1
   local _ensure_rv=$?
   bes_assert "[[ ${_ensure_rv} == 0 ]]"
   local _new_pip_exe="$(bes_pip_exe ${_builtin_python} "${_tmp}")"
   bes_assert "[[ $(bes_pip_exe_version ${_builtin_python} ${_new_pip_exe}) == 20.2.1 ]]"
 
-  bes_pip_ensure "${_builtin_python}" "${_tmp}" 20.2.2
+  BES_PIP_EXTRA_ARGS="--no-cache-dir" bes_pip_ensure "${_builtin_python}" "${_tmp}" 20.2.2
   _ensure_rv=$?
   bes_assert "[[ ${_ensure_rv} == 0 ]]"
   bes_assert "[[ $(bes_pip_exe_version ${_builtin_python} ${_new_pip_exe}) == 20.2.2 ]]"
@@ -140,7 +140,7 @@ function test_bes_pip_install_package()
   local _user_site_dir_tail="$(bes_python_user_site_dir_tail "${_builtin_python}")"
   local _user_site_dir="${_tmp}/${_user_site_dir_tail}"
   
-  bes_pip_ensure "${_builtin_python}" "${_tmp}" 20.2.3
+  BES_PIP_EXTRA_ARGS="--no-cache-dir" bes_pip_ensure "${_builtin_python}" "${_tmp}" 20.2.3
   local _pip_exe=$(bes_pip_exe ${_builtin_python} "${_tmp}")
 
   local _test_pip_dot_py=${_tmp}/test_pip.py
@@ -159,7 +159,7 @@ EOF
   local _test_rv=$?
   bes_assert "[[ ${_test_rv} == 1 ]]"
 
-  bes_pip_install_package "${_builtin_python}" "${_pip_exe}" requests
+  BES_PIP_EXTRA_ARGS="--no-cache-dir" bes_pip_install_package "${_builtin_python}" "${_pip_exe}" requests
   local _install_rv=$?
   bes_assert "[[ ${_install_rv} == 0 ]]"
 

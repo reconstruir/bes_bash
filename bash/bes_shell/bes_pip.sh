@@ -49,7 +49,12 @@ function bes_pip_call()
   local _python_version=$(bes_python_exe_version "${_python_exe}")
   local _pip_basename=pip${_python_version}
 
-  bes_pip_call_program "${_python_exe}" "${_user_base_dir}" ${_pip_basename} ${1+"$@"}
+  local _extra_args=
+  if [[ -n "${BES_PIP_EXTRA_ARGS}" ]]; then
+    _extra_args="${BES_PIP_EXTRA_ARGS}"
+  fi
+  
+  bes_pip_call_program "${_python_exe}" "${_user_base_dir}" ${_pip_basename} ${_extra_args} ${1+"$@"}
   local _pip_rv=$?
   return ${_pip_rv}
 }
@@ -141,7 +146,11 @@ function bes_pip_install()
     bes_message "Failed to download ${_GET_PIP_URL} to ${_tmp_get_pip_dot_py}"
     return 1
   fi
-  if ! PYTHONUSERBASE="${_user_base_dir}" "${_python_exe}" ${_tmp_get_pip_dot_py} --user >& "${_tmp_log}"; then
+  local _extra_args=
+  if [[ -n "${BES_PIP_EXTRA_ARGS}" ]]; then
+    _extra_args="${BES_PIP_EXTRA_ARGS}"
+  fi
+  if ! PYTHONUSERBASE="${_user_base_dir}" "${_python_exe}" ${_tmp_get_pip_dot_py} ${_extra_args} --user >& "${_tmp_log}"; then
     bes_message "Failed to install pip in ${_user_base_dir} with ${_python_exe}"
     cat "${_tmp_log}"
     rm -f "${_tmp_get_pip_dot_py}" "${_tmp_log}"
