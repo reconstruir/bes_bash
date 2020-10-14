@@ -71,6 +71,23 @@ function _bes_git_make_temp_repo()
   ( bes_git_call "${_tmp}" clone ${_tmp_remote_repo} local ) >& "${_BES_GIT_LOG_FILE}"
   _bes_git_add_file ${_tmp_local_repo} readme.txt "this is readme.txt\n" true
   echo ${_tmp}
+  if [[ -n "${BES_DEBUG}" ]]; then
+    bes_console_message "temp git repo for ${_name} => ${_tmp}"
+  fi
+  return 0
+}
+
+function _bes_git_temp_repo_rm()
+{
+  if [[ $# != 1 ]]; then
+    echo "usage: _bes_git_temp_repo_rm where"
+    return 1
+  fi
+  local _where="${1}"
+  if [[ -n "${BES_DEBUG}" ]]; then
+    return 0
+  fi
+  rm -rf ${_where}
   return 0
 }
 
