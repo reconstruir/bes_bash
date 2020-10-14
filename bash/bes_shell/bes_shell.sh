@@ -564,7 +564,10 @@ function bes_assert()
   
   eval "${1}"
   if [[ $? -ne 0 ]]; then
-    echo "failed: " ${1} " at $_filename:$_line"
+    echo "failed: ${_function} $_filename:$_line: " ${1}
+    if [[ -n ${BES_UNIT_TEST_FAIL} ]]; then
+        exit 1
+    fi
     _bes_testing_exit_code=1
   else
     echo "$_filename $_function: passed"
