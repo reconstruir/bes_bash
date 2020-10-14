@@ -51,14 +51,9 @@ function test_bes_pipenv_ensure()
     bes_message "bes_pipenv_ensure: skipping because no builtin python found"
     return 0
   fi
-#  if bes_pip_has_pip ${_builtin_python}; then
-#    bes_message "bes_pipenv_ensure: skipping because pip already found"
-#    return 0
-#  fi
-
   local _tmp=/tmp/test_bes_pipenv_ensure_$$
 
-  bes_pipenv_ensure "${_builtin_python}" "${_tmp}" 20.2.2 2020.8.13
+  BES_PIP_EXTRA_ARGS="--no-cache-dir" bes_pipenv_ensure "${_builtin_python}" "${_tmp}" 20.2.2 2020.8.13
   local _ensure_rv=$?
   bes_assert "[[ ${_ensure_rv} == 0 ]]"
 
@@ -101,7 +96,7 @@ function test_bes_pipenv_call()
 
   local _tmp=/tmp/test_bes_pipenv_call_$$
 
-  bes_pipenv_ensure "${_builtin_python}" "${_tmp}" 20.2.2 2020.8.13
+  BES_PIP_EXTRA_ARGS="--no-cache-dir" bes_pipenv_ensure "${_builtin_python}" "${_tmp}" 20.2.2 2020.8.13
   local _ensure_rv=$?
   bes_assert "[[ ${_ensure_rv} == 0 ]]"
 
