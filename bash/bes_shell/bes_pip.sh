@@ -139,8 +139,7 @@ function bes_pip_install()
 
   local _GET_PIP_URL="https://bootstrap.pypa.io/get-pip.py"
   local _tmp_get_pip_dot_py=/tmp/tmp_bes_pip_install_get_pip_$$.py
-  local _tmp_log=/tmp/tmp_bes_pip_install_$$.log
-  rm -f "${_tmp_get_pip_dot_py}" "${_tmp_log}"
+  rm -f "${_tmp_get_pip_dot_py}"
   if ! bes_download "${_GET_PIP_URL}" "${_tmp_get_pip_dot_py}"; then
     rm -f "${_tmp_get_pip_dot_py}"
     bes_message "Failed to download ${_GET_PIP_URL} to ${_tmp_get_pip_dot_py}"
@@ -150,6 +149,7 @@ function bes_pip_install()
   if [[ -n "${BES_PIP_EXTRA_ARGS}" ]]; then
     _extra_args="${BES_PIP_EXTRA_ARGS}"
   fi
+  local _tmp_log=/tmp/tmp_bes_pip_install_$$.log
   if ! PYTHONUSERBASE="${_user_base_dir}" "${_python_exe}" ${_tmp_get_pip_dot_py} ${_extra_args} --user >& "${_tmp_log}"; then
     bes_message "Failed to install pip in ${_user_base_dir} with ${_python_exe}"
     cat "${_tmp_log}"
