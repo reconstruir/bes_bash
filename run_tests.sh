@@ -2,6 +2,9 @@
 
 function main()
 {
+  local _tmp=/tmp/bes_run_tests_tmp_$$
+  rm -rf "${_tmp}"
+  mkdir -p "${_tmp}"
   local _test_dir=$(_bes_test_this_dir)/tests
   local _result=0
   local _test_file
@@ -15,8 +18,7 @@ function main()
   local _failed_tests=()
   declare -a _failed_tests
 
-  local _side_effects=()
-  declare -a _side_effects
+  local _side_effects_log="${_tmp}"/side_effects.log
   
   if [[ $# > 0 ]]; then
     _tests=${1+"$@"}
@@ -34,15 +36,12 @@ function main()
     else
       echo "PASSED: ${_test_file_rel}"
     fi
-    for _side_effect in $(find "${_temp_home}" -type f); do
-      _side_effects+=( "${_test_file_rel}:${_side_effect}" )
-    done
+    find "${_temp_home}" -type f | awk '$0="PREFIX"$0' | sed 's@PREFIX@'"SIDE_EFFECT ${_test_file_rel} "'@' >> "${_side_effects_log}"
   done
-  local _side_effect
-  for _side_effect in ${_side_effects[@]}; do
-    echo "SIDE_EFFECT: ${_side_effect}"
+  if [[ -s "${_side_effects_log}" ]]; then
+    cat "${_side_effects_log}"
     _result=1
-  done
+  fi
 
   rm -rf "${_temp_home}"
 
@@ -55,7 +54,9 @@ function main()
       echo "FAILED: ${_failed_test}"
     done
   fi
-  
+
+  rm -rf "${_tmp}"
+
   return ${_result}
 }
 
