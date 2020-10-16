@@ -18,10 +18,14 @@ function bes_pipenv_call()
   local _project_dir="${1}"
   shift
   local _user_base_dir="${_project_dir}"/.py-user-base
-
+  local _fake_home_dir="${_project_dir}"/.home
+  local _pip_cache_dir="${_project_dir}"/.pip-cache
+  local _pipenv_cache_dir="${_project_dir}"/.pipenv-cache
+  
   local _tmp_log=/tmp/tmp_bes_pipenv_call_$$.log
   rm -f "${_tmp_log}"
-  ( cd "${_project_dir}" && bes_pip_call_program "${_python_exe}" "${_user_base_dir}" pipenv ${1+"$@"} >& "${_tmp_log}" )
+
+  ( cd "${_project_dir}" && HOME="${_fake_home_dir}" WORKON_HOME="${_project_dir}" PIPENV_VENV_IN_PROJECT=1 PIP_CACHE_DIR="${_pip_cache_dir}" PIPENV_CACHE_DIR="${_pipenv_cache_dir}" bes_pip_call_program "${_python_exe}" "${_user_base_dir}" pipenv --python "${_python_exe}" ${1+"$@"} >& "${_tmp_log}" )
   local _pipenv_rv=$?
   if [[ ${_pipenv_rv} != 0 ]]; then
     bes_message "failed to call: pipenv "${1+"$@"}
@@ -105,14 +109,15 @@ function bes_pipenv_ensure()
   fi
 
   local _user_base_dir="${_project_dir}"/.py-user-base
-
-  if ! bes_pip_ensure "${_python_exe}" "${_user_base_dir}" ${_pip_version}; then
+  local _pip_cache_dir="${_project_dir}"/.pip-cache
+  local _fake_home_dir="${_project_dir}"/.home
+  if ! HOME="${_fake_home_dir}" PIP_CACHE_DIR="${_pip_cache_dir}" bes_pip_ensure "${_python_exe}" "${_user_base_dir}" ${_pip_version}; then
     return 1
   fi
 
   local _pip_exe="$(bes_pip_exe "${_python_exe}" "${_user_base_dir}")"
   if ! bes_pipenv_has_pipenv "${_python_exe}" "${_project_dir}"; then
-    if ! bes_pip_install_package "${_python_exe}" "${_pip_exe}" pipenv ${_pipenv_version}; then
+    if ! HOME="${_fake_home_dir}" PIP_CACHE_DIR="${_pip_cache_dir}" bes_pip_install_package "${_python_exe}" "${_pip_exe}" pipenv ${_pipenv_version}; then
       return 1
     fi
   fi
@@ -123,7 +128,7 @@ function bes_pipenv_ensure()
     return 0
   fi
   
-  if ! bes_pip_install_package "${_python_exe}" "${_pip_exe}" pipenv ${_pipenv_version}; then
+  if ! HOME="${_fake_home_dir}" PIP_CACHE_DIR="${_pip_cache_dir}" bes_pip_install_package "${_python_exe}" "${_pip_exe}" pipenv ${_pipenv_version}; then
     return 1
   fi
   return 0
