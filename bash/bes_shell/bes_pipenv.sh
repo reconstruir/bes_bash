@@ -80,7 +80,7 @@ function bes_pipenv_has_pipenv()
 # Print the version of the given pipenv exe
 function bes_pipenv_version()
 {
-  if [[ $# != 1 ]]; then
+  if [[ $# != 2 ]]; then
     bes_message "Usage: bes_pipenv_version _python_exe _project_dir"
     return 1
   fi
