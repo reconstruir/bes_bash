@@ -1262,4 +1262,19 @@ function bes_path_is_symlink()
   return 1
 }
 
+function bes_file_check()
+{
+  if [[ $# != 2 ]]; then
+    bes_message "Usage: bes_file_check label filename"
+    return 1
+  fi
+  local _label="${1}"
+  local _filename="${2}"
+  if [[ ! -e "${_filename}" ]]; then
+    bes_message "${_label}: not found: ${_filename}"
+    exit 1
+  fi
+  return 0
+}
+
 _bes_trace_file "end"
