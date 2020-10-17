@@ -68,14 +68,10 @@ function test_bes_pipenv_call()
 
   bes_pipenv_ensure "${_builtin_python}" "${_tmp}" 20.2.2 2020.8.13
 
-  echo TEST1
-  bes_pipenv_call "${_builtin_python}" "${_tmp}" --version 
-  echo TEST2
+  local _pipenv_version=$(bes_pipenv_call "${_builtin_python}" "${_tmp}" --version | awk '{ print $3; }')
+  bes_assert "[[ ${_pipenv_version} == 2020.8.13 ]]"
   
-#  local _pipenv_version=$(bes_pipenv_call "${_builtin_python}" "${_tmp}" --version | awk '{ print $3; }')
-#  bes_assert "[[ ${_pipenv_version} == 2020.8.13 ]]"
-  
-#  rm -rf ${_tmp}
+  rm -rf ${_tmp}
 }
 
 function test_bes_pipenv_exe()

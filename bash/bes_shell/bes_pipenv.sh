@@ -22,20 +22,21 @@ function bes_pipenv_call()
   local _pip_cache_dir="${_project_dir}"/.droppings/pip-cache
   local _pipenv_cache_dir="${_project_dir}"/.droppings/pipenv-cache
   
-  local _tmp_log=/tmp/tmp_bes_pipenv_call_$$.log
-  rm -f "${_tmp_log}"
+  local _tmp_stdout=/tmp/tmp_bes_pipenv_call_stdout_$$.log
+  local _tmp_stderr=/tmp/tmp_bes_pipenv_call_stderr_$$.log
+  rm -f "${_tmp_stdout}" "${_tmp_stderr}"
 
-  echo TEST45
-  echo TEST CMD "${_project_dir}" AND HOME="${_fake_home_dir}" WORKON_HOME="${_project_dir}" PIPENV_VENV_IN_PROJECT=1 PIP_CACHE_DIR="${_pip_cache_dir}" PIPENV_CACHE_DIR="${_pipenv_cache_dir}" bes_pip_call_program "${_python_exe}" "${_user_base_dir}" pipenv --python "${_python_exe}" ${1+"$@"}
-  ( cd "${_project_dir}" && HOME="${_fake_home_dir}" WORKON_HOME="${_project_dir}" PIPENV_VENV_IN_PROJECT=1 PIP_CACHE_DIR="${_pip_cache_dir}" PIPENV_CACHE_DIR="${_pipenv_cache_dir}" bes_pip_call_program "${_python_exe}" "${_user_base_dir}" pipenv --python "${_python_exe}" ${1+"$@"} >& "${_tmp_log}" )
+  ( cd "${_project_dir}" && HOME="${_fake_home_dir}" WORKON_HOME="${_project_dir}" PIPENV_VENV_IN_PROJECT=1 PIP_CACHE_DIR="${_pip_cache_dir}" PIPENV_CACHE_DIR="${_pipenv_cache_dir}" bes_pip_call_program "${_python_exe}" "${_user_base_dir}" pipenv --python "${_python_exe}" ${1+"$@"} > "${_tmp_stdout}" 2> "${_tmp_stderr}" )
   local _pipenv_rv=$?
   if [[ ${_pipenv_rv} != 0 ]]; then
     bes_message "failed to call: pipenv "${1+"$@"}
-    cat "${_tmp_log}"
-    rm -f "${_tmp_log}"
+    cat "${_tmp_stderr}" 
+    cat "${_tmp_stdout}"
+    rm -f "${_tmp_stdout}" "${_tmp_stderr}"
     return ${_pipenv_rv}
   fi
-  rm -f "${_tmp_log}"
+  cat "${_tmp_stdout}"
+  rm -f "${_tmp_stdout}" "${_tmp_stderr}"
   return 0
 }
 
