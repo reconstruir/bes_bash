@@ -40,6 +40,22 @@ function test_bes_pipenv_ensure()
   rm -rf ${_tmp}
 }
 
+function test_bes_pipenv_version()
+{
+  local _builtin_python="$(bes_python_find_builtin_python)"
+  if [[ ! -x ${_builtin_python} ]]; then
+    bes_message "bes_pipenv_ensure: skipping because no builtin python found"
+    return 0
+  fi
+  local _tmp=/tmp/test_bes_pipenv_version_$$
+
+  bes_pipenv_ensure "${_builtin_python}" "${_tmp}" 20.2.2 2020.8.13
+  local _pipenv_version=$(bes_pipenv_version ${_builtin_python} ${_tmp})
+  bes_assert "[[ ${_pipenv_version} == 2020.8.13 ]]"
+  
+  rm -rf ${_tmp}
+}
+
 function test_bes_pipenv_call()
 {
   local _builtin_python="$(bes_python_find_builtin_python)"
@@ -50,13 +66,36 @@ function test_bes_pipenv_call()
 
   local _tmp=/tmp/test_bes_pipenv_call_$$
 
-  BES_PIP_EXTRA_ARGS="--no-cache-dir" bes_pipenv_ensure "${_builtin_python}" "${_tmp}" 20.2.2 2020.8.13
+  bes_pipenv_ensure "${_builtin_python}" "${_tmp}" 20.2.2 2020.8.13
+
+  echo TEST1
+  bes_pipenv_call "${_builtin_python}" "${_tmp}" --version 
+  echo TEST2
+  
+#  local _pipenv_version=$(bes_pipenv_call "${_builtin_python}" "${_tmp}" --version | awk '{ print $3; }')
+#  bes_assert "[[ ${_pipenv_version} == 2020.8.13 ]]"
+  
+#  rm -rf ${_tmp}
+}
+
+function test_bes_pipenv_exe()
+{
+  local _builtin_python="$(bes_python_find_builtin_python)"
+  if [[ ! -x ${_builtin_python} ]]; then
+    bes_message "bes_pipenv_call: skipping because no builtin python found"
+    return 0
+  fi
+
+  local _tmp=/tmp/test_bes_pipenv_exe_$$
+
+  bes_pipenv_ensure "${_builtin_python}" "${_tmp}" 20.2.2 2020.8.13
   local _ensure_rv=$?
   bes_assert "[[ ${_ensure_rv} == 0 ]]"
 
-  local _pipenv_version=$(bes_pipenv_call "${_builtin_python}" "${_tmp}" --version)
-  bes_assert "[[ ${_pipenv_version} == 2020.8.13 ]]"
-  
+  local _pipenv_exe=$(bes_pipenv_exe "${_builtin_python}" "${_tmp}")
+
+  bes_assert "[[ $(bes_testing_call_function test -x ${_pipenv_exe}) == 0 ]]"
+
   rm -rf ${_tmp}
 }
 
@@ -112,7 +151,7 @@ EOF
 
   bes_pipenv_call "${_builtin_python}" "${_tmp}" install -r "${_test_requirements}"
 
-  #rm -rf ${_tmp}
+  rm -rf ${_tmp}
 }
 
 bes_testing_run_unit_tests
