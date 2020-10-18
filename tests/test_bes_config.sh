@@ -17,13 +17,20 @@ source "$(_test_bes_config_this_dir)"/../bash/bes_shell/bes_shell.sh
 source "$(_test_bes_config_this_dir)"/../bash/bes_shell/bes_string.bash
 source "$(_test_bes_config_this_dir)"/../bash/bes_shell/bes_config.bash
 
+function _make_test_config()
+{
+  local _label="${1}"
+  local _content="${2}"
+  local _tmp=/tmp/test_${_label}_$$.cfg
+  rm -f "${_tmp}"
+  echo "${_content}" > "${_tmp}"
+  echo "${_tmp}"
+  return 0
+}
+
 function test_bes_config_get()
 {
-  local _tmp=/tmp/test_bes_config_get_$$
-  rm -rf "${_tmp}"
-  mkdir -p "${_tmp}"
-  local _test_config=${_tmp}/test_config.cfg
-  cat > "${_test_config}" << EOF
+  local _tmp_config=$(_make_test_config bes_config_get "\
 [drink]
   type: wine
   name: barolo
@@ -32,12 +39,11 @@ function test_bes_config_get()
 [cheese]
   name: cheddar
   color: yellow
-EOF
-
-  local _value="$(bes_config_get "${_test_config}" cheese name)"
+")
+  local _value="$(bes_config_get "${_tmp_config}" cheese name)"
   bes_assert "[[ ${_value} == cheddar ]]"
 
-  rm -rf ${_tmp}
+  rm -rf ${_tmp_config}
 }
 
 bes_testing_run_unit_tests
