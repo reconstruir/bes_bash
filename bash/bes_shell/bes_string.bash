@@ -48,6 +48,15 @@ function bes_string_strip()
 
 # Partition a string into left, separator and right.
 # delimiter needs to be single char
+# the result is 3 lines:
+#  left
+#  delimiter
+#  right
+# if no delimiter is found then the result is:
+#  str
+#
+#
+# so you need to use "head" and "tail" on the results to get the parts
 function bes_string_partition()
 {
   if [[ $# != 2 ]]; then
