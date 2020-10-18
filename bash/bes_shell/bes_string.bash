@@ -46,7 +46,8 @@ function bes_string_strip()
   return 0
 }
 
-# Partition a string into left, separator and right.  delimiter needs to be a char
+# Partition a string into left, separator and right.
+# delimiter needs to be single char
 function bes_string_partition()
 {
   if [[ $# != 2 ]]; then
@@ -55,7 +56,10 @@ function bes_string_partition()
   fi
   local _str="${1}"
   local _delimiter=${2}
-
+  if [[ ${#_delimiter} != 1 ]]; then
+    bes_message "bes_string_partition: delimiter should be a single char: \"${_delimiter}\""
+    return 1
+  fi
   local _left="$(echo "${_str}" | cut -d${_delimiter} -f 1)"
   local _right
   local _delimiter
