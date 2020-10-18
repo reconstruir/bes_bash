@@ -17,13 +17,12 @@ function bes_config_get()
 
   local __line_number
   local __value
-  if ! _bes_config_find_entry "${_filename}" ${_section} ${_key} __line_number __value; then
-    bes_message "bes_config_get: no entry found in ${_filename} ${_section} ${_key}"
-    return 1
+  if _bes_config_find_entry "${_filename}" ${_section} ${_key} __line_number __value; then
+    echo "${__value}"
+    return 0
   fi
-  echo "${__value}"
-  
-  return 0
+  echo ""
+  return 1
 }
 
 function _bes_config_find_entry()
@@ -38,25 +37,70 @@ function _bes_config_find_entry()
   local _line_number_result_var=${4}
   local _value_result_var=${5}
 
-  local _line
-  local _line_number=1
-  local _found_section=false
+  local _line_number=0
   local _found_entry=false
   local _value
+  local _state=state_expecting_section
+  local _line
+  local _next_key
+  local _next_value
   while IFS= read -r _line; do
     _line_number=$(( _line_number + 1 ))
-    if ! ${_found_section}; then
-      if [[ "${_line}" == "[${_section}]" ]]; then
-        _found_section=true
-      fi
-    else
-      local _next_key="$(bes_string_strip $(echo "${_line}" | awk -F':' '{ print $1; }'))"
-      if [[ "${_next_key}" == "${_key}" ]]; then
-        _value="$(bes_string_strip $(echo "${_line}" | awk -F':' '{ print $2; }'))"
-        _found_entry=true
+    local _line_type=$(_bes_config_line_type "${_line}")
+    #echo $_line_number: $_state : $_line_type : $_line > /dev/tty
+    case ${_state} in
+      state_expecting_section)
+        case ${_line_type} in
+          section)
+            if [[ "${_line}" == "[${_section}]" ]]; then
+              _state=state_wanted_section
+            else
+              _state=state_ignore_section
+            fi
+            ;;
+          comment)
+            ;;
+          entry)
+            true
+            ;;
+          whitespace)
+            ;;
+        esac
+        ;;
+      state_ignore_section)
+        case ${_line_type} in
+          section)
+            if [[ "${_line}" == "[${_section}]" ]]; then
+              _state=state_wanted_section
+            else
+              _state=state_ignore_section
+            fi
+            ;;
+          comment|entry|whitespace)
+            ;;
+        esac
+        ;;
+      state_wanted_section)
+        case ${_line_type} in
+          section)
+            _state=state_done
+            ;;
+          comment|whitespace)
+            ;;
+          entry)
+            _next_key="$(bes_string_strip $(echo "${_line}" | awk -F':' '{ print $1; }'))"
+            if [[ "${_next_key}" == "${_key}" ]]; then
+              _value="$(bes_string_strip $(echo "${_line}" | awk -F':' '{ print $2; }'))"
+              #_state=state_done
+              _found_entry=true
+            fi
+            ;;
+        esac
+        ;;
+      state_done)
         break
-      fi
-    fi
+        ;;
+    esac
   done < "${_filename}"
 
   if ${_found_entry}; then
@@ -65,6 +109,28 @@ function _bes_config_find_entry()
     return 0
   fi
   return 1
+}
+
+function _bes_config_line_type()
+{
+  local _line="${1}"
+
+  if [[ $(echo "${_line}" | cut -b 1) == '[' ]]; then
+    echo "section"
+    return 0
+  fi
+
+  local _stripped_line="$(bes_string_strip "${_line}")"
+  if [[ -z "${_stripped_line}" ]]; then
+    echo "whitespace"
+    return 0
+  fi
+  if [[ $(echo "${_stripped_line}" | cut -b 1) == '#' ]]; then
+    echo "comment"
+    return 0
+  fi
+  echo "entry"
+  return 0
 }
 
 _bes_trace_file "end"
