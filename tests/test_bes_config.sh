@@ -14,12 +14,16 @@ function _test_bes_config_this_dir()
 }
 
 source "$(_test_bes_config_this_dir)"/../bash/bes_shell/bes_shell.sh
-source "$(_test_bes_config_this_dir)"/../bash/bes_shell/bes_config.sh
+source "$(_test_bes_config_this_dir)"/../bash/bes_shell/bes_string.bash
+source "$(_test_bes_config_this_dir)"/../bash/bes_shell/bes_config.bash
 
 function test_bes_config_get()
 {
+  local _tmp=/tmp/test_bes_config_get_$$
+  rm -rf "${_tmp}"
+  mkdir -p "${_tmp}"
   local _test_config=${_tmp}/test_config.cfg
-  cat > ${_test_config} << EOF
+  cat > "${_test_config}" << EOF
 [drink]
   type: wine
   name: barolo
@@ -30,7 +34,8 @@ function test_bes_config_get()
   color: yellow
 EOF
 
-  bes_assert "[[ $(bes_config_get ${_test_config} drink type) == wine ]]"
+  local _value="$(bes_config_get "${_test_config}" cheese name)"
+  bes_assert "[[ ${_value} == cheddar ]]"
 
   rm -rf ${_tmp}
 }
