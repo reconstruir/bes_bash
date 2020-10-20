@@ -14,7 +14,7 @@ function bes_pip_call_program()
   
   local _python_exe="${1}"
   shift
-  bes_python_check_python_exe "bes_pip_call_program" "${_python_exe}"
+  bes_python_check_python_exe "${_python_exe}"
 
   local _user_base_dir="${1}"
   shift
@@ -41,7 +41,7 @@ function bes_pip_call()
   fi
   local _python_exe="${1}"
   shift
-  bes_python_check_python_exe "bes_pip_call_program" "${_python_exe}"
+  bes_python_check_python_exe "${_python_exe}"
 
   local _user_base_dir="${1}"
   shift

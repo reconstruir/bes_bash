@@ -20,18 +20,18 @@ source "$(_test_bes_devenv_this_dir)"/../bash/bes_shell/bes_pip.sh
 source "$(_test_bes_devenv_this_dir)"/../bash/bes_shell/bes_pipenv.sh
 source "$(_test_bes_devenv_this_dir)"/../bash/bes_shell/bes_devenv.sh
 
-function test_bes_devenv_init()
+function test_bes_devenv_ensure()
 {
   local _builtin_python="$(bes_python_find_builtin_python)"
   if [[ ! -x ${_builtin_python} ]]; then
     bes_message "bes_pipenv_ensure: skipping because no builtin python found"
     return 0
   fi
-  local _tmp=/tmp/test_bes_devenv_init_$$
+  local _tmp=/tmp/test_bes_devenv_ensure_$$
 
-  bes_devenv_init "${_builtin_python}" "${_tmp}" 20.2.2 2020.8.13
-  local _init_rv=$?
-  bes_assert "[[ ${_init_rv} == 0 ]]"
+  bes_devenv_ensure "${_builtin_python}" "${_tmp}" 20.2.2 2020.8.13
+  local _ensure_rv=$?
+  bes_assert "[[ ${_ensure_rv} == 0 ]]"
 
   rm -rf ${_tmp}
 }

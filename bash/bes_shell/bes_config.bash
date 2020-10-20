@@ -13,7 +13,31 @@ function bes_config_get()
   local _section="${2}"
   local _key="${3}"
 
-  bes_file_check bes_config_get "${_filename}" 
+  bes_file_check "${_filename}" 
+
+  local __line_number
+  local __value
+  if _bes_config_find_entry "${_filename}" ${_section} ${_key} __line_number __value; then
+    echo "${__value}"
+    return 0
+  fi
+  echo ""
+  return 1
+}
+
+# Read a value from a config file
+function bes_config_set()
+{
+  if [[ $# != 4 ]]; then
+    echo "usage: bes_config_set filename section key value"
+    return 1
+  fi
+  local _filename="${1}"
+  local _section="${2}"
+  local _key="${3}"
+  local _value="${4}"
+
+  bes_file_check "${_filename}" 
 
   local __line_number
   local __value
@@ -91,7 +115,6 @@ function _bes_config_find_entry()
             _next_key="$(bes_string_strip $(echo "${_line}" | awk -F':' '{ print $1; }'))"
             if [[ "${_next_key}" == "${_key}" ]]; then
               _value="$(bes_string_strip $(echo "${_line}" | awk -F':' '{ print $2; }'))"
-              #_state=state_done
               _found_entry=true
             fi
             ;;

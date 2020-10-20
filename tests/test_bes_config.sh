@@ -157,4 +157,36 @@ function test_bes_config_get_not_found()
   rm -rf ${_tmp_config}
 }
 
+function xtest_bes_config_set()
+{
+  local _tmp_config1=$(_make_test_config "\
+[drink]
+  type: wine
+  name: barolo
+  region: piedmont
+
+[cheese]
+  name: cheddar
+  color: yellow
+")
+  bes_config_set "${_tmp_config}" cheese name brie
+
+  local _tmp_config2=$(_make_test_config "\
+[drink]
+  type: wine
+  name: barolo
+  region: piedmont
+
+[cheese]
+  name: brie
+  color: yellow
+")
+
+  diff "${_tmp_config1}" "${_tmp_config2}" >& /dev/null
+  local _rv=$?
+  bes_assert "[[ ${_rv} == 0 ]]"
+
+  rm -rf ${_tmp_config1} ${_tmp_config2}
+}
+
 bes_testing_run_unit_tests

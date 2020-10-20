@@ -13,7 +13,7 @@ function bes_pipenv_call()
   fi
   local _python_exe="${1}"
   shift
-  bes_python_check_python_exe bes_pipenv_call "${_python_exe}"
+  bes_python_check_python_exe "${_python_exe}"
 
   local _project_dir="${1}"
   shift
@@ -49,7 +49,7 @@ function bes_pipenv_exe()
   fi
   local _python_exe="${1}"
   local _project_dir="${2}"
-  bes_python_check_python_exe bes_pipenv_exe "${_python_exe}"
+  bes_python_check_python_exe "${_python_exe}"
 
   local _user_base_dir="${_project_dir}"/.droppings/py-user-base
   local _pipenv_exe="${_user_base_dir}/bin/pipenv"
@@ -86,7 +86,7 @@ function bes_pipenv_version()
   fi
   local _python_exe="${1}"
   local _project_dir="${2}"
-  bes_python_check_python_exe bes_pipenv_call "${_python_exe}"
+  bes_python_check_python_exe "${_python_exe}"
 
   local _pipenv_version=$(bes_pipenv_call "${_python_exe}" "${_project_dir}" --version | awk '{ print $3; }')
   echo ${_pipenv_version}
