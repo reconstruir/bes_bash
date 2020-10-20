@@ -86,6 +86,7 @@ function test_bes_string_partition()
   bes_assert "[[ $( _part "key=value" ":") == key=value:: ]]"
   bes_assert "[[ $( _part "=value only" "=") == :=:value_only ]]"
   bes_assert "[[ $( _part "=" "=") == :=: ]]"
+  bes_assert "[[ $( _part "key with spaces=value" "=") == key_with_spaces:=:value ]]"
 }
 
 bes_testing_run_unit_tests
