@@ -73,17 +73,17 @@ function test_bes_string_partition()
   {
     bes_string_partition "${1}" ${2} | tail -1 | tr ' ' '_'
   }
-
-  bes_assert "[[ $( _part_left "   key: pvalue with spaces" ":") == ___key ]]"
-  bes_assert "[[ $(_part_delim "   key: pvalue with spaces" ":") == : ]]"
-  bes_assert "[[ $(_part_right "   key: pvalue with spaces" ":") == _pvalue_with_spaces ]]"
+  function _part()
+  {
+    local _left=$(_part_left "${1}" ${2})
+    local _delim=$(_part_delim "${1}" ${2})
+    local _right=$(_part_right "${1}" ${2})
+    echo "${_left}:${_delim}:${_right}"
+  }
   
-#  local _left="$(bes_string_partition "     key: pvalue with spaces" ":" _x _y _z)" # | head -1 | tr ' ' '_')
-#  local _delimiter="$(bes_string_partition "     key: pvalue with spaces" ":" _x _y _z | tail -2 | head -1)"
-#  local _tail="$(bes_string_partition "     key: pvalue with spaces" ":" _x _y _z | tail -1)"
-#  bes_assert "[[ $(echo ${_left} | tr ' ' '_') == __key ]]"
-#  bes_assert "[[ $(echo ${_delimiter}) == : ]]"
-#  bes_assert "[[ $(echo ${_right} | tr ' ' '_') == _value_with_spaces ]]"
+  bes_assert "[[ $( _part "key=value" "=") == key:=:value ]]"
+  bes_assert "[[ $( _part "   key: pvalue with spaces" ":") == ___key:::_pvalue_with_spaces ]]"
+  bes_assert "[[ $( _part "key=value" ":") == key=value:: ]]"
 }
 
 bes_testing_run_unit_tests

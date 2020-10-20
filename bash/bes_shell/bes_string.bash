@@ -56,7 +56,9 @@ function bes_string_strip()
 #  str
 #
 #
-# so you need to use "head" and "tail" on the results to get the parts
+# you can either use "head" and "tail" on the results to get the parts you
+# need or use arrays like this:
+# foo=( "$(bes_string_partition "  key: value with spaces" ":")" )
 function bes_string_partition()
 {
   if [[ $# != 2 ]]; then
@@ -71,16 +73,16 @@ function bes_string_partition()
   fi
   local _left="$(echo "${_str}" | cut -d${_delimiter} -f 1)"
   local _right
-  local _delimiter
+  local _delimiter_result
   if [[ "${_left}" != "${_str}" ]]; then
     local _left_len=$(echo ${#_left})
     local _cut_index=$(( _left_len + 2 ))
     _right="$(echo "${_str}" | cut -b${_cut_index}-)"
-    _delimiter=${_delimiter}
+    _delimiter_result=${_delimiter}
   fi
 
   echo "${_left}"
-  echo "${_delimiter}"
+  echo "${_delimiter_result}"
   echo "${_right}"
   
   return 0
