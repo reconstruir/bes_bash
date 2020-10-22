@@ -189,4 +189,29 @@ function xtest_bes_config_set()
   rm -rf ${_tmp_config1} ${_tmp_config2}
 }
 
+function test__bes_config_text_escape()
+{
+  bes_assert "[[ $(_bes_config_text_escape "foo bar") == foo@SPACE@bar ]]"
+  bes_assert "[[ $(_bes_config_text_escape "foo") == foo ]]"
+  bes_assert "[[ $(_bes_config_text_escape "") == ]]"
+  bes_assert "[[ $(_bes_config_text_escape "foo@FOO@bar") == foo@FOO@bar ]]"
+  bes_assert "[[ $(_bes_config_text_escape "key: value with spaces") == key@COLON@@SPACE@value@SPACE@with@SPACE@spaces ]]"
+  bes_assert "[[ $(_bes_config_text_escape "foo bar@SPACE@baz") == foo@SPACE@bar%%SPACE%%baz ]]"
+}
+
+function test__bes_config_text_unescape()
+{
+  function _call_unescape()
+  {
+    _bes_config_text_unescape "${1}" | tr ' ' '_'
+  }
+  bes_assert "[[ $(_call_unescape foo@SPACE@bar) == foo_bar ]]"
+  bes_assert "[[ $(_call_unescape foo) == foo ]]"
+  bes_assert "[[ $(_call_unescape "") == ]]"
+  bes_assert "[[ $(_call_unescape foo@SPACE@bar ) == "foo_bar" ]]"
+  bes_assert "[[ $(_call_unescape foo@FOO@bar ) == "foo@FOO@bar" ]]"
+  bes_assert "[[ $(_call_unescape key@COLON@@SPACE@value@SPACE@with@SPACE@spaces ) == key:_value_with_spaces ]]"
+  bes_assert "[[ $(_call_unescape foo@SPACE@bar) == foo_bar ]]"
+}
+
 bes_testing_run_unit_tests
