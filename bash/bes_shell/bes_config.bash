@@ -280,4 +280,35 @@ function _bes_config_token_type()
   return 0
 }
 
+function bes_config_has_section()
+{
+  if [[ $# != 2 ]]; then
+    echo "usage: _bes_config_has_section filename section"
+    return 1
+  fi
+  local _filename="${1}"
+  local _section="${2}"
+
+  local _tokens=( $(_bes_config_tokenize "${_filename}") )
+  local _token
+  local _parts
+  declare -a _parts
+  
+  for _token in ${_tokens[@]}; do
+    _parts=( $(echo ${_token} | tr ':' ' ') )
+    _next_token_type=${_parts[0]}
+    _next_line_number=${_parts[1]}
+    _next_text=${_parts[2]}
+    _next_key=${_parts[3]}
+    _next_value=${_parts[4]}
+
+    if [[ ${_next_token_type} == "token_section" ]]; then
+      if [[ "${_next_text}" == "${_section}" ]]; then
+        return 0
+      fi
+    fi
+  done
+  return 1
+}
+
 _bes_trace_file "end"

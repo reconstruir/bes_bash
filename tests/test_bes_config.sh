@@ -292,5 +292,24 @@ function test__bes_config_tokenize()
   rm -rf ${_tmp_config}
 }
 
+function test_bes_config_has_section()
+{
+  local _tmp_config=$(_make_test_config "\
+[drink]
+  type: wine
+  name: barolo
+  region: piedmont
+
+[cheese]
+  name: cheddar
+  color: yellow
+")
+
+  bes_assert "[[ $(bes_testing_call_function bes_config_has_section ${_tmp_config} drink) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_config_has_section ${_tmp_config} cheese) == 0 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_config_has_section ${_tmp_config} wine) == 1 ]]"
+
+  rm -rf ${_tmp_config}
+}
 
 bes_testing_run_unit_tests
