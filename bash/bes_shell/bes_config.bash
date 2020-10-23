@@ -286,9 +286,9 @@ function bes_config_has_section()
     echo "usage: _bes_config_has_section filename section"
     return 1
   fi
+
   local _filename="${1}"
   local _section="${2}"
-
   local _tokens=( $(_bes_config_tokenize "${_filename}") )
   local _token
   local _parts

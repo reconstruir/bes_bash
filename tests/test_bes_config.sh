@@ -19,9 +19,9 @@ source "$(_test_bes_config_this_dir)"/../bash/bes_shell/bes_config.bash
 
 function _make_test_config()
 {
-  local _content="${1}"
-  local _funcname=${FUNCNAME[1]}
   local _label="${1}"
+  local _content="${2}"
+  local _funcname=${FUNCNAME[1]}
   local _tmp=/tmp/test_${_funcname}_${_label}_$$.cfg
   rm -f "${_tmp}"
   echo "${_content}" > "${_tmp}"
@@ -253,7 +253,7 @@ function test__bes_config_text_unescape()
 
 function test__bes_config_tokenize()
 {
-  local _tmp_config=$(_make_test_config "\
+  local _tmp_config=$(_make_test_config one "\
 [drink]
   type: wine
   name: barolo
@@ -296,7 +296,7 @@ function test__bes_config_tokenize()
 
 function test_bes_config_has_section()
 {
-  local _tmp_config=$(_make_test_config "\
+  local _tmp_config=$(_make_test_config one "\
 [drink]
   type: wine
   name: barolo
