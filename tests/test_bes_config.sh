@@ -49,7 +49,7 @@ function test__bes_config_parse_section_name()
     _bes_config_parse_section_name "${1}" >& /dev/null
     local _rv=$?
     echo ${_rv}:"${_value}"
-    return ${_rv}
+    return 0
   }
 
   bes_assert "[[ $(_call_parse_section_name "[foo]") == 0:foo ]]"
@@ -254,6 +254,7 @@ function test__bes_config_text_unescape()
   function _call_unescape()
   {
     _bes_config_text_unescape "${1}" | tr ' ' '_'
+    return 0
   }
   bes_assert "[[ $(_call_unescape foo@SPACE@bar) == foo_bar ]]"
   bes_assert "[[ $(_call_unescape foo) == foo ]]"
@@ -323,6 +324,53 @@ function test_bes_config_has_section()
   bes_assert "[[ $(bes_testing_call_function bes_config_has_section ${_tmp_config} drink) == 0 ]]"
   bes_assert "[[ $(bes_testing_call_function bes_config_has_section ${_tmp_config} cheese) == 0 ]]"
   bes_assert "[[ $(bes_testing_call_function bes_config_has_section ${_tmp_config} wine) == 1 ]]"
+
+  rm -rf ${_tmp_config}
+}
+
+function test_bes_config_has_section_empty_config()
+{
+  local _tmp_config=$(_make_test_config one "\
+")
+
+  bes_assert "[[ $(bes_testing_call_function bes_config_has_section ${_tmp_config} drink) == 1 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_config_has_section ${_tmp_config} cheese) == 1 ]]"
+  bes_assert "[[ $(bes_testing_call_function bes_config_has_section ${_tmp_config} wine) == 1 ]]"
+
+  rm -rf ${_tmp_config}
+}
+
+function test__bes_config_find_entry()
+{
+  function _call_find_entry()
+  {
+    local _filename="${1}"
+    local _section="${2}"
+    local _key="${3}"
+    local _line_number
+    local _value
+    _bes_config_find_entry "${_filename}" "${_section}" "${_key}" _line_number _value
+    local _rv=$?
+    echo ${_rv}:${_line_number}:"${_value}"
+    return 0
+  }
+
+local _tmp_config=$(_make_test_config one "\
+[drink]
+  type: wine
+  name: barolo
+  region: piedmont
+
+[cheese]
+  name: cheddar
+  color: yellow
+")
+
+  bes_assert "[[ $(_call_find_entry ${_tmp_config} drink type) == 0:2:wine ]]"
+  bes_assert "[[ $(_call_find_entry ${_tmp_config} drink color) == 1:: ]]"
+  bes_assert "[[ $(_call_find_entry ${_tmp_config} dessert foo) == 1:: ]]"
+  bes_assert "[[ $(_call_find_entry ${_tmp_config} drink regions) == 1:: ]]"
+  bes_assert "[[ $(_call_find_entry ${_tmp_config} drinks fo) == 1:: ]]"
 
   rm -rf ${_tmp_config}
 }
