@@ -61,22 +61,33 @@ function _bes_config_find_entry()
   local _line_number_result_var=${4}
   local _value_result_var=${5}
 
-  local _line_number=0
   local _found_entry=false
-  local _value
+  local _found_value
+  local _found_line_number
   local _state=state_expecting_section
-  local _line
   local _next_key
   local _next_value
-  while IFS= read -r _line; do
-    _line_number=$(( _line_number + 1 ))
-    local _token_type=$(_bes_config_token_type "${_line}")
-    #echo $_line_number: $_state : $_token_type : $_line > /dev/tty
+  local _next_token_type
+  local _next_line_number
+  
+  local _tokens=( $(_bes_config_tokenize "${_filename}") )
+  local _token
+  local _parts
+  declare -a _parts
+  
+  for _token in ${_tokens[@]}; do
+    _parts=( $(echo ${_token} | tr ':' ' ') )
+    _next_token_type=${_parts[0]}
+    _next_line_number=${_parts[1]}
+    _next_text=${_parts[2]}
+    _next_key=${_parts[3]}
+    _next_value=${_parts[4]}
+
     case ${_state} in
       state_expecting_section)
-        case ${_token_type} in
+        case ${_next_token_type} in
           token_section)
-            if [[ "${_line}" == "[${_section}]" ]]; then
+            if [[ "${_next_text}" == "${_section}" ]]; then
               _state=state_wanted_section
             else
               _state=state_ignore_section
@@ -92,9 +103,9 @@ function _bes_config_find_entry()
         esac
         ;;
       state_ignore_section)
-        case ${_token_type} in
+        case ${_next_token_type} in
           token_section)
-            if [[ "${_line}" == "[${_section}]" ]]; then
+            if [[ "${_next_text}" == "${_section}" ]]; then
               _state=state_wanted_section
             else
               _state=state_ignore_section
@@ -105,16 +116,16 @@ function _bes_config_find_entry()
         esac
         ;;
       state_wanted_section)
-        case ${_token_type} in
+        case ${_next_token_type} in
           token_section)
             _state=state_done
             ;;
           token_comment|token_whitespace)
             ;;
           token_entry)
-            _next_key="$(bes_string_strip $(echo "${_line}" | awk -F':' '{ print $1; }'))"
             if [[ "${_next_key}" == "${_key}" ]]; then
-              _value="$(bes_string_strip $(echo "${_line}" | awk -F':' '{ print $2; }'))"
+              _found_value=${_next_value}
+              _found_line_number=${_next_line_number}
               _found_entry=true
             fi
             ;;
@@ -124,11 +135,12 @@ function _bes_config_find_entry()
         break
         ;;
     esac
-  done < "${_filename}"
-
+    
+  done
+  
   if ${_found_entry}; then
-    eval "${_line_number_result_var}='${_line_number}'"
-    eval "${_value_result_var}='${_value}'"
+    eval "${_line_number_result_var}='${_found_line_number}'"
+    eval "${_value_result_var}='${_found_value}'"
     return 0
   fi
   return 1
