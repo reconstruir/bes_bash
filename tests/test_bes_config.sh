@@ -193,6 +193,19 @@ function test_bes_config_get_not_found()
   rm -rf ${_tmp_config}
 }
 
+function test_bes_config_get_empty_section()
+{
+  local _tmp_config=$(_make_test_config one "\
+[fruit]
+")
+
+  bes_config_get "${_tmp_config}" fruit name > /dev/null
+  local _rv=$?
+  bes_assert "[[ ${_rv} == 1 ]]"
+
+  rm -rf ${_tmp_config}
+}
+
 function xtest_bes_config_set()
 {
   local _tmp_config1=$(_make_test_config one "\
