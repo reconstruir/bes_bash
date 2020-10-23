@@ -340,22 +340,22 @@ function test_bes_config_has_section_empty_config()
   rm -rf ${_tmp_config}
 }
 
+function _call_find_entry()
+{
+  local _filename="${1}"
+  local _section="${2}"
+  local _key="${3}"
+  local _line_number
+  local _value
+  _bes_config_find_entry "${_filename}" "${_section}" "${_key}" _line_number _value
+  local _rv=$?
+  echo ${_rv}:${_line_number}:"${_value}"
+  return 0
+}
+
 function test__bes_config_find_entry()
 {
-  function _call_find_entry()
-  {
-    local _filename="${1}"
-    local _section="${2}"
-    local _key="${3}"
-    local _line_number
-    local _value
-    _bes_config_find_entry "${_filename}" "${_section}" "${_key}" _line_number _value
-    local _rv=$?
-    echo ${_rv}:${_line_number}:"${_value}"
-    return 0
-  }
-
-local _tmp_config=$(_make_test_config one "\
+  local _tmp_config=$(_make_test_config one "\
 [drink]
   type: wine
   name: barolo
@@ -371,6 +371,25 @@ local _tmp_config=$(_make_test_config one "\
   bes_assert "[[ $(_call_find_entry ${_tmp_config} dessert foo) == 1:: ]]"
   bes_assert "[[ $(_call_find_entry ${_tmp_config} drink regions) == 1:: ]]"
   bes_assert "[[ $(_call_find_entry ${_tmp_config} drinks fo) == 1:: ]]"
+
+  rm -rf ${_tmp_config}
+}
+
+function test__bes_config_find_entry_dup_entry()
+{
+  local _tmp_config=$(_make_test_config one "\
+[drink]
+  type: wine
+  name: barolo
+  region: piedmont
+  name: brunello
+
+[cheese]
+  name: cheddar
+  color: yellow
+")
+
+  bes_assert "[[ $(_call_find_entry ${_tmp_config} drink name) == 0:5:brunello ]]"
 
   rm -rf ${_tmp_config}
 }
