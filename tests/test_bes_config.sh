@@ -58,22 +58,21 @@ function test__bes_config_parse_section_name()
   bes_assert "[[ $(_call_parse_section_name "foo") == 1: ]]"
 }
 
-function xtest__bes_config_parse_entry()
+function test__bes_config_parse_entry()
 {
   function _call_parse_entry()
   {
-    local _left="$(bes_string_partition "${1}" ":" | head -1)"
-    local _delim="$(bes_string_partition "${1}" ":" | tail -2 | head -1)"
-    local _right="$(bes_string_partition "${1}" ":" | tail -1)"
-    
     local _value="$(_bes_config_parse_entry "${1}")"
     _bes_config_parse_entry "${1}" >& /dev/null
     local _rv=$?
     echo ${_rv}:"${_value}"
-    return ${_rv}
+    return 0
   }
 
-  bes_assert "[[ $(_call_parse_entry "  cheese: brie") == 0:cheese:brie ]]"
+  bes_assert "[[ $(_call_parse_entry "  name: cheddar") == 0:name:cheddar ]]"
+  bes_assert "[[ $(_call_parse_entry "  foo name: cheddar") == 0:foo@SPACE@name:cheddar ]]"
+  bes_assert "[[ $(_call_parse_entry "  foo name: cheddar is nice") == 0:foo@SPACE@name:cheddar@SPACE@is@SPACE@nice ]]"
+  bes_assert "[[ $(_call_parse_entry "  foo: bar: baz") == 0:foo:bar@COLON@@SPACE@baz ]]"
 }
 
 function test_bes_config_get()

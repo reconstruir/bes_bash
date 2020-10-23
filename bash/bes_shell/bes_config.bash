@@ -187,14 +187,21 @@ function _bes_config_parse_entry()
 
   local _key="$(bes_string_partition "${_text}" ":" | head -1)"
   local _delim="$(bes_string_partition "${_text}" ":" | tail -2 | head -1)"
-  local _valye="$(bes_string_partition "${_text}" ":" | tail -1)"
+  local _value="$(bes_string_partition "${_text}" ":" | tail -1)"
 
+#  echo _text ${_text} > $(tty)
+#  echo _key ${_key} > $(tty)
+#  echo _delim ${_delim} > $(tty)
+#  echo _value ${_value} > $(tty)
+  
   if [[ ${_delim} != ":" ]]; then
     return 1
   fi
 
-  local _escaped_key=$(_bes_config_text_escape "${_key}")
-  local _escaped_value=$(_bes_config_text_escape "${_value}")
+  local _stripped_key=$(bes_string_strip "${_key}")
+  local _stripped_value=$(bes_string_strip "${_value}")
+  local _escaped_key=$(_bes_config_text_escape "${_stripped_key}")
+  local _escaped_value=$(_bes_config_text_escape "${_stripped_value}")
   echo ${_escaped_key}:${_escaped_value}
   return 0
 }
