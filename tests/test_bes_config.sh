@@ -249,4 +249,48 @@ function test__bes_config_text_unescape()
   bes_assert "[[ $(_call_unescape foo@SPACE@bar) == foo_bar ]]"
 }
 
+function test__bes_config_tokenize()
+{
+  local _tmp_config=$(_make_test_config "\
+[drink]
+  type: wine
+  name: barolo
+  region: piedmont
+
+[cheese]
+  name: cheddar
+  color: yellow
+")
+
+  local _expected_tokens=( \
+"token_section:1:drink::" \
+"token_entry:2:@SPACE@@SPACE@type@COLON@@SPACE@wine:type:wine" \
+"token_entry:3:@SPACE@@SPACE@name@COLON@@SPACE@barolo:name:barolo" \
+"token_entry:4:@SPACE@@SPACE@region@COLON@@SPACE@piedmont:region:piedmont" \
+"token_whitespace:5:::" \
+"token_section:6:cheese::" \
+"token_entry:7:@SPACE@@SPACE@name@COLON@@SPACE@cheddar:name:cheddar" \
+"token_entry:8:@SPACE@@SPACE@color@COLON@@SPACE@yellow:color:yellow" \
+"token_whitespace:9:::" \
+)
+  
+  local _actual_tokens=( $(_bes_config_tokenize "${_tmp_config}") )
+  local _token
+  local _num_actual=${#_actual_tokens}
+  local _num_expected=${#_expected_tokens}
+
+  bes_assert "[[ ${_num_actual} == ${_num_expected} ]]"
+
+  local _i=0
+  while [[ ${_i} -lt ${_num_actual} ]]; do
+    local _actual_token=${_actual_tokens[${_i}]}
+    local _expected_token=${_expected_tokens[${_i}]}
+    bes_assert "[[ ${_actual_token} == ${_expected_token} ]]"
+    _i=$(( _i + 1 ))
+  done
+  
+  rm -rf ${_tmp_config}
+}
+
+
 bes_testing_run_unit_tests

@@ -225,9 +225,11 @@ function _bes_config_tokenize()
     case ${_token_type} in
       token_section)
         _text="$(_bes_config_parse_section_name "${_line}")"
+        _rest=":"
         ;;
       token_comment)
         _text="$(bes_string_strip "${_line}")"
+        _rest=":"
         ;;
       token_entry)
         _text=$(_bes_config_text_escape "${_line}")
@@ -235,6 +237,7 @@ function _bes_config_tokenize()
         ;;
       token_whitespace)
         _text=""
+        _rest=":"
         ;;
     esac
     echo ${_token_type}:${_line_number}:${_text}:${_rest}
