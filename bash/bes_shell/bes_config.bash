@@ -70,48 +70,48 @@ function _bes_config_find_entry()
   local _next_value
   while IFS= read -r _line; do
     _line_number=$(( _line_number + 1 ))
-    local _line_type=$(_bes_config_line_type "${_line}")
-    #echo $_line_number: $_state : $_line_type : $_line > /dev/tty
+    local _token_type=$(_bes_config_token_type "${_line}")
+    #echo $_line_number: $_state : $_token_type : $_line > /dev/tty
     case ${_state} in
       state_expecting_section)
-        case ${_line_type} in
-          section)
+        case ${_token_type} in
+          token_section)
             if [[ "${_line}" == "[${_section}]" ]]; then
               _state=state_wanted_section
             else
               _state=state_ignore_section
             fi
             ;;
-          comment)
+          token_comment)
             ;;
-          entry)
+          token_entry)
             true
             ;;
-          whitespace)
+          token_whitespace)
             ;;
         esac
         ;;
       state_ignore_section)
-        case ${_line_type} in
-          section)
+        case ${_token_type} in
+          token_section)
             if [[ "${_line}" == "[${_section}]" ]]; then
               _state=state_wanted_section
             else
               _state=state_ignore_section
             fi
             ;;
-          comment|entry|whitespace)
+          token_comment|entry|whitespace)
             ;;
         esac
         ;;
       state_wanted_section)
-        case ${_line_type} in
-          section)
+        case ${_token_type} in
+          token_section)
             _state=state_done
             ;;
-          comment|whitespace)
+          token_comment|token_whitespace)
             ;;
-          entry)
+          token_entry)
             _next_key="$(bes_string_strip $(echo "${_line}" | awk -F':' '{ print $1; }'))"
             if [[ "${_next_key}" == "${_key}" ]]; then
               _value="$(bes_string_strip $(echo "${_line}" | awk -F':' '{ print $2; }'))"
@@ -167,8 +167,40 @@ function _bes_config_text_unescape()
   return 0
 }
 
+function _bes_config_parse_section_name()
+{
+  local _text="${1}"
+  if [[ "${_text}" =~ \[(.+)\] ]]; then
+    local _section_name="${BASH_REMATCH[1]}"
+    if [[ -z "${_section_name}" ]]; then
+      return 1
+    fi
+    echo ${BASH_REMATCH[1]}
+    return 0
+  fi
+  return 1
+}
+
+function _bes_config_parse_entry()
+{
+  local _text="${1}"
+
+  local _key="$(bes_string_partition "${_text}" ":" | head -1)"
+  local _delim="$(bes_string_partition "${_text}" ":" | tail -2 | head -1)"
+  local _valye="$(bes_string_partition "${_text}" ":" | tail -1)"
+
+  if [[ ${_delim} != ":" ]]; then
+    return 1
+  fi
+
+  local _escaped_key=$(_bes_config_text_escape "${_key}")
+  local _escaped_value=$(_bes_config_text_escape "${_value}")
+  echo ${_escaped_key}:${_escaped_value}
+  return 0
+}
+
 # Tokenize a config file and produce tokens as such
-# ${token_type}:${line_number}:${text}
+# ${token_type}:${line_number}:${text}:${key}:${value}
 function _bes_config_tokenize()
 {
   if [[ $# != 1 ]]; then
@@ -176,103 +208,53 @@ function _bes_config_tokenize()
     return 1
   fi
   local _filename="${1}"
-  local _section="${2}"
-  local _key="${3}"
-  local _line_number_result_var=${4}
-  local _value_result_var=${5}
-
-  local _line_number=0
-  local _found_entry=false
-  local _value
-  local _state=state_expecting_section
+  local _line_number=1
   local _line
-  local _next_key
-  local _next_value
+  local _token_type
+  local _text
+  local _rest
   while IFS= read -r _line; do
-    _line_number=$(( _line_number + 1 ))
-    local _line_type=$(_bes_config_line_type "${_line}")
-    #echo $_line_number: $_state : $_line_type : $_line > /dev/tty
-    case ${_state} in
-      state_expecting_section)
-        case ${_line_type} in
-          section)
-            if [[ "${_line}" == "[${_section}]" ]]; then
-              _state=state_wanted_section
-            else
-              _state=state_ignore_section
-            fi
-            ;;
-          comment)
-            ;;
-          entry)
-            true
-            ;;
-          whitespace)
-            ;;
-        esac
+    _token_type=$(_bes_config_token_type "${_line}")
+    case ${_token_type} in
+      token_section)
+        _text="$(_bes_config_parse_section_name "${_line}")"
         ;;
-      state_ignore_section)
-        case ${_line_type} in
-          section)
-            if [[ "${_line}" == "[${_section}]" ]]; then
-              _state=state_wanted_section
-            else
-              _state=state_ignore_section
-            fi
-            ;;
-          comment|entry|whitespace)
-            ;;
-        esac
+      token_comment)
+        _text="$(bes_string_strip "${_line}")"
         ;;
-      state_wanted_section)
-        case ${_line_type} in
-          section)
-            _state=state_done
-            ;;
-          comment|whitespace)
-            ;;
-          entry)
-            _next_key="$(bes_string_strip $(echo "${_line}" | awk -F':' '{ print $1; }'))"
-            if [[ "${_next_key}" == "${_key}" ]]; then
-              _value="$(bes_string_strip $(echo "${_line}" | awk -F':' '{ print $2; }'))"
-              _found_entry=true
-            fi
-            ;;
-        esac
+      token_entry)
+        _text=$(_bes_config_text_escape "${_line}")
+        _rest=$(_bes_config_parse_entry "${_line}")
         ;;
-      state_done)
-        break
+      token_whitespace)
+        _text=""
         ;;
     esac
+    echo ${_token_type}:${_line_number}:${_text}:${_rest}
+    _line_number=$(( _line_number + 1 ))
   done < "${_filename}"
-
-  if ${_found_entry}; then
-    eval "${_line_number_result_var}='${_line_number}'"
-    eval "${_value_result_var}='${_value}'"
-    return 0
-  fi
-  return 1
+  return 0
 }
 
-function _bes_config_line_type()
+function _bes_config_token_type()
 {
   local _line="${1}"
 
   if [[ $(echo "${_line}" | cut -b 1) == '[' ]]; then
-    echo "section"
+    echo "token_section"
     return 0
   fi
 
   local _stripped_line="$(bes_string_strip "${_line}")"
   if [[ -z "${_stripped_line}" ]]; then
-    echo "whitespace"
+    echo "token_whitespace"
     return 0
   fi
   if [[ $(echo "${_stripped_line}" | cut -b 1) == '#' ]]; then
-    echo "comment"
+    echo "token_comment"
     return 0
   fi
-  echo "entry"
+  echo "token_entry"
   return 0
 }
 

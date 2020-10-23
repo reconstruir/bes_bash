@@ -28,16 +28,52 @@ function _make_test_config()
   return 0
 }
 
-function test__bes_config_line_type()
+function test__bes_config_token_type()
 {
-  bes_assert "[[ $(_bes_config_line_type [foo]) == section ]]"
-  bes_assert "[[ $(_bes_config_line_type "[foo] # foo") == section ]]"
-  bes_assert "[[ $(_bes_config_line_type "# foo") == comment ]]"
-  bes_assert "[[ $(_bes_config_line_type "  # foo") == comment ]]"
-  bes_assert "[[ $(_bes_config_line_type "") == whitespace ]]"
-  bes_assert "[[ $(_bes_config_line_type "  ") == whitespace ]]"
-  bes_assert "[[ $(_bes_config_line_type "foo") == entry ]]"
-  bes_assert "[[ $(_bes_config_line_type "  foo") == entry ]]"
+  bes_assert "[[ $(_bes_config_token_type [foo]) == token_section ]]"
+  bes_assert "[[ $(_bes_config_token_type "[foo] # foo") == token_section ]]"
+  bes_assert "[[ $(_bes_config_token_type "# foo") == token_comment ]]"
+  bes_assert "[[ $(_bes_config_token_type "  # foo") == token_comment ]]"
+  bes_assert "[[ $(_bes_config_token_type "") == token_whitespace ]]"
+  bes_assert "[[ $(_bes_config_token_type "  ") == token_whitespace ]]"
+  bes_assert "[[ $(_bes_config_token_type "foo") == token_entry ]]"
+  bes_assert "[[ $(_bes_config_token_type "  foo") == token_entry ]]"
+}
+
+function test__bes_config_parse_section_name()
+{
+  function _call_parse_section_name()
+  {
+    local _value="$(_bes_config_parse_section_name "${1}" | tr ' ' '_')"
+    _bes_config_parse_section_name "${1}" >& /dev/null
+    local _rv=$?
+    echo ${_rv}:"${_value}"
+    return ${_rv}
+  }
+
+  bes_assert "[[ $(_call_parse_section_name "[foo]") == 0:foo ]]"
+  bes_assert "[[ $(_call_parse_section_name "[foo bar]") == 0:foo_bar ]]"
+  bes_assert "[[ $(_call_parse_section_name "[]") == 1: ]]"
+  bes_assert "[[ $(_call_parse_section_name "") == 1: ]]"
+  bes_assert "[[ $(_call_parse_section_name "foo") == 1: ]]"
+}
+
+function xtest__bes_config_parse_entry()
+{
+  function _call_parse_entry()
+  {
+    local _left="$(bes_string_partition "${1}" ":" | head -1)"
+    local _delim="$(bes_string_partition "${1}" ":" | tail -2 | head -1)"
+    local _right="$(bes_string_partition "${1}" ":" | tail -1)"
+    
+    local _value="$(_bes_config_parse_entry "${1}")"
+    _bes_config_parse_entry "${1}" >& /dev/null
+    local _rv=$?
+    echo ${_rv}:"${_value}"
+    return ${_rv}
+  }
+
+  bes_assert "[[ $(_call_parse_entry "  cheese: brie") == 0:cheese:brie ]]"
 }
 
 function test_bes_config_get()
