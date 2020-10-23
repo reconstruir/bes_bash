@@ -20,8 +20,9 @@ source "$(_test_bes_config_this_dir)"/../bash/bes_shell/bes_config.bash
 function _make_test_config()
 {
   local _content="${1}"
-  local _label=${FUNCNAME[1]}
-  local _tmp=/tmp/test_${_label}_$$.cfg
+  local _funcname=${FUNCNAME[1]}
+  local _label="${1}"
+  local _tmp=/tmp/test_${_funcname}_${_label}_$$.cfg
   rm -f "${_tmp}"
   echo "${_content}" > "${_tmp}"
   echo "${_tmp}"
@@ -77,7 +78,7 @@ function test__bes_config_parse_entry()
 
 function test_bes_config_get()
 {
-  local _tmp_config=$(_make_test_config "\
+  local _tmp_config=$(_make_test_config one "\
 [drink]
   type: wine
   name: barolo
@@ -97,7 +98,7 @@ function test_bes_config_get()
 
 function test_bes_config_get_with_no_space()
 {
-  local _tmp_config=$(_make_test_config "\
+  local _tmp_config=$(_make_test_config one "\
 [drink]
 type: wine
 name: barolo
@@ -122,7 +123,7 @@ color: yellow
 
 function test_bes_config_get_with_comments()
 {
-  local _tmp_config=$(_make_test_config "\
+  local _tmp_config=$(_make_test_config one "\
 # foo1
 [drink]
   type: wine
@@ -152,7 +153,7 @@ function test_bes_config_get_with_comments()
 
 function test_bes_config_get_dup_key()
 {
-  local _tmp_config=$(_make_test_config "\
+  local _tmp_config=$(_make_test_config one "\
 [drink]
   type: wine
   name: barolo
@@ -173,7 +174,7 @@ function test_bes_config_get_dup_key()
 
 function test_bes_config_get_not_found()
 {
-  local _tmp_config=$(_make_test_config "\
+  local _tmp_config=$(_make_test_config one "\
 [drink]
   type: wine
   name: barolo
@@ -194,7 +195,7 @@ function test_bes_config_get_not_found()
 
 function xtest_bes_config_set()
 {
-  local _tmp_config1=$(_make_test_config "\
+  local _tmp_config1=$(_make_test_config one "\
 [drink]
   type: wine
   name: barolo
@@ -204,9 +205,10 @@ function xtest_bes_config_set()
   name: cheddar
   color: yellow
 ")
-  bes_config_set "${_tmp_config}" cheese name brie
 
-  local _tmp_config2=$(_make_test_config "\
+  bes_config_set "${_tmp_config1}" cheese name brie
+
+  local _tmp_config2=$(_make_test_config two "\
 [drink]
   type: wine
   name: barolo
