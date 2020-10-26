@@ -206,7 +206,7 @@ function test_bes_config_get_empty_section()
   rm -rf ${_tmp_config}
 }
 
-function xtest_bes_config_set()
+function test_bes_config_set()
 {
   local _tmp_config1=$(_make_test_config one "\
 [drink]
@@ -232,7 +232,7 @@ function xtest_bes_config_set()
   color: yellow
 ")
 
-  diff "${_tmp_config1}" "${_tmp_config2}" >& /dev/null
+  diff -c --ignore-blank-lines "${_tmp_config1}" "${_tmp_config2}"
   local _rv=$?
   bes_assert "[[ ${_rv} == 0 ]]"
 
@@ -392,6 +392,59 @@ function test__bes_config_find_entry_dup_entry()
   bes_assert "[[ $(_call_find_entry ${_tmp_config} drink name) == 0:5:brunello ]]"
 
   rm -rf ${_tmp_config}
+}
+
+function test__bes_config_add_section()
+{
+  local _tmp_config1=$(_make_test_config one "\
+[drink]
+  type: wine
+  name: barolo
+  region: piedmont
+
+[cheese]
+  name: cheddar
+  color: yellow
+")
+
+  _bes_config_add_section "${_tmp_config1}" dessert
+
+  local _tmp_config2=$(_make_test_config two "\
+[drink]
+  type: wine
+  name: barolo
+  region: piedmont
+
+[cheese]
+  name: cheddar
+  color: yellow
+
+[dessert]
+")
+
+  diff -c --ignore-blank-lines  --ignore-all-space "${_tmp_config1}" "${_tmp_config2}"
+  local _rv=$?
+  bes_assert "[[ ${_rv} == 0 ]]"
+
+  rm -rf ${_tmp_config1} ${_tmp_config2}
+}
+
+function test__bes_config_add_section_empty_config()
+{
+  local _tmp_config1=$(_make_test_config one "\
+")
+
+  _bes_config_add_section "${_tmp_config1}" dessert
+
+  local _tmp_config2=$(_make_test_config two "\
+[dessert]
+")
+
+  diff -c --ignore-blank-lines  --ignore-all-space "${_tmp_config1}" "${_tmp_config2}"
+  local _rv=$?
+  bes_assert "[[ ${_rv} == 0 ]]"
+
+  rm -rf ${_tmp_config1} ${_tmp_config2}
 }
 
 bes_testing_run_unit_tests

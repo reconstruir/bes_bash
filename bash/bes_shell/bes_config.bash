@@ -39,14 +39,17 @@ function bes_config_set()
 
   bes_file_check "${_filename}" 
 
-  local __line_number
-  local __value
-  if _bes_config_find_entry "${_filename}" ${_section} ${_key} __line_number __value; then
-    echo "${__value}"
-    return 0
+  if ! bes_config_has_section "${_filename}" "${_section}"; then
+    _bes_config_add_section "${_filename}" "${_section}"
   fi
-  echo ""
-  return 1
+#  local __line_number
+#  local __value
+#  if _bes_config_find_entry "${_filename}" ${_section} ${_key} __line_number __value; then
+#    echo "${__value}"
+#    return 0
+#  fi
+#  echo ""
+  return 0
 }
 
 function _bes_config_find_entry()
@@ -309,6 +312,36 @@ function bes_config_has_section()
     fi
   done
   return 1
+}
+
+function _bes_config_add_section()
+{
+  if [[ $# != 2 ]]; then
+    echo "usage: _bes_config_has_section filename section"
+    return 1
+  fi
+
+  local _filename="${1}"
+  local _section="${2}"
+
+  printf "\n[%s]\n\n" "${_section}" >> "${_filename}"
+  return 0
+}
+
+function _bes_config_add_entry()
+{
+  if [[ $# != 4 ]]; then
+    echo "usage: _bes_config_has_section filename section key value"
+    return 1
+  fi
+
+  local _filename="${1}"
+  local _section="${2}"
+  local _key="${3}"
+  local _value="${4}"
+
+  printf "\n[%s]\n\n" "${_section}" >> "${_filename}"
+  return 0
 }
 
 _bes_trace_file "end"
