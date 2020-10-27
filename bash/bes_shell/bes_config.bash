@@ -15,9 +15,10 @@ function bes_config_get()
 
   bes_file_check "${_filename}" 
 
+  local __section_line_number
   local __line_number
   local __value
-  if _bes_config_find_entry "${_filename}" ${_section} ${_key} __line_number __value; then
+  if _bes_config_find_entry "${_filename}" ${_section} ${_key} __section_line_number __line_number __value; then
     echo "${__value}"
     return 0
   fi
@@ -42,27 +43,29 @@ function bes_config_set()
   if ! bes_config_has_section "${_filename}" "${_section}"; then
     _bes_config_add_section "${_filename}" "${_section}"
   fi
-#  local __line_number
-#  local __value
-#  if _bes_config_find_entry "${_filename}" ${_section} ${_key} __line_number __value; then
-#    echo "${__value}"
-#    return 0
-#  fi
-#  echo ""
+  local __section_line_number
+  local __line_number
+  local __value
+  if _bes_config_find_entry "${_filename}" ${_section} ${_key} __section_line_number __line_number __value; then
+    echo "${__value}"
+    return 0
+  fi
+  echo ""
   return 0
 }
 
 function _bes_config_find_entry()
 {
-  if [[ $# != 5 ]]; then
-    echo "usage: _bes_config_find_key filename section key line_number_result_var value_result_var"
+  if [[ $# != 6 ]]; then
+    echo "usage: _bes_config_find_key filename section key section_line_number_result_var line_number_result_var value_result_var"
     return 1
   fi
   local _filename="${1}"
   local _section="${2}"
   local _key="${3}"
-  local _line_number_result_var=${4}
-  local _value_result_var=${5}
+  local _section_line_number_result_var=${5}
+  local _line_number_result_var=${5}
+  local _value_result_var=${6}
 
   local _found_entry=false
   local _found_value

@@ -345,11 +345,12 @@ function _call_find_entry()
   local _filename="${1}"
   local _section="${2}"
   local _key="${3}"
-  local _line_number
-  local _value
-  _bes_config_find_entry "${_filename}" "${_section}" "${_key}" _line_number _value
+  local __section_line_number
+  local __line_number
+  local __value
+  _bes_config_find_entry "${_filename}" "${_section}" "${_key}" __section_line_number __line_number __value
   local _rv=$?
-  echo ${_rv}:${_line_number}:"${_value}"
+  echo ${_rv}:${__line_number}:"${__value}"
   return 0
 }
 
