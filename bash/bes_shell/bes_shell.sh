@@ -62,7 +62,7 @@ function _bes_which()
   local _one_which
 
   for _program in "${_programs[@]}"; do
-    _one_whiches=( $(_bes_which_one_program "${_program}" _list_all_instances) )
+    _one_whiches=( $(_bes_which_one_program "${_program}" ${_list_all_instances}) )
     _one_rv=$?
     if [[ ${_one_rv} == 0 ]]; then
       if [[ ${_no_output} == "false" ]]; then

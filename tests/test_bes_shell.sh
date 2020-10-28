@@ -541,6 +541,7 @@ function test__bes_which()
   local _program3=$(_make_test_program "${_p3}" two)
 
   local _path="${_p1}":"${_p2}":"${_p3}"
+
   
   bes_assert "[[ $( PATH="${_path}" _call__bes_which one) == 0:${_program1}@ ]]"
   bes_assert "[[ $( PATH="${_path}" _call__bes_which notthere) == 1: ]]"
@@ -556,8 +557,8 @@ function test__bes_which()
   bes_assert "[[ $( PATH="${_path}" _call__bes_which -s two one) == 0: ]]"
   bes_assert "[[ $( PATH="${_path}" _call__bes_which -s one notthere) == 1: ]]"
 
-#  bes_assert "[[ $( PATH="${_path}" _call__bes_which -a two) == 0:${_program2}@ ]]"
-#  bes_assert "[[ $( PATH="${_path}" _call__bes_which -a one two) == 0:${_program1}@${_program2}@ ]]"
+  bes_assert "[[ $( PATH="${_path}" _call__bes_which -a two) == 0:${_program2}@${_program3}@ ]]"
+  bes_assert "[[ $( PATH="${_path}" _call__bes_which -a one two) == 0:${_program1}@${_program2}@${_program3}@ ]]"
   
   rm -rf ${_tmp}
 }
