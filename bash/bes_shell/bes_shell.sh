@@ -6,11 +6,125 @@ function _bes_trace_file() ( _bes_trace "file: ${BASH_SOURCE}: $*" )
 
 _bes_trace_file "begin"
 
-# A basic UNIX path that is guranteed to find common exeutables on both linux and macos
+# A basic UNIX path that is guranteed to find common exeutables on all platforms
 _BES_BASIC_PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin:/c/Windows/System32
 
-# Which is in the same place on both linux and macos
-_BES_WHICH_EXE=/usr/bin/which
+# An implemention of "which" with the same semantics as /usr/bin/which for cases
+# where /usr/bin/which is not found
+function _bes_which()
+{
+  function _bes_which_help()
+  {
+    echo "_bes_which: illegal option -- ${_key}"
+    echo "usage: _bes_which [-as] program ..."
+  }
+  
+  local _positional_args=()
+  local _key
+  local _list_all_instances=false
+  local _no_output=false
+  while [[ $# -gt 0 ]]; do
+    _key="${1}"
+    case ${_key} in
+      -a)
+        _list_all_instances=true
+        shift # past argument
+        ;;
+      -s)
+        _no_output=true
+        shift # past argument
+        ;;
+      -*)
+        _bes_which_help
+        return 1
+        ;;
+      *)    # unknown option
+        positional_args+=("${1}") # save it in an array for later
+        shift # past argument
+        ;;
+    esac
+  done
+
+  set -- "${positional_args[@]}" # restore positional parameters
+  
+  if [[ $# < 1 ]]; then
+    _bes_which_help
+    return 1
+  fi
+
+  local _programs
+  declare -a _programs
+  _programs=( ${1+"$@"} )
+  local _one_whiches
+  declare -a _one_whiches
+  local _one_rv
+  local _found_all=true
+  local _one_which
+
+  for _program in "${_programs[@]}"; do
+    _one_whiches=( $(_bes_which_one_program "${_program}" _list_all_instances) )
+    _one_rv=$?
+    if [[ ${_one_rv} == 0 ]]; then
+      if [[ ${_no_output} == "false" ]]; then
+        for _one_which in "${_one_whiches[@]}"; do
+          echo "${_one_which}"
+        done
+      fi
+    else
+      _found_all=false
+    fi
+  done
+
+  if [[ ${_found_all} == "true" ]]; then
+    return 0
+  fi
+  return 1
+}
+
+function _bes_which_one_program()
+{
+  if [[ $# != 2 ]]; then
+    echo "Usage: _bes_which_one_program program list_all"
+    return 1
+  fi
+  local _program="${1}"
+  local _list_all=${2}
+  local _path
+  declare -a _path
+  local _path_entry
+  local _possible_which
+  local _found_any=false
+
+  if [[ -x "${_program}" ]]; then
+    echo "${_program}"
+    return 0
+  fi
+  
+  IFS=':' read -ra _path <<< "${PATH}"
+  for _path_entry in "${_path[@]}"; do
+    _possible_which=${_path_entry}/${_program}
+    if [[ -x "${_possible_which}" ]]; then
+      echo "${_possible_which}"
+      if [[ ${_list_all} != "true" ]]; then
+        return 0
+      fi
+      _found_any=true
+    fi
+  done
+  if [[ ${_found_any} == "true" ]]; then
+    return 0
+  fi
+  return 1
+}
+
+# When found which is in the same place on both linux and macos
+# when not found use the handrolled _bes_which instead
+if [[ -x /usr/bin/which ]]; then
+  _BES_WHICH_EXE=/usr/bin/which
+else
+  _BES_WHICH_EXE=_bes_which
+fi
+
 
 # Use which to find the abs paths to a handful of executables used in this library.
 # The reason for using _BES_BASIC_PATH in this manner is that we want this library to
