@@ -559,6 +559,9 @@ function test__bes_which()
 
   bes_assert "[[ $( PATH="${_path}" _call__bes_which -a two) == 0:${_program2}@${_program3}@ ]]"
   bes_assert "[[ $( PATH="${_path}" _call__bes_which -a one two) == 0:${_program1}@${_program2}@${_program3}@ ]]"
+
+  bes_assert "[[ $( PATH="${_path}" _call__bes_which -a -s two) == 0: ]]"
+  bes_assert "[[ $( PATH="${_path}" _call__bes_which -a -s one two) == 0: ]]"
   
   rm -rf ${_tmp}
 }
