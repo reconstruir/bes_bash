@@ -18,4 +18,18 @@ function bes_has_brew()
   return 1
 }
 
+# Install brew
+function bes_brew_install()
+{
+  local _system=$(bes_system)
+  if [[ ${_system} != "macos" ]]; then
+    bes_message "bes_brew_install: this only works on macos"
+    return 1
+  fi
+  if bes_has_brew; then
+    return 0
+  fi
+  return 1
+}
+
 _bes_trace_file "end"
