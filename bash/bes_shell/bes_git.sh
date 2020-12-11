@@ -394,7 +394,7 @@ function bes_git_pack_size()
   else
     _repo="$(pwd)"
   fi
-  local _pack_size=$(bes_git_call "${_repo}" && ${BES_GIT_EXE:-git} count-objects -v | grep size-pack  | awk '{ print $2; }')
+  local _pack_size=$(bes_git_call "${_repo}" count-objects -v | grep size-pack  | awk '{ print $2; }')
   echo ${_pack_size}
   return 0
 }
