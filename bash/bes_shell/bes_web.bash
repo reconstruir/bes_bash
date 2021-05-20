@@ -112,8 +112,6 @@ function bes_web_request()
     if [[ -n "${_method}" ]]; then
       _curl_args+=( "--request" "${_method}" )
     fi
-    echo fuck ${_url} > $(tty)
-    echo fuck ${_curl_args[@]} > $(tty)
     _bes_web_request_curl "${_url}" "${_response_data_file}" "${_http_status_file}" "${_log_file}" "${_curl_args[@]}"
     _rv=$?
     return ${_rv}
