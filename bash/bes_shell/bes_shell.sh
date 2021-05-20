@@ -1166,6 +1166,27 @@ function bes_atexit_message_successful()
   return ${_actual_exit_code}
 }
 
+function bes_atexit_remove_dir_handler()
+{
+  local _actual_exit_code=$?
+  if [[ $# != 1 ]]; then
+    bes_message "Usage: _bes_atexit_remove_dir_handler dir"
+    return 1
+  fi
+  local _dir="${1}"
+  if [[ -e "${_dir}" ]]; then
+    if [[ ! -d "${_dir}" ]]; then
+      bes_message "_bes_atexit_remove_dir_handler: not a directory: ${_dir}"
+      return 1
+    fi
+    bes_debug_message "_bes_atexit_remove_dir_handler: removing ${_dir}"
+    /bin/rm -rf ${_dir}
+  else
+    bes_debug_message "_bes_atexit_remove_dir_handler: directory not found ${_dir}"
+  fi
+  return ${_actual_exit_code}
+}
+
 # DEPRECATED: use bes_abs_dir instead
 # Return the absolute path for the path arg
 function bes_abs_path()
