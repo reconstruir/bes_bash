@@ -22,6 +22,7 @@ function bes_web_request()
   local _http_status_file=
   local _method=
   local _log_file=/dev/null
+  local _enable_redirects=false
   local _positional_args=()
   local _key
   while [[ $# -gt 0 ]]; do
@@ -68,6 +69,10 @@ function bes_web_request()
         shift # past argument
         shift # past value
         ;;
+      --enable-redirects)
+        _enable_redirects=true
+        shift # past argument
+        ;;
       *)    # unknown option
         positional_args+=("${1}") # save it in an array for later
         shift # past argument
@@ -83,6 +88,7 @@ function bes_web_request()
   bes_debug_message "          _password: ${_password}"
   bes_debug_message "          _username: ${_username}"
   bes_debug_message "_response_data_file: ${_response_data_file}"
+  bes_debug_message "  _enable_redirects: ${_enable_redirects}"
   
   set -- "${positional_args[@]}" # restore positional parameters
 
@@ -111,6 +117,9 @@ function bes_web_request()
     fi
     if [[ -n "${_method}" ]]; then
       _curl_args+=( "--request" "${_method}" )
+    fi
+    if [[ ${_enable_redirects} == "true" ]]; then
+      _curl_args+=( "--location" )
     fi
     _bes_web_request_curl "${_url}" "${_response_data_file}" "${_http_status_file}" "${_log_file}" "${_curl_args[@]}"
     _rv=$?
