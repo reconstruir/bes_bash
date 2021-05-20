@@ -1,10 +1,19 @@
 #!/bin/sh
 
+# turn this on for debugging with bes logging
+#function _dominictarr_json_this_dir()
+#{
+#  echo "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+#  return 0
+#}
+#source "$(_dominictarr_json_this_dir)/bes_shell.sh"
+
 #
 # this code borrowed from here:
 # https://github.com/dominictarr/JSON.sh
 #
 throw() {
+  #bes_debug_message "$*"
   echo "$*" >&2
   exit 1
 }
@@ -17,7 +26,7 @@ NORMALIZE_SOLIDUS=0
 
 usage() {
   echo
-  echo "Usage: JSON.sh [-b] [-l] [-p] [-s] [-h]"
+  echo "Usage: dominictarr_json.sh [-b] [-l] [-p] [-s] [-h]"
   echo
   echo "-p - Prune empty. Exclude fields with empty values."
   echo "-l - Leaf only. Only show leaf nodes, which stops data duplication."
