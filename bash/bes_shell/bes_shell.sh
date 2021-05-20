@@ -1250,7 +1250,7 @@ function bes_str_split()
   return 0
 }
 
-# reuturn just the extension of a file
+# return just the extension of a file
 function bes_file_extension()
 {
   if [[ $# < 1 ]]; then
@@ -1261,6 +1261,19 @@ function bes_file_extension()
   local _base=$($_BES_BASENAME_EXE -- "${_filename}")
   local _ext="${_base##*.}"
   echo "${_ext}"
+  return 0
+}
+
+# print the file size in bytes
+function bes_file_size()
+{
+  if [[ $# < 1 ]]; then
+    bes_message "usage: bes_file_size filename"
+    return 1
+  fi
+  local _filename="${1}"
+  local _file_size=$(wc -c < "${_filename}" | tr -d ' ')
+  echo "${_file_size}"
   return 0
 }
 
