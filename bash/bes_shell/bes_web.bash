@@ -17,6 +17,7 @@ function bes_web_request()
   local _username
   local _password
   local _datas=()
+  local _headers=()
   local _headers_file=
   local _response_data_file=
   local _http_status_file=
@@ -41,6 +42,11 @@ function bes_web_request()
         ;;
       --data)
         _datas+=( "${2}" )
+        shift # past argument
+        shift # past value
+        ;;
+      --header)
+        _headers+=( "${2}" )
         shift # past argument
         shift # past value
         ;;
@@ -81,6 +87,7 @@ function bes_web_request()
   done
   
   bes_debug_message "             _datas: ${_datas[@]}"
+  bes_debug_message "           _headers: ${_headers[@]}"
   bes_debug_message "      _headers_file: ${_headers_file}"
   bes_debug_message "            _method: ${_method}"
   bes_debug_message "  _http_status_file: ${_http_status_file}"
@@ -111,6 +118,10 @@ function bes_web_request()
     local _data
     for _data in "${_datas[@]}"; do
       _curl_args+=( "--data" "${_data}" )
+    done
+    local _header
+    for _header in "${_headers[@]}"; do
+      _curl_args+=( "--header" "${_header}" )
     done
     if [[ -n "${_headers_file}" ]]; then
       _curl_args+=( "--header" "@${_headers_file}" )
