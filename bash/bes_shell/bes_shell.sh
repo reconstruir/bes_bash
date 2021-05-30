@@ -508,6 +508,74 @@ function bes_unsetup()
   return 0
 }
 
+function bes_setup_v2()
+{
+  _bes_trace_function $*
+
+  local _root_dir
+  local _set_title
+  local _change_dir
+  local _set_path
+  local _set_pythonpath
+  local _virtual_env=
+  local _positional_args=()
+  local _key
+  while [[ $# -gt 0 ]]; do
+    _key="${1}"
+    bes_debug_message "bes_setup_v2: checking key ${_key} ${2}"
+    case ${_key} in
+      --virtual-env)
+        _virtual_env="${2}"
+        shift # past argument
+        shift # past value
+        ;;
+      --set-path)
+        _set_path=true
+        shift # past argument
+        ;;
+      --set-python-path)
+        _set_python_path=true
+        shift # past argument
+        ;;
+      --change-dir)
+        _change_dir=true
+        shift # past argument
+        ;;
+      --set-title)
+        _set_title=true
+        shift # past argument
+        ;;
+      *)    # unknown option
+        positional_args+=("${1}") # save it in an array for later
+        shift # past argument
+        ;;
+    esac
+  done
+  
+  set -- "${positional_args[@]}" # restore positional parameters
+
+  if [[ $# != 1 ]]; then
+    printf "\nUsage: bes_setup <options> root_dir\n\n"
+    return 1
+  fi
+  local _root_dir="${1}"
+
+  if [[ ${_set_path} == true ]]; then
+    bes_env_path_prepend PATH "${_root_dir}/bin"
+  fi
+  if [[ ${_set_python_path} == true ]]; then
+    bes_env_path_prepend PYTHONPATH "${_root_dir}/lib"
+  fi
+  if [[ ${_change_dir} == true ]]; then
+    cd "${_root_dir}"
+  fi
+  if [[ ${_set_title} == true ]]; then
+    bes_tab_title $($_BES_BASENAME_EXE "${_root_dir}")
+  fi
+
+  return 0
+}
+
 # Get a var value
 function bes_var_get()
 {
