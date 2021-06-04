@@ -8,7 +8,7 @@ function main()
 
   local _root_dir="$(pwd)"
   local _local_branch="master"
-  local _address="git@gitlab.com:rebuilder/bes_shell.git"
+  local _address="git@gitlab_rebuilder:rebuilder/bes_shell.git"
   local _remote_branch="master"
   local _revision="@latest@"
   local _src_dir="bash/bes_shell"
