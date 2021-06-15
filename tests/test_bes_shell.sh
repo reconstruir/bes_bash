@@ -93,9 +93,19 @@ function test_bes_env_path_append()
 
 function test_bes_env_path_prepend()
 {
-  local _SAVE_PATH="${PATH}"
-  PATH=/foo ; bes_env_path_prepend PATH /bar ; bes_assert "[ ${PATH} = /bar:/foo ]"
-  PATH="${_SAVE_PATH}"
+  function _call()
+  {
+    _BT1="${1}"
+    shift
+    bes_env_path_prepend _BT1 ${1+"$@"}
+    echo "${_BT1}" | tr ' ' '_'
+    unset _BT1
+    return $?
+  }
+  bes_assert "[ $(_call /foo /bar) = /bar:/foo ]"
+  bes_assert "[ $(_call /foo /bar /baz) = /bar:/baz:/foo ]"
+  bes_assert "[ $(_call /foo "/bar bar" /baz) = /bar_bar:/baz:/foo ]"
+  bes_assert "[ $(_call /foo /bar "/baz baz") = /bar:/baz_baz:/foo ]"
 }
 
 function test_bes_env_path_remove()
