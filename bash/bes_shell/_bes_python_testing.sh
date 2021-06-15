@@ -23,27 +23,4 @@ EOF
   return 0
 }
 
-function _bes_python_testing_make_testing_pip_exe()
-{
-  if [[ $# != 2 ]]; then
-    bes_message "Usage: _bes_python_testing_make_testing_pip_exe python_exe full_version"
-    return 1
-  fi
-  local _python_exe="${1}"
-  local _where="$(dirname "${_python_exe}")"
-  local _python_version=$(bes_python_exe_version "${_python_exe}")
-  local _full_version="${2}"
-  local _pip_basename=pip${_python_version}
-  local _pip_exe="${_where}/${_pip_basename}"
-
-  cat > "${_pip_exe}" << EOF
-#!/usr/bin/env python
-print('"pip ${_full_version} from /doesnt/matter (python ${_python_version})"')
-raise SystemExit(0)
-EOF
-  chmod 755 ${_pip_exe}
-  echo "${_pip_exe}"
-  return 0
-}
-
 _bes_trace_file "end"
