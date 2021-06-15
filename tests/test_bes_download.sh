@@ -13,8 +13,10 @@ function _test_bes_download_this_dir()
   return 0
 }
 
-source "$(_test_bes_download_this_dir)"/../bash/bes_shell/bes_shell.sh
-source "$(_test_bes_download_this_dir)"/../bash/bes_shell/bes_download.sh
+source "$(_test_bes_download_this_dir)"/../bash/bes_shell/bes_shell.bash
+source "$(_test_bes_download_this_dir)"/../bash/bes_shell/bes_testing.bash
+source "$(_test_bes_download_this_dir)"/../bash/bes_shell/bes_checksum.bash
+source "$(_test_bes_download_this_dir)"/../bash/bes_shell/bes_download.bash
 
 function test_download_success()
 {

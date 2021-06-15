@@ -13,7 +13,8 @@ function _test_bes_string_this_dir()
   return 0
 }
 
-source "$(_test_bes_string_this_dir)"/../bash/bes_shell/bes_shell.sh
+source "$(_test_bes_string_this_dir)"/../bash/bes_shell/bes_shell.bash
+source "$(_test_bes_string_this_dir)"/../bash/bes_shell/bes_testing.bash
 source "$(_test_bes_string_this_dir)"/../bash/bes_shell/bes_string.bash
 
 function test_bes_string_strip_head()
