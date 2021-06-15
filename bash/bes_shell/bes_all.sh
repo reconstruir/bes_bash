@@ -13,5 +13,3 @@ source $(_bes_all_this_dir)/bes_download.sh
 source $(_bes_all_this_dir)/bes_bfg.sh
 source $(_bes_all_this_dir)/bes_version.sh
 source $(_bes_all_this_dir)/bes_python.sh
-source $(_bes_all_this_dir)/bes_pip.sh
-source $(_bes_all_this_dir)/bes_pipenv.sh
