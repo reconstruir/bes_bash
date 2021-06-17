@@ -254,36 +254,6 @@ function bes_env_path_prepend()
   return 0
 }
 
-function bes_env_path_prepend2()
-{
-  bes_log_trace_function path $*
-
-  local _var_name=$(bes_variable_map $1)
-  shift
-  local _new_parts=()
-  local _next_part
-  local i
-
-  for ((i = 1; i <= ${#}; i++)); do
-    _new_parts+=("${!i}")
-  done
-  
-  local _right_parts=($(bes_var_get ${_var_name}))
-  local _next_part
-  for _next_part in "${_right_parts[@]}"; do
-    _new_parts+=("${_next_part}")
-  done
-  local _new_value=$(for ((i = 0; i < ${#_new_parts[@]}; i++)); do
-    if [[ $i != 0 ]]; then
-       printf ":"
-    fi
-    printf "%s" "${_new_parts[${i}]}"
-  done)
-  bes_var_set ${_var_name} "${_new_value}"
-  export ${_var_name}
-  return 0
-}
-
 function bes_env_path_remove()
 {
   bes_log_trace_function path $*
