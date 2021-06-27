@@ -171,7 +171,7 @@ function bes_path_prepend()
   bes_log path debug "bes_path_prepend NUM ${#}"
   local _right
   IFS=':' read -ra _right <<< "${1}"
-  bes_log path debug "bes_path_prepend ${#_right[@]} _right=${_right[@]}"
+  bes_log path debug "bes_path_prepend _right=${_right[*]} num=${#_right[*]}"
   shift
   local _left=()
   local i
@@ -179,7 +179,7 @@ function bes_path_prepend()
   for ((i = 1; i <= ${#}; i++)); do
     _left+=("${!i}")
   done
-  bes_log path debug "bes_path_prepend ${#_left[@]} _left=${_left[@]}"
+  bes_log path debug "bes_path_prepend _left=${_left[*]} num=${#_left[*]}"
   local _new_path=()
   for ((i = 0; i < ${#_left[@]}; i++)); do
     _new_path+=("${_left[${i}]}")
