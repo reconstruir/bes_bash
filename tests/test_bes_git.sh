@@ -1,4 +1,4 @@
- test_bes_python.sh#!/bin/bash
+#!/bin/bash
 
 function _test_bes_git_this_dir()
 {
