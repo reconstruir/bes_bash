@@ -51,19 +51,15 @@ function test_bes_variable_map_macos()
   bes_assert "[ $(bes_variable_map DYLD_LIBRARY_PATH) = DYLD_LIBRARY_PATH ]"
 }
 
-function test_bes_source_dir()
+function test_bes_source_file()
 {
   local _pid=$$
-  local _tmp=/tmp/test_bes_source_dir_${_pid}
-  mkdir -p ${_tmp}
-  echo "FOO=foo_${_pid}" > $_tmp/1.sh
-  echo "BAR=bar_${_pid}" > $_tmp/2.sh
-  echo "BAZ=baz_${_pid}" > $_tmp/3.sh
+  local _tmp="/tmp/test_bes_source_dir_${_pid}"
+  mkdir -p "${_tmp}"
+  echo "FOO=foo_${_pid}" > "$_tmp/1.sh"
   (
-    bes_source_dir ${_tmp}
+    bes_source_file "$_tmp/1.sh"
     bes_assert "[ ${FOO} = foo_${_pid} ]"
-    bes_assert "[ ${BAR} = bar_${_pid} ]"
-    bes_assert "[ ${BAZ} = baz_${_pid} ]"
   )
   rm -rf ${_tmp}
 }  

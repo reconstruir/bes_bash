@@ -32,7 +32,38 @@ function bes_testing_call_function()
   return 0
 }
 
-_bes_testing_exit_code=0
+function _bes_testing_exit_code_filename()
+{
+  local _exit_code_filename="${TMPDIR}/_bes_testing_exit_code_$$"
+  echo "${_exit_code_filename}"
+  return 0
+}
+
+function _bes_testing_exit_code_filename_clean()
+{
+  local _exit_code_filename="$(_bes_testing_exit_code_filename)"
+  rm -f "${_exit_code_filename}"
+  return 0
+}
+
+function _bes_testing_exit_code_set()
+{
+  local _exit_code_filename="$(_bes_testing_exit_code_filename)"
+  echo $1 > "${_exit_code_filename}"
+  echo set ${_exit_code_filename} to 1
+  return 0
+}
+
+function _bes_testing_exit_code_get()
+{
+  local _exit_code_filename="$(_bes_testing_exit_code_filename)"
+  local _exit_code=0
+  if [[ -f "${_exit_code_filename}" ]]; then
+    _exit_code=$(cat "${_exit_code_filename}")
+  fi
+  echo ${_exit_code}
+  return $(expr ${_exit_code})
+}
 
 # Run all the unit tests found in this script environment
 function bes_testing_run_unit_tests()
@@ -43,7 +74,9 @@ function bes_testing_run_unit_tests()
   for _test in $_tests; do
     ${_test}
   done
-  exit $_bes_testing_exit_code
+  local _exit_code="$(_bes_testing_exit_code_get)"
+  _bes_testing_exit_code_filename_clean
+  exit ${_exit_code}
 }
 
 # Run that an expression argument is true and print that
@@ -58,7 +91,7 @@ function bes_assert()
     if [[ -n ${BES_UNIT_TEST_FAIL} ]]; then
         exit 1
     fi
-    _bes_testing_exit_code=1
+    _bes_testing_exit_code_set 1
   else
     echo "$_filename $_function: passed"
   fi

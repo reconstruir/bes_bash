@@ -16,40 +16,49 @@ source "${_BES_SHELL_THIS_DIR}/bes_path.bash"
 
 _bes_trace_file "begin"
 
-# Source a shell file if it exists
+# Source a shell file or print an error if it does not exist
+function bes_source_file()
+{
+  _bes_trace_function $*
+  if [[ $# < 1 ]]; then
+    echo "Usage: bes_source_file filename"
+    return 1
+  fi
+  local _filename="${1}"
+  if [[ ! -e "${_filename}" ]]; then
+    echo "bes_source_file: File not found: ${_filename}"
+    return 1
+  fi
+  if [[ ! -f "${_filename}" ]]; then
+    echo "bes_source_file: Not a file: ${_filename}"
+    return 1
+  fi
+  source "${_filename}"
+  return 0
+}
+
+# deprecated
 function bes_source()
+{
+  _bes_trace_function $*
+  bes_source_file $@
+  return $?
+}
+
+# Source a shell file but only if it exists
+function bes_source_file_if()
 {
   _bes_trace_function $*
   if [[ $# < 1 ]]; then
     printf "\nUsage: bes_source filename\n\n"
     return 1
   fi
-  local _filename=$1
-  if [[ -f $_filename ]]; then
-     source $_filename
-     return 0
-  fi
-  return 1
-}
-
-# Source all the *.sh files in a dir if it exists and has such files
-function bes_source_dir()
-{
-  _bes_trace_function $*
-  if [[ $# < 1 ]]; then
-    printf "\nUsage: bes_source_dir dir\n\n"
+  local _filename="${1}"
+  if [[ ! -f "${_filename}" ]]; then
     return 1
   fi
-  local _dir=$1
-  if [[ ! -d $_dir ]]; then
-    return 0
-  fi
-  local _files=$(find $_dir -maxdepth 1 -name "*.sh")
-  local _file
-  for _file in $_files; do
-    source "$_file"
-  done
-  return 0
+  bes_source_file "${_filename}"
+  return $?
 }
 
 # Convert a single argument string to lower case
