@@ -219,12 +219,13 @@ function test_bes_path_prepend()
 {
   local _tmp="$(bes_testing_make_temp_dir test_bes_path_print)"
   local _tmp_home="${_tmp}/home"
-  HOME="${_tmp_home}" bes_path_print "/bin:/usr/bin:${_tmp_home}/bin" > ${_tmp}/output
+  HOME="${_tmp_home}" bes_path_print "/bin:/usr/bin:${_tmp_home}/bin:/Applications/Foo Bar/bin" > ${_tmp}/output
   local _expected
   read -r -d '' _expected <<- EOM
 /bin
 /usr/bin
 ~/bin
+/Applications/Foo Bar/bin
 EOM
   bes_testing_check_file ${_tmp}/output "${_expected}"
   local _rv=$?
