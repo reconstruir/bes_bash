@@ -6,7 +6,7 @@ _bes_shell_dev_root()
 
 bes_shell_dev()
 {
-  bes_dev no
+  bes_dev --no-change-dir --no-venv-activate # --no-set-title
   bes_setup $(_bes_shell_dev_root) ${1+"$@"}
   return 0
 }

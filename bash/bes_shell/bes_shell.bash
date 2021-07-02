@@ -190,6 +190,10 @@ EOF
         _set_title=true
         shift # past argument
         ;;
+      --no-set-title|-nst)
+        _set_title=false
+        shift # past argument
+        ;;
       --help|-h)
         _bes_setup_v2_help
         shift # past argument
