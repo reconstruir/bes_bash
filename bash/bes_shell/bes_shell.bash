@@ -136,16 +136,21 @@ Usage: bes_setup_v2 <options> root_dir
 
   Where options is one or more of:
 
-    -h,--help     Show this help.
-    -o,--ouput    Output the resulting egoist path to the given filename. []
-    -p,--purpose  The purpose of the egosit [ general ]
-
+    -h,--help                  Show this help.
+    --set-title                Set the title terminal [ true ]
+    --no-set-title,-nst        Dont set the title [ false ]
+    --change-dir               Change dir [ true ]
+    --no-change-dir,-ncd       Dont change dir [ false ]
+    --set-python-path
+    --set-path
+    --no-venv-activate,-nva
+    --venv-config
+    --venv-activate
 EOF
   }
 
   _bes_trace_function $*
 
-  local _root_dir
   local _set_title=false
   local _change_dir=false
   local _set_path=false
@@ -208,13 +213,16 @@ EOF
   
   set -- "${positional_args[@]}" # restore positional parameters
 
-  local _root_dir="${1}"
-  if [[ $# -ge 1 ]]; then
+  local _root_dir=
+  if [[ $# < 1 ]]; then
+    _bes_setup_v2_help
+    return 1
+  fi
+  if [[ $# > 0 ]]; then
     _root_dir="${1}"
     shift
   fi
-
-  if [[ ! $# -eq 0 ]]; then
+  if [[ $# > 0 ]]; then
     printf "\nbes_setup_v2: unknown arguments: $*\n\n"
     return 1
   fi
