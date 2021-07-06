@@ -1,0 +1,255 @@
+#-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
+
+function _bes_shell_this_dir()
+{
+  echo "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+  return 0
+}
+
+_BES_SHELL_THIS_DIR="$(_bes_shell_this_dir)"
+
+source "${_BES_SHELL_THIS_DIR}/bes_var.bash"
+source "${_BES_SHELL_THIS_DIR}/bes_log.bash"
+source "${_BES_SHELL_THIS_DIR}/bes_system.bash"
+source "${_BES_SHELL_THIS_DIR}/bes_list.bash"
+source "${_BES_SHELL_THIS_DIR}/bes_path.bash"
+source "${_BES_SHELL_THIS_DIR}/bes_string.bash"
+
+_bes_trace_file "begin"
+
+function bes_setup()
+{
+  _bes_trace_function $*
+  if [[ $# < 1 ]]; then
+    printf "\nUsage: bes_setup root_dir [go_there]\n\n"
+    return 1
+  fi
+  local _root_dir=$1
+  local _go_there=true
+  if [[ $# > 1 ]]; then
+    _go_there=$2
+  fi
+
+  bes_env_path_prepend PATH ${_root_dir}/bin
+  bes_env_path_prepend PYTHONPATH ${_root_dir}/lib
+
+  if $(bes_is_true $_go_there); then
+    cd $_root_dir
+    bes_tab_title $($_BES_BASENAME_EXE $_root_dir)
+  fi
+  
+  return 0
+}
+
+function bes_unsetup()
+{
+  _bes_trace_function $*
+  if [[ $# < 1 ]]; then
+    printf "\nUsage: bes_unsetup root_dir\n\n"
+    return 1
+  fi
+  local _root_dir=$1
+  bes_env_path_remove PATH ${_root_dir}/bin
+  bes_env_path_remove PYTHONPATH ${_root_dir}/lib
+  bes_tab_title ""
+  return 0
+}
+
+function bes_setup_v2()
+{
+  echo bes_setup_v2 ${BASH_SOURCE[0]} 
+  function _bes_setup_v2_help()
+  {
+    cat << EOF
+Usage: bes_setup_v2 <options> root_dir
+
+  Where options is one or more of:
+
+    -h,--help                  Show this help.
+    --set-title                Set the title terminal [ true ]
+    --no-set-title,-nst        Dont set the title [ false ]
+    --change-dir               Change dir [ true ]
+    --no-change-dir,-ncd       Dont change dir [ false ]
+    --set-python-path
+    --set-path
+    --no-venv-activate,-nva
+    --venv-config
+    --venv-activate
+EOF
+  }
+
+  _bes_trace_function $*
+
+  local _set_title=false
+  local _change_dir=false
+  local _set_path=false
+  local _set_pythonpath=false
+  local _venv_config=
+  local _positional_args=()
+  local _key
+  while [[ $# -gt 0 ]]; do
+    _key="${1}"
+    bes_debug_message "bes_setup_v2: checking key ${_key} ${2}"
+    case ${_key} in
+      --venv-config)
+        _venv_config="${2}"
+        shift # past argument
+        shift # past value
+        ;;
+      --venv-activate)
+        _venv_activate=true
+        shift # past argument
+        ;;
+      --no-venv-activate|-nva)
+        _venv_activate=false
+        shift # past argument
+        ;;
+      --set-path)
+        _set_path=true
+        shift # past argument
+        ;;
+      --set-python-path)
+        _set_python_path=true
+        shift # past argument
+        ;;
+      --change-dir)
+        _change_dir=true
+        shift # past argument
+        ;;
+      --no-change-dir|-ncd)
+        _change_dir=false
+        shift # past argument
+        ;;
+      --set-title)
+        _set_title=true
+        shift # past argument
+        ;;
+      --no-set-title|-nst)
+        _set_title=false
+        shift # past argument
+        ;;
+      --help|-h)
+        _bes_setup_v2_help
+        shift # past argument
+        return 0
+        ;;
+      *)    # unknown option
+        positional_args+=("${1}") # save it in an array for later
+        shift # past argument
+        ;;
+    esac
+  done
+  
+  set -- "${positional_args[@]}" # restore positional parameters
+
+  local _root_dir=
+  if [[ $# < 1 ]]; then
+    _bes_setup_v2_help
+    return 1
+  fi
+  if [[ $# > 0 ]]; then
+    _root_dir="${1}"
+    shift
+  fi
+  if [[ $# > 0 ]]; then
+    printf "\nbes_setup_v2: unknown arguments: $*\n\n"
+    return 1
+  fi
+  if [[ ${_set_path} == true ]]; then
+    bes_env_path_prepend PATH "${_root_dir}/bin"
+  fi
+  if [[ ${_set_python_path} == true ]]; then
+    bes_env_path_prepend PYTHONPATH "${_root_dir}/lib"
+  fi
+  if [[ ${_change_dir} == true ]]; then
+    cd "${_root_dir}"
+  fi
+  if [[ ${_set_title} == true ]]; then
+    bes_tab_title $($_BES_BASENAME_EXE "${_root_dir}")
+  fi
+  if [[ -n "${_venv_config}" ]]; then
+    if [[ ! -f "${_venv_config}" ]]; then
+      printf "\nbes_setup_v2: venv activate config not found: ${_venv_config}\n\n"
+      return 1
+    fi
+    if [[ ${_venv_activate} == true ]]; then
+      source "${_venv_config}"
+    fi
+  fi
+  return 0
+}
+
+# return just the extension of a file
+function bes_file_extension()
+{
+  if [[ $# < 1 ]]; then
+    bes_message "usage: bes_file_extension filename"
+    return 1
+  fi
+  local _filename="${1}"
+  local _base=$($_BES_BASENAME_EXE -- "${_filename}")
+  local _ext="${_base##*.}"
+  echo "${_ext}"
+  return 0
+}
+
+# print the file size in bytes
+function bes_file_size()
+{
+  if [[ $# < 1 ]]; then
+    bes_message "usage: bes_file_size filename"
+    return 1
+  fi
+  local _filename="${1}"
+  local _file_size=$(wc -c < "${_filename}" | tr -d ' ')
+  echo "${_file_size}"
+  return 0
+}
+
+
+function bes_question_yes_no()
+{
+  if [[ $# != 2 ]]; then
+    echo "usage: bes_question_yes_no var_name message"
+    return 1
+  fi
+  local _CHOICES="[y]es [n]o"
+  local _var_name="${1}"
+  local _message="${2}"
+  local _local_answer
+  local _result=1
+  while true; do
+    read -p "${_message} - ${_CHOICES}: " _local_answer
+    case "${_local_answer}" in
+      y|Y|yes|YES)
+        _result=yes
+        break
+        ;;
+      n|N|no|NO)
+        _result=no
+        break
+        ;;
+      *)
+        bes_message "Invalid answer: ${_local_answer}.  Please answer: ${_CHOICES}"
+    esac
+  done
+  eval ${_var_name}=${_result}
+  return 0
+}
+
+function bes_file_check()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "Usage: bes_file_check label"
+    return 1
+  fi
+  local _label=${FUNCNAME[1]}
+  local _filename="${1}"
+  if [[ ! -e "${_filename}" ]]; then
+    bes_message "${_label}: not found: ${_filename}"
+    exit 1
+  fi
+  return 0
+}
+
+_bes_trace_file "end"
