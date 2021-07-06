@@ -35,13 +35,13 @@ function _bes_which()
         return 1
         ;;
       *)    # unknown option
-        positional_args+=("${1}") # save it in an array for later
+        _positional_args+=("${1}") # save it in an array for later
         shift # past argument
         ;;
     esac
   done
 
-  set -- "${positional_args[@]}" # restore positional parameters
+  set -- "${_positional_args[@]}" # restore positional parameters
   
   if [[ $# < 1 ]]; then
     _bes_which_help
