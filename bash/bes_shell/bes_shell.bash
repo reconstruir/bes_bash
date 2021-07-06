@@ -97,14 +97,6 @@ function bes_LD_LIBRARY_PATH()
   bes_env_path_print LD_LIBRARY_PATH
 }
 
-function bes_tab_title()
-{
-  echo -ne "\033]0;"$*"\007"
-  local _prompt=$(echo -ne "\033]0;"$*"\007")
-  export PROMPT_COMMAND='${_prompt}'
-}
-
-
 function bes_script_name()
 {
   if [[ -n "${_BES_SCRIPT_NAME}"  ]]; then

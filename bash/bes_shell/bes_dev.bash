@@ -1,27 +1,19 @@
 #-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
 
-function _bes_shell_this_dir()
-{
-  echo "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-  return 0
-}
-
-_BES_SHELL_THIS_DIR="$(_bes_shell_this_dir)"
-
-source "${_BES_SHELL_THIS_DIR}/bes_var.bash"
-source "${_BES_SHELL_THIS_DIR}/bes_log.bash"
-source "${_BES_SHELL_THIS_DIR}/bes_system.bash"
-source "${_BES_SHELL_THIS_DIR}/bes_list.bash"
-source "${_BES_SHELL_THIS_DIR}/bes_path.bash"
-source "${_BES_SHELL_THIS_DIR}/bes_string.bash"
-
 _bes_trace_file "begin"
 
-function bes_setup()
+function bes_dev_set_tab_title()
+{
+  echo -ne "\033]0;"$*"\007"
+  local _prompt=$(echo -ne "\033]0;"$*"\007")
+  export PROMPT_COMMAND='${_prompt}'
+}
+
+function bes_dev_setup_old()
 {
   _bes_trace_function $*
   if [[ $# < 1 ]]; then
-    printf "\nUsage: bes_setup root_dir [go_there]\n\n"
+    printf "\nUsage: bes_dev_setup root_dir [go_there]\n\n"
     return 1
   fi
   local _root_dir=$1
@@ -35,33 +27,33 @@ function bes_setup()
 
   if $(bes_is_true $_go_there); then
     cd $_root_dir
-    bes_tab_title $($_BES_BASENAME_EXE $_root_dir)
+    bes_dev_set_tab_title $($_BES_BASENAME_EXE $_root_dir)
   fi
   
   return 0
 }
 
-function bes_unsetup()
+function bes_dev_unsetup()
 {
   _bes_trace_function $*
   if [[ $# < 1 ]]; then
-    printf "\nUsage: bes_unsetup root_dir\n\n"
+    printf "\nUsage: bes_dev_unsetup root_dir\n\n"
     return 1
   fi
-  local _root_dir=$1
-  bes_env_path_remove PATH ${_root_dir}/bin
-  bes_env_path_remove PYTHONPATH ${_root_dir}/lib
-  bes_tab_title ""
+  local _root_dir="${1}"
+  bes_env_path_remove PATH "${_root_dir}/bin"
+  bes_env_path_remove PYTHONPATH "${_root_dir}/lib"
+  bes_dev_set_tab_title ""
   return 0
 }
 
-function bes_setup_v2()
+function bes_dev_setup()
 {
-  echo bes_setup_v2 ${BASH_SOURCE[0]} 
-  function _bes_setup_v2_help()
+  echo bes_dev_setup ${BASH_SOURCE[0]} 
+  function _bes_dev_setup_help()
   {
     cat << EOF
-Usage: bes_setup_v2 <options> root_dir
+Usage: bes_dev_setup <options> root_dir
 
   Where options is one or more of:
 
@@ -89,7 +81,7 @@ EOF
   local _key
   while [[ $# -gt 0 ]]; do
     _key="${1}"
-    bes_debug_message "bes_setup_v2: checking key ${_key} ${2}"
+    bes_debug_message "bes_dev_setup: checking key ${_key} ${2}"
     case ${_key} in
       --venv-config)
         _venv_config="${2}"
@@ -129,7 +121,7 @@ EOF
         shift # past argument
         ;;
       --help|-h)
-        _bes_setup_v2_help
+        _bes_dev_setup_help
         shift # past argument
         return 0
         ;;
@@ -144,7 +136,7 @@ EOF
 
   local _root_dir=
   if [[ $# < 1 ]]; then
-    _bes_setup_v2_help
+    _bes_dev_setup_help
     return 1
   fi
   if [[ $# > 0 ]]; then
@@ -152,7 +144,7 @@ EOF
     shift
   fi
   if [[ $# > 0 ]]; then
-    printf "\nbes_setup_v2: unknown arguments: $*\n\n"
+    printf "\nbes_dev_setup: unknown arguments: $*\n\n"
     return 1
   fi
   if [[ ${_set_path} == true ]]; then
@@ -165,11 +157,11 @@ EOF
     cd "${_root_dir}"
   fi
   if [[ ${_set_title} == true ]]; then
-    bes_tab_title $($_BES_BASENAME_EXE "${_root_dir}")
+    bes_dev_set_tab_title $($_BES_BASENAME_EXE "${_root_dir}")
   fi
   if [[ -n "${_venv_config}" ]]; then
     if [[ ! -f "${_venv_config}" ]]; then
-      printf "\nbes_setup_v2: venv activate config not found: ${_venv_config}\n\n"
+      printf "\nbes_dev_setup: venv activate config not found: ${_venv_config}\n\n"
       return 1
     fi
     if [[ ${_venv_activate} == true ]]; then
