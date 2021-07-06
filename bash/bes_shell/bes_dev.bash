@@ -49,7 +49,6 @@ function bes_dev_unsetup()
 
 function bes_dev_setup()
 {
-  echo bes_dev_setup ${BASH_SOURCE[0]} 
   function _bes_dev_setup_help()
   {
     cat << EOF
@@ -126,13 +125,13 @@ EOF
         return 0
         ;;
       *)    # unknown option
-        positional_args+=("${1}") # save it in an array for later
+        _positional_args+=("${1}") # save it in an array for later
         shift # past argument
         ;;
     esac
   done
   
-  set -- "${positional_args[@]}" # restore positional parameters
+  set -- "${_positional_args[@]}" # restore positional parameters
 
   local _root_dir=
   if [[ $# < 1 ]]; then
