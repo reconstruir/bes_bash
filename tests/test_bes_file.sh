@@ -17,15 +17,24 @@ source "$(_test_bes_path_this_dir)"/../bash/bes_shell/bes_var.bash
 source "$(_test_bes_path_this_dir)"/../bash/bes_shell/bes_log.bash
 source "$(_test_bes_path_this_dir)"/../bash/bes_shell/bes_system.bash
 source "$(_test_bes_path_this_dir)"/../bash/bes_shell/bes_testing.bash
+source "$(_test_bes_path_this_dir)"/../bash/bes_shell/bes_shell.bash
 source "$(_test_bes_path_this_dir)"/../bash/bes_shell/bes_file.bash
 
 function test_bes_file_dir()
 {
-  local _tmp="$(bes_testing_make_temp_dir test_bes_path_print)"
+  local _tmp="$(bes_testing_make_temp_dir test_bes_file_dir)"
   mkdir -p "${_tmp}/foo"
   bes_assert "[ $(bes_file_dir "${_tmp}/foo/file.txt") = ${_tmp}/foo ]"
   ( cd "${_tmp}" && ln -s foo bar )
   bes_assert "[ $(bes_file_dir "${_tmp}/bar/file.txt") = ${_tmp}/foo ]"
+  rm -rf "${_tmp}"
+}
+
+function test_bes_file_check()
+{
+  local _tmp="$(bes_testing_make_temp_dir test_bes_file_check)"
+  touch ${_tmp}/kiwi.txt
+  bes_assert "[[ $(bes_testing_call_function bes_file_check "${_tmp}/kiwi.txt") == 0 ]]"
   rm -rf "${_tmp}"
 }
 

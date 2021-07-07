@@ -339,19 +339,4 @@ function bes_question_yes_no()
   return 0
 }
 
-function bes_file_check()
-{
-  if [[ $# != 1 ]]; then
-    bes_message "Usage: bes_file_check label"
-    return 1
-  fi
-  local _label=${FUNCNAME[1]}
-  local _filename="${1}"
-  if [[ ! -e "${_filename}" ]]; then
-    bes_message "${_label}: not found: ${_filename}"
-    exit 1
-  fi
-  return 0
-}
-
 _bes_trace_file "end"
