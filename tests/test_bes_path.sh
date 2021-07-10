@@ -67,6 +67,7 @@ function test_bes_path_clean_rogue_slashes()
   bes_assert "[ $(_call bes_path_clean_rogue_slashes /a:/b://c) = /a:/b:/c ]"
   bes_assert "[ $(_call bes_path_clean_rogue_slashes /a:/b:///c) = /a:/b:/c ]"
   bes_assert "[ $(_call bes_path_clean_rogue_slashes /a:/b:"///c d") = /a:/b:/c_d ]"
+  bes_assert "[ $(_call bes_path_clean_rogue_slashes /bin//foo:////usr/////bin) = /bin/foo:/usr/bin ]"
 }
 
 function test_bes_path_sanitize()
@@ -82,6 +83,7 @@ function test_bes_path_sanitize()
   bes_assert "[ $(_call bes_path_sanitize :a\ b:c\ d) = a_b:c_d ]"
   bes_assert "[ $(_call bes_path_sanitize a\ b:c\ d:) = a_b:c_d ]"
   bes_assert "[ $(_call bes_path_sanitize :a\ b:c\ d:a\ b:) = a_b:c_d ]"
+  bes_assert "[ $(_call bes_path_sanitize /a://b:///a) = /a:/b ]"
 }
 
 function test_bes_path_append()
