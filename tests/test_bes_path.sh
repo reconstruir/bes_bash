@@ -22,113 +22,116 @@ source "$(_test_bes_path_this_dir)"/../bash/bes_shell/bes_testing.bash
 
 source "$(_test_bes_path_this_dir)"/../bash/bes_shell/bes_shell.bash # for bes_sytem
 
+# Call a function and convert resulting spaces to underscores to make
+# unit tests easier to write
+function _call()
+{
+  local _function=${1}
+  shift
+  local _result="$(${_function} ${1+"$@"})"
+  local _rv=$?
+  echo "${_result}" | tr ' ' '_'
+  return ${_rv}
+}
+
+# Call a function on an environment variable and convert resulting spaces
+# to underscores to make unit tests easier to write
+function _call_with_env()
+{
+  local _function=${1}
+  shift
+  local _value="${1}"
+  shift
+  _BT1="${_value}"
+  ${_function} _BT1 ${1+"$@"}
+  local _rv=$?
+  echo "${_BT1}" | tr ' ' '_'
+  unset _BT1
+  return ${_rv}
+}
+
 function test_bes_path_dedup()
 {
-  bes_assert "[ $(bes_path_dedup /bin:/foo:/bin) = /bin:/foo ]"
-  bes_assert "[ $(bes_path_dedup /bin:/bin:/bin) = /bin ]"
-  bes_assert "[ $(bes_path_dedup /bin::/bin:/bin) = /bin ]"
-  bes_assert "[ $(bes_path_dedup /bin::/bin:/bin:::) = /bin ]"
-  bes_assert "[ $(bes_path_dedup \"\") = \"\" ]"
-  bes_assert "[ $(bes_path_dedup /bin:/foo/bin:/bin) = /bin:/foo/bin ]"
-  bes_assert "[ $(bes_path_dedup /bin:/foo/bin:/bin:/a\ b | tr ' ' '_') = /bin:/foo/bin:/a_b ]"
-  bes_assert "[ $(bes_path_dedup /bin\ foo:/bin\ foo:/bin\ foo | tr ' ' '_') = /bin_foo ]"
+  bes_assert "[ $(_call bes_path_dedup /bin:/foo:/bin) = /bin:/foo ]"
+  bes_assert "[ $(_call bes_path_dedup /bin:/bin:/bin) = /bin ]"
+  bes_assert "[ $(_call bes_path_dedup /bin::/bin:/bin) = /bin ]"
+  bes_assert "[ $(_call bes_path_dedup /bin::/bin:/bin:::) = /bin ]"
+  bes_assert "[ $(_call bes_path_dedup \"\") = \"\" ]"
+  bes_assert "[ $(_call bes_path_dedup /bin:/foo/bin:/bin) = /bin:/foo/bin ]"
+  bes_assert "[ $(_call bes_path_dedup /bin:/foo/bin:/bin:/a\ b) = /bin:/foo/bin:/a_b ]"
+  bes_assert "[ $(_call bes_path_dedup /bin\ foo:/bin\ foo:/bin\ foo) = /bin_foo ]"
+}
+
+function test_bes_path_clean_rogue_slashes()
+{
+  bes_assert "[ $(_call bes_path_clean_rogue_slashes /a:/b://c) = /a:/b:/c ]"
+  bes_assert "[ $(_call bes_path_clean_rogue_slashes /a:/b:///c) = /a:/b:/c ]"
+  bes_assert "[ $(_call bes_path_clean_rogue_slashes /a:/b:"///c d") = /a:/b:/c_d ]"
 }
 
 function test_bes_path_sanitize()
 {
-  bes_assert "[ $(bes_path_sanitize /bin:/foo:/bin) = /bin:/foo ]"
-  bes_assert "[ $(bes_path_sanitize /bin:/bin:/bin) = /bin ]"
-  bes_assert "[ $(bes_path_sanitize :/bin) = /bin ]"
-  bes_assert "[ $(bes_path_sanitize /bin::/bin:/bin:::) = /bin ]"
-  bes_assert "[ $(bes_path_sanitize \"\") = \"\" ]"
-  bes_assert "[ $(bes_path_sanitize :a::::b:) = a:b ]"
-  bes_assert "[ $(bes_path_sanitize a:b:c:a:b:c) = a:b:c ]"
-  bes_assert "[ $(bes_path_sanitize a\ b:c\ d | tr ' ' '_') = a_b:c_d ]"
-  bes_assert "[ $(bes_path_sanitize :a\ b:c\ d | tr ' ' '_') = a_b:c_d ]"
-  bes_assert "[ $(bes_path_sanitize a\ b:c\ d: | tr ' ' '_') = a_b:c_d ]"
-  bes_assert "[ $(bes_path_sanitize :a\ b:c\ d:a\ b: | tr ' ' '_') = a_b:c_d ]"
+  bes_assert "[ $(_call bes_path_sanitize /bin:/foo:/bin) = /bin:/foo ]"
+  bes_assert "[ $(_call bes_path_sanitize /bin:/bin:/bin) = /bin ]"
+  bes_assert "[ $(_call bes_path_sanitize :/bin) = /bin ]"
+  bes_assert "[ $(_call bes_path_sanitize /bin::/bin:/bin:::) = /bin ]"
+  bes_assert "[ $(_call bes_path_sanitize \"\") = \"\" ]"
+  bes_assert "[ $(_call bes_path_sanitize :a::::b:) = a:b ]"
+  bes_assert "[ $(_call bes_path_sanitize a:b:c:a:b:c) = a:b:c ]"
+  bes_assert "[ $(_call bes_path_sanitize a\ b:c\ d) = a_b:c_d ]"
+  bes_assert "[ $(_call bes_path_sanitize :a\ b:c\ d) = a_b:c_d ]"
+  bes_assert "[ $(_call bes_path_sanitize a\ b:c\ d:) = a_b:c_d ]"
+  bes_assert "[ $(_call bes_path_sanitize :a\ b:c\ d:a\ b:) = a_b:c_d ]"
 }
 
 function test_bes_path_append()
 {
-  function _call()
-  {
-    local _p="${1}"
-    shift
-    local _result=$(bes_path_append "${_p}" ${1+"$@"})
-    echo "${_result}" | tr ' ' '_'
-    return $?
-  }
-  bes_assert "[ $(_call /bin:/foo/bin /foo/bin) = /bin:/foo/bin ]"
-  bes_assert "[ $(_call /bin:/foo/bin /foo/bin /bar/bin) = /bin:/foo/bin:/bar/bin ]"
-  bes_assert "[ $(_call /bin:/foo/bin /bin) = /bin:/foo/bin ]"
-  bes_assert "[ $(_call foo bar) = foo:bar ]"
-  bes_assert "[ $(_call foo bar bar foo) = foo:bar ]"
-  bes_assert "[ $(_call /bin:/foo/bin /a\ b) = /bin:/foo/bin:/a_b ]"
-  bes_assert "[ $(_call : /bin/foo) = /bin/foo ]"
-  bes_assert "[ $(_call /bin:/"a b" /"c d") = /bin:/a_b:/c_d ]"
+  bes_assert "[ $(_call bes_path_append /bin:/foo/bin /foo/bin) = /bin:/foo/bin ]"
+  bes_assert "[ $(_call bes_path_append /bin:/foo/bin /foo/bin /bar/bin) = /bin:/foo/bin:/bar/bin ]"
+  bes_assert "[ $(_call bes_path_append /bin:/foo/bin /bin) = /bin:/foo/bin ]"
+  bes_assert "[ $(_call bes_path_append foo bar) = foo:bar ]"
+  bes_assert "[ $(_call bes_path_append foo bar bar foo) = foo:bar ]"
+  bes_assert "[ $(_call bes_path_append /bin:/foo/bin /a\ b) = /bin:/foo/bin:/a_b ]"
+  bes_assert "[ $(_call bes_path_append : /bin/foo) = /bin/foo ]"
+  bes_assert "[ $(_call bes_path_append /bin:/"a b" /"c d") = /bin:/a_b:/c_d ]"
+  bes_assert "[ $(_call bes_path_append /a:/b /c) = /a:/b:/c ]"
 }
 
 function test_bes_path_prepend()
 {
-  function _call()
-  {
-    local _p="${1}"
-    shift
-    local _result=$(bes_path_prepend "${_p}" ${1+"$@"})
-    echo "${_result}" | tr ' ' '_'
-    return $?
-  }
-  bes_assert "[ $(_call /bin /foo/bin) = /foo/bin:/bin ]"
-  bes_assert "[ $(_call /foo/bin:/bin /foo/bin) = /foo/bin:/bin ]"
-  bes_assert "[ $(_call /foo/bin:/bin /bin) = /bin:/foo/bin ]"
-  bes_assert "[ $(_call /foo/bin:/bin "/a b") = /a_b:/foo/bin:/bin ]"
-  bes_assert "[ $(_call /foo /bar /baz) = /bar:/baz:/foo ]"
-  bes_assert "[ $(_call /foo /bar /baz /bar) = /bar:/baz:/foo ]"
-  bes_assert "[ $(_call /bin:"/c d" "/a b") = /a_b:/bin:/c_d ]"
+  bes_assert "[ $(_call bes_path_append /bin /foo/bin) = /foo/bin:/bin ]"
+  bes_assert "[ $(_call bes_path_append /foo/bin:/bin /foo/bin) = /foo/bin:/bin ]"
+  bes_assert "[ $(_call bes_path_append /foo/bin:/bin /bin) = /bin:/foo/bin ]"
+  bes_assert "[ $(_call bes_path_append /foo/bin:/bin "/a b") = /a_b:/foo/bin:/bin ]"
+  bes_assert "[ $(_call bes_path_append /foo /bar /baz) = /bar:/baz:/foo ]"
+  bes_assert "[ $(_call bes_path_append /foo /bar /baz /bar) = /bar:/baz:/dfoo ]"
+  bes_assert "[ $(_call bes_path_append /bin:"/c d" "/a b") = /a_b:/bin:/c_d ]"
+  bes_assert "[ $(_call bes_path_append /a:/b /c) = /c:/a:/b ]"
 }
 
 function test_bes_path_remove()
 {
-  bes_assert "[ $(bes_path_remove /bin:/foo/bin /foo/bin) = /bin ]"
-  bes_assert "[ $(bes_path_remove /bin:/foo/bin foo/bin) = /bin:/foo/bin ]"
-  bes_assert "[ $(bes_path_remove foo:bar bar) = foo ]"
-  bes_assert "[ $(bes_path_remove foo:bar bar foo) = ]"
-  bes_assert "[ $(bes_path_remove foo:a\ b:bar bar | tr ' ' '_') = foo:a_b ]"
+  bes_assert "[ $(_call bes_path_remove /bin:/foo/bin /foo/bin) = /bin ]"
+  bes_assert "[ $(_call bes_path_remove /bin:/foo/bin foo/bin) = /bin:/foo/bin ]"
+  bes_assert "[ $(_call bes_path_remove foo:bar bar) = foo ]"
+  bes_assert "[ $(_call bes_path_remove foo:bar bar foo) = ]"
+  bes_assert "[ $(_call bes_path_remove foo:a\ b:bar bar) = foo:a_b ]"
 }
 
 function test_bes_env_path_append()
 {
-  function _call()
-  {
-    _BT1="${1}"
-    shift
-    bes_env_path_append _BT1 ${1+"$@"}
-    echo "${_BT1}" | tr ' ' '_'
-    unset _BT1
-    return $?
-  }
-  bes_assert "[ $(_call /foo /bar) = /foo:/bar ]"
-  bes_assert "[ $(_call /foo /bar /baz) = /foo:/bar:/baz ]"
-  bes_assert "[ $(_call /foo "/a b" /baz) = /foo:/a_b:/baz ]"
-  bes_assert "[ $(_call /foo:"/a b" "/c d" "/bar") = /foo:/a_b:/c_d:/bar ]"
+  bes_assert "[ $(_call_with_env bes_env_path_append /foo /bar) = /foo:/bar ]"
+  bes_assert "[ $(_call_with_env bes_env_path_append /foo /bar /baz) = /foo:/bar:/baz ]"
+  bes_assert "[ $(_call_with_env bes_env_path_append /foo "/a b" /baz) = /foo:/a_b:/baz ]"
+  bes_assert "[ $(_call_with_env bes_env_path_append /foo:"/a b" "/c d" "/bar") = /foo:/a_b:/c_d:/bar ]"
 }
 
 function test_bes_env_path_prepend()
 {
-  function _call()
-  {
-    _BT1="${1}"
-    shift
-    bes_env_path_prepend _BT1 ${1+"$@"}
-    echo "${_BT1}" | tr ' ' '_'
-    unset _BT1
-    return $?
-  }
-  bes_assert "[ $(_call /foo /bar) = /bar:/foo ]"
-  bes_assert "[ $(_call /foo /bar /baz) = /bar:/baz:/foo ]"
-  bes_assert "[ $(_call /foo "/a b" /baz) = /a_b:/baz:/foo ]"
-  bes_assert "[ $(_call /foo /bar "/c d") = /bar:/c_d:/foo ]"
+  bes_assert "[ $(_call_with_env bes_env_path_prepend /foo /bar) = /bar:/foo ]"
+  bes_assert "[ $(_call_with_env bes_env_path_prepend /foo /bar /baz) = /bar:/baz:/foo ]"
+  bes_assert "[ $(_call_with_env bes_env_path_prepend /foo "/a b" /baz) = /a_b:/baz:/foo ]"
+  bes_assert "[ $(_call_with_env bes_env_path_prepend /foo /bar "/c d") = /bar:/c_d:/foo ]"
 }
 
 function test_bes_env_path_remove()
