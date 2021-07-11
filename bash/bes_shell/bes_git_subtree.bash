@@ -38,6 +38,10 @@ function bes_git_subtree_update_with_temp_repo()
     bes_message "bes_git_subtree_update_with_temp_repo: Failed to update in ${_tmp_dir}"
     return 2
   fi
+  if ! git push -u origin ${_local_branch}; then
+    bes_message "bes_git_subtree_update_with_temp_repo: Failed to push to ${_my_address}:${_local_branch}"
+    return 2
+  fi
   return 0
 }
 
