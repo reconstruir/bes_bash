@@ -67,7 +67,7 @@ function bes_path_clean_rogue_slashes()
     return 1
   fi
   local _path="${1}"
-  echo "${_path}" | sed 's#//*#/#g'
+  echo "${_path}" | ${_BES_SED} 's#//*#/#g'
   return 0
 }
 
