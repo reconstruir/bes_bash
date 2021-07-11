@@ -3,7 +3,7 @@
 _bes_trace_file "begin"
 
 # Update a git subtree in a temporary cloned dir to prevent polluting the local
-# repo with the subtree remote including tags which confuses things
+# repo with the subtree remote including tags which confuses things. Foo.
 function bes_git_subtree_update_with_temp_repo()
 {
   if [[ $# != 8 ]]; then
