@@ -298,8 +298,8 @@ function bes_env_path_print()
   bes_log_trace_function path $*
 
   local _var_name=$(bes_variable_map $1)
-  local _value=$(bes_var_get ${_var_name})
-  bes_path_print $_value
+  local _value="$(bes_var_get ${_var_name})"
+  bes_path_print "${_value}"
   return 0
 }
 
