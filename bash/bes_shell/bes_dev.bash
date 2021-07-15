@@ -81,15 +81,23 @@ EOF
         _set_path=true
         shift # past argument
         ;;
+      --no-set-path)
+        _set_path=false
+        shift # past argument
+        ;;
       --set-python-path)
         _set_python_path=true
+        shift # past argument
+        ;;
+      --no-set-python-path)
+        _set_python_path=false
         shift # past argument
         ;;
       --change-dir)
         _change_dir=true
         shift # past argument
         ;;
-      --no-change-dir|-ncd)
+      --no-change-dir)
         _change_dir=false
         shift # past argument
         ;;
@@ -97,7 +105,7 @@ EOF
         _set_title=true
         shift # past argument
         ;;
-      --no-set-title|-nst)
+      --no-set-title)
         _set_title=false
         shift # past argument
         ;;
