@@ -86,11 +86,11 @@ EOF
         shift # past argument
         ;;
       --set-python-path)
-        _set_python_path=true
+        _set_pythonpath=true
         shift # past argument
         ;;
       --no-set-python-path)
-        _set_python_path=false
+        _set_pythonpath=false
         shift # past argument
         ;;
       --change-dir)
@@ -111,7 +111,7 @@ EOF
         ;;
       --light|-l)
         _set_path=true
-        _set_python_path=true
+        _set_pythonpath=true
         _set_title=false
         _venv_activate=false
         _change_dir=false
@@ -147,7 +147,7 @@ EOF
   if [[ ${_set_path} == true ]]; then
     bes_env_path_prepend PATH "${_root_dir}/bin"
   fi
-  if [[ ${_set_python_path} == true ]]; then
+  if [[ ${_set_pythonpath} == true ]]; then
     bes_env_path_prepend PYTHONPATH "${_root_dir}/lib"
   fi
   if [[ ${_change_dir} == true ]]; then
