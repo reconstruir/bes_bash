@@ -17,7 +17,7 @@ source "$(_test_bes_git_subtree_this_dir)"/../bash/bes_shell/bes_shell.bash
 source "$(_test_bes_git_subtree_this_dir)"/../bash/bes_shell/bes_testing.bash
 source "$(_test_bes_git_subtree_this_dir)"/../bash/bes_shell/bes_git.bash
 source "$(_test_bes_git_subtree_this_dir)"/../bash/bes_shell/bes_git_subtree.bash
-source "$(_test_bes_git_subtree_this_dir)"/../bash/bes_shell/bes_git_unit_test.bash
+source "$(_test_bes_git_subtree_this_dir)"/../bash/bes_shell/_bes_git_unit_test.bash
 
 function test_bes_git_subtree_basic()
 {
