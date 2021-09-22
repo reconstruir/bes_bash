@@ -14,8 +14,8 @@ function _test_bes_string_this_dir()
 }
 
 source "$(_test_bes_string_this_dir)"/../bash/bes_shell/bes_shell.bash
-source "$(_test_bes_string_this_dir)"/../bash/bes_shell/bes_testing.bash
-source "$(_test_bes_string_this_dir)"/../bash/bes_shell/bes_string.bash
+bes_import "bes_testing.bash"
+bes_import "bes_string.bash"
 
 function test_bes_str_strip_head()
 {

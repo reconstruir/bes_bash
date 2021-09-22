@@ -8,14 +8,43 @@ function _bes_shell_this_dir()
 
 _BES_SHELL_THIS_DIR="$(_bes_shell_this_dir)"
 
-source "${_BES_SHELL_THIS_DIR}/bes_var.bash"
-source "${_BES_SHELL_THIS_DIR}/bes_log.bash"
-source "${_BES_SHELL_THIS_DIR}/bes_system.bash"
-source "${_BES_SHELL_THIS_DIR}/bes_list.bash"
-source "${_BES_SHELL_THIS_DIR}/bes_path.bash"
-source "${_BES_SHELL_THIS_DIR}/bes_string.bash"
-source "${_BES_SHELL_THIS_DIR}/bes_file.bash"
-source "${_BES_SHELL_THIS_DIR}/bes_filename.bash"
+function bes_import()
+{
+  if [[ $# != 1 ]]; then
+    echo "usage: bes_import filename"
+    return 1
+  fi
+
+  local _filename="${1}"
+  local _this_dir="$(_bes_shell_this_dir)"
+  local _filename_abs="${_this_dir}/${_filename}"
+  if [[ ! -f "${_filename_abs}" ]]; then
+    local _basename="$(basename ${_filename_abs})"
+    echo "bes_import: ${BASH_SOURCE[1]}:${BASH_LINENO[0]}: file \"${_basename}\"not found in ${_this_dir}"
+    exit 1
+  fi
+
+  local _sanitized_filename=$(echo ${_filename} | tr '[:punct:]' '_' | tr '[:space:]' '_')
+  local _var_name=__imported_${_sanitized_filename}__
+  local _var_value=$(eval 'printf "%s\n" "${'"${_var_name}"'}"')
+  if [[ "${_var_value}" == "true" ]]; then
+    #echo "already imported ${_filename}"
+    return 0
+  fi
+  #echo "calling ${_filename_abs} _var_name=${_var_name} _var_value=${_var_value}"
+  source "${_filename_abs}"
+  eval "${_var_name}=\"true\""
+  return 0
+}
+
+bes_import "bes_var.bash"
+bes_import "bes_log.bash"
+bes_import "bes_system.bash"
+bes_import "bes_list.bash"
+bes_import "bes_path.bash"
+bes_import "bes_string.bash"
+bes_import "bes_file.bash"
+bes_import "bes_filename.bash"
 
 _bes_trace_file "begin"
 
@@ -262,19 +291,6 @@ function bes_atexit_remove_dir_handler()
   return ${_actual_exit_code}
 }
 
-# DEPRECATED: use bes_abs_dir instead
-# Return the absolute path for the path arg
-function bes_abs_path()
-{
-  if [[ $# < 1 ]]; then
-    bes_message "usage: bes_abs_path path"
-    return 1
-  fi
-  local _path="${1}"
-  echo $(cd ${_path} && pwd)
-  return 0
-}
-
 # Return the absolute dir path for path.  Note that path will be created
 # if it doesnt exist so that this function can be used for paths that
 # dont yet exist.  That is useful for scripts that want to normalize
@@ -306,36 +322,6 @@ function bes_abs_file()
   local _abs_dirname="$(bes_abs_dir "${_dirname}")"
   local _result="${_abs_dirname}"/"${_basename}"
   echo ${_result}
-  return 0
-}
-
-function bes_question_yes_no()
-{
-  if [[ $# != 2 ]]; then
-    echo "usage: bes_question_yes_no var_name message"
-    return 1
-  fi
-  local _CHOICES="[y]es [n]o"
-  local _var_name="${1}"
-  local _message="${2}"
-  local _local_answer
-  local _result=1
-  while true; do
-    read -p "${_message} - ${_CHOICES}: " _local_answer
-    case "${_local_answer}" in
-      y|Y|yes|YES)
-        _result=yes
-        break
-        ;;
-      n|N|no|NO)
-        _result=no
-        break
-        ;;
-      *)
-        bes_message "Invalid answer: ${_local_answer}.  Please answer: ${_CHOICES}"
-    esac
-  done
-  eval ${_var_name}=${_result}
   return 0
 }
 

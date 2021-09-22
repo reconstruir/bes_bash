@@ -14,9 +14,9 @@ function _test_bes_python_this_dir()
 }
 
 source "$(_test_bes_python_this_dir)"/../bash/bes_shell/bes_shell.bash
-source "$(_test_bes_python_this_dir)"/../bash/bes_shell/bes_python.bash
-source "$(_test_bes_python_this_dir)"/../bash/bes_shell/bes_testing.bash
-source "$(_test_bes_python_this_dir)"/../bash/bes_shell/_bes_python_testing.bash
+bes_import "bes_python.bash"
+bes_import "bes_testing.bash"
+bes_import "_bes_python_testing.bash"
 
 function test_bes_has_python()
 {

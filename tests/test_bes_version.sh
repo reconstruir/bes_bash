@@ -14,8 +14,8 @@ function _test_bes_version_this_dir()
 }
 
 source "$(_test_bes_version_this_dir)"/../bash/bes_shell/bes_shell.bash
-source "$(_test_bes_version_this_dir)"/../bash/bes_shell/bes_testing.bash
-source "$(_test_bes_version_this_dir)"/../bash/bes_shell/bes_version.bash
+bes_import "bes_testing.bash"
+bes_import "bes_version.bash"
 
 function test_bes_version_is_valid()
 {

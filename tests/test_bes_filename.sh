@@ -13,11 +13,12 @@ function _test_bes_path_this_dir()
   return 0
 }
 
-source "$(_test_bes_path_this_dir)"/../bash/bes_shell/bes_var.bash
-source "$(_test_bes_path_this_dir)"/../bash/bes_shell/bes_log.bash
-source "$(_test_bes_path_this_dir)"/../bash/bes_shell/bes_system.bash
-source "$(_test_bes_path_this_dir)"/../bash/bes_shell/bes_testing.bash
-source "$(_test_bes_path_this_dir)"/../bash/bes_shell/bes_filename.bash
+source "$(_test_bes_path_this_dir)"/../bash/bes_shell/bes_shell.bash
+bes_import "bes_var.bash"
+bes_import "bes_log.bash"
+bes_import "bes_system.bash"
+bes_import "bes_testing.bash"
+bes_import "bes_filename.bash"
 
 function test_bes_filename_extension()
 {

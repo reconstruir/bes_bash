@@ -14,9 +14,9 @@ function _test_bes_download_this_dir()
 }
 
 source "$(_test_bes_download_this_dir)"/../bash/bes_shell/bes_shell.bash
-source "$(_test_bes_download_this_dir)"/../bash/bes_shell/bes_testing.bash
-source "$(_test_bes_download_this_dir)"/../bash/bes_shell/bes_checksum.bash
-source "$(_test_bes_download_this_dir)"/../bash/bes_shell/bes_download.bash
+bes_import "bes_testing.bash"
+bes_import "bes_checksum.bash"
+bes_import "bes_download.bash"
 
 function test_download_success()
 {
