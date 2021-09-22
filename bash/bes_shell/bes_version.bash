@@ -1,5 +1,7 @@
 #-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
 
+bes_import "bes_string.bash"
+
 _bes_trace_file "begin"
 
 # Return 0 if version is a valid software version in the form $major.$minor.$revision

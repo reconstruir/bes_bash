@@ -37,16 +37,16 @@ function bes_import()
   return 0
 }
 
-bes_import "bes_var.bash"
-bes_import "bes_log.bash"
-bes_import "bes_system.bash"
-bes_import "bes_list.bash"
-bes_import "bes_path.bash"
-bes_import "bes_string.bash"
-bes_import "bes_file.bash"
-bes_import "bes_filename.bash"
+#bes_import "bes_var.bash"
+#bes_import "bes_log.bash"
+#bes_import "bes_system.bash"
+#bes_import "bes_list.bash"
+#bes_import "bes_path.bash"
+#bes_import "bes_string.bash"
+#bes_import "bes_file.bash"
+#bes_import "bes_filename.bash"
 
-_bes_trace_file "begin"
+#_bes_trace_file "begin"
 
 # Source a shell file or print an error if it does not exist
 function bes_source_file()
@@ -325,4 +325,4 @@ function bes_abs_file()
   return 0
 }
 
-_bes_trace_file "end"
+#_bes_trace_file "end"

@@ -16,41 +16,6 @@ function _test_bes_shell_this_dir()
 source "$(_test_bes_shell_this_dir)"/../bash/bes_shell/bes_shell.bash
 bes_import "bes_testing.bash"
 
-function test_bes_var_set()
-{
-  bes_var_set FOO 666
-  bes_assert "[ $FOO = 666 ]"
-}
-
-function test_bes_var_get()
-{
-  BAR=667
-  v=$(bes_var_get BAR)
-  bes_assert "[ $v = 667 ]"
-}
-
-function test_bes_variable_map_linux()
-{
-  if [[ $(bes_system) != 'linux' ]]; then
-    return 0
-  fi
-  bes_assert "[ $(bes_variable_map PATH) = PATH ]"
-  bes_assert "[ $(bes_variable_map PYTHONPATH) = PYTHONPATH ]"
-  bes_assert "[ $(bes_variable_map LD_LIBRARY_PATH) = LD_LIBRARY_PATH ]"
-  bes_assert "[ $(bes_variable_map DYLD_LIBRARY_PATH) = LD_LIBRARY_PATH ]"
-}
-
-function test_bes_variable_map_macos()
-{
-  if [[ $(bes_system) != 'macos' ]]; then
-    return 0
-  fi
-  bes_assert "[ $(bes_variable_map PATH) = PATH ]"
-  bes_assert "[ $(bes_variable_map PYTHONPATH) = PYTHONPATH ]"
-  bes_assert "[ $(bes_variable_map LD_LIBRARY_PATH) = DYLD_LIBRARY_PATH ]"
-  bes_assert "[ $(bes_variable_map DYLD_LIBRARY_PATH) = DYLD_LIBRARY_PATH ]"
-}
-
 function test_bes_source_file()
 {
   local _pid=$$

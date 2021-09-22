@@ -14,12 +14,8 @@ function _test_bes_path_this_dir()
 }
 
 source "$(_test_bes_path_this_dir)"/../bash/bes_shell/bes_shell.bash
-bes_import "bes_var.bash"
-bes_import "bes_log.bash"
-bes_import "bes_system.bash"
-bes_import "bes_list.bash"
-bes_import "bes_path.bash"
 bes_import "bes_testing.bash"
+bes_import "bes_path.bash"
 
 # Call a function and convert resulting spaces to underscores to make
 # unit tests easier to write
@@ -235,6 +231,28 @@ EOM
   local _rv=$?
   bes_assert "[[ ${_rv} == 0 ]]"
   rm -rf "${_tmp}"
+}
+
+function test_bes_variable_map_linux()
+{
+  if [[ $(bes_system) != 'linux' ]]; then
+    return 0
+  fi
+  bes_assert "[ $(bes_variable_map PATH) = PATH ]"
+  bes_assert "[ $(bes_variable_map PYTHONPATH) = PYTHONPATH ]"
+  bes_assert "[ $(bes_variable_map LD_LIBRARY_PATH) = LD_LIBRARY_PATH ]"
+  bes_assert "[ $(bes_variable_map DYLD_LIBRARY_PATH) = LD_LIBRARY_PATH ]"
+}
+
+function test_bes_variable_map_macos()
+{
+  if [[ $(bes_system) != 'macos' ]]; then
+    return 0
+  fi
+  bes_assert "[ $(bes_variable_map PATH) = PATH ]"
+  bes_assert "[ $(bes_variable_map PYTHONPATH) = PYTHONPATH ]"
+  bes_assert "[ $(bes_variable_map LD_LIBRARY_PATH) = DYLD_LIBRARY_PATH ]"
+  bes_assert "[ $(bes_variable_map DYLD_LIBRARY_PATH) = DYLD_LIBRARY_PATH ]"
 }
 
 bes_testing_run_unit_tests

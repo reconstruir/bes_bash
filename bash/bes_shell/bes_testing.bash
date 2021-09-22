@@ -3,6 +3,8 @@
 # Unit testing code mostly borrowed from:
 #   https://unwiredcouch.com/2016/04/13/bash-unit-testing-101.html
 
+bes_import "bes_system.bash"
+
 # Print all the unit tests defined in this script environment (functions starting with test_)
 function bes_testing_print_unit_tests()
 {

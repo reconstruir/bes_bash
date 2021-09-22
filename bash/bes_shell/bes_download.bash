@@ -2,6 +2,8 @@
 
 # Functions to download stuff
 
+bes_import "bes_log.bash"
+
 _bes_trace_file "begin"
 
 # Download a url to a file with optional username and password.

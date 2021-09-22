@@ -2,6 +2,12 @@
 
 # Functions to deal with python
 
+bes_import "bes_download.bash"
+bes_import "bes_log.bash"
+bes_import "bes_path.bash"
+bes_import "bes_system.bash"
+bes_import "bes_string.bash"
+
 _bes_trace_file "begin"
 
 # Return 0 if the python version given is found

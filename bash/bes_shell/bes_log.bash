@@ -1,5 +1,7 @@
 #-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
 
+bes_import "bes_var.bash"
+
 function _bes_trace() ( if [[ "$_BES_TRACE" == "1" ]]; then printf '_BES_TRACE: %s\n' "$*"; fi )
 function _bes_trace_function() ( _bes_trace "func: ${FUNCNAME[1]}($*)" )
 function _bes_trace_file() ( _bes_trace "file: ${BASH_SOURCE}: $*" )

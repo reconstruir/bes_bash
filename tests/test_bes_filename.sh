@@ -14,9 +14,6 @@ function _test_bes_path_this_dir()
 }
 
 source "$(_test_bes_path_this_dir)"/../bash/bes_shell/bes_shell.bash
-bes_import "bes_var.bash"
-bes_import "bes_log.bash"
-bes_import "bes_system.bash"
 bes_import "bes_testing.bash"
 bes_import "bes_filename.bash"
 

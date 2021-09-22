@@ -1,5 +1,7 @@
 #-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
 
+bes_import "bes_string.bash"
+
 _bes_trace_file "begin"
 
 _BES_GIT_LOG_FILE=${BES_GIT_LOG_FILE:-/dev/null}

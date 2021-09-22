@@ -1,5 +1,8 @@
 #-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
 
+bes_import "bes_var.bash"
+bes_import "bes_log.bash"
+
 bes_log_trace_file system "begin"
 
 # A basic UNIX path that is guranteed to find common exeutables on all platforms
