@@ -255,4 +255,36 @@ function test_bes_variable_map_macos()
   bes_assert "[ $(bes_variable_map DYLD_LIBRARY_PATH) = DYLD_LIBRARY_PATH ]"
 }
 
+function test_bes_path_abs_dir()
+{
+  local _tmp_parent=/tmp/parent/test_bes_path_abs_dir_$$
+  local _tmp=${_tmp_parent}/cwd
+  mkdir -p ${_tmp}
+  bes_assert "[[ $(bes_path_abs_dir ${_tmp}) == ${_tmp} ]]"
+  bes_assert "[[ $(cd ${_tmp} && bes_path_abs_dir .) == ${_tmp} ]]"
+  bes_assert "[[ $(cd ${_tmp} && bes_path_abs_dir $(pwd)) == ${_tmp} ]]"
+  bes_assert "[[ $(cd ${_tmp} && bes_path_abs_dir foo) == ${_tmp}/foo ]]"
+  bes_assert "[[ $(cd ${_tmp} && bes_path_abs_dir foo/bar) == ${_tmp}/foo/bar ]]"
+  bes_assert "[[ $(cd ${_tmp} && bes_path_abs_dir ../foo) == ${_tmp_parent}/foo ]]"
+  bes_assert "[[ $(cd ${_tmp} && bes_path_abs_dir ..) == ${_tmp_parent} ]]"
+  bes_assert "[[ $(cd ${_tmp} && bes_path_abs_dir foo/bar/..) == ${_tmp}/foo ]]"
+  bes_assert "[[ $(cd ${_tmp} && bes_path_abs_dir foo/../bar) == ${_tmp}/bar ]]"
+  rm -rf ${_tmp}
+}
+
+function test_bes_path_abs_file()
+{
+  local _tmp_parent=/tmp/foo/test_bes_path_abs_file_$$
+  local _tmp=${_tmp_parent}/cwd
+  mkdir -p ${_tmp}
+  bes_assert "[[ $(bes_path_abs_file ${_tmp}/foo) == ${_tmp}/foo ]]"
+  bes_assert "[[ $(cd ${_tmp} && bes_path_abs_file foo) == ${_tmp}/foo ]]"
+  bes_assert "[[ $(cd ${_tmp} && bes_path_abs_file $(pwd)/foo) == ${_tmp}/foo ]]"
+  bes_assert "[[ $(cd ${_tmp} && bes_path_abs_file foo/bar) == ${_tmp}/foo/bar ]]"
+  bes_assert "[[ $(cd ${_tmp} && bes_path_abs_file ../foo) == ${_tmp_parent}/foo ]]"
+  bes_assert "[[ $(cd ${_tmp} && bes_path_abs_file foo/bar/../baz) == ${_tmp}/foo/baz ]]"
+  bes_assert "[[ $(cd ${_tmp} && bes_path_abs_file foo/../bar) == ${_tmp}/bar ]]"
+  rm -rf ${_tmp}
+}
+
 bes_testing_run_unit_tests

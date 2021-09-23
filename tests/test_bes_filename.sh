@@ -20,6 +20,8 @@ bes_import "bes_filename.bash"
 function test_bes_filename_extension()
 {
   bes_assert "[ $(bes_filename_extension foo.png) = png ]"
+  bes_assert "[ $(bes_filename_extension foo.tar.gz) = gz ]"
+  bes_assert "[ $(bes_filename_extension foo) = foo ]"
 }
 
 bes_testing_run_unit_tests
