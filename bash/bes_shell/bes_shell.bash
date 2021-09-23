@@ -56,14 +56,6 @@ function bes_source_file()
   return 0
 }
 
-# deprecated
-function bes_source()
-{
-  _bes_trace_function $*
-  bes_source_file $@
-  return $?
-}
-
 # Source a shell file but only if it exists
 function bes_source_file_if()
 {
@@ -145,14 +137,6 @@ function bes_debug_message()
   return 0
 }
 
-function bes_is_ci()
-{
-  if [[ -n "${CI}"|| -n "${HUDSON_COOKIE}" ]]; then
-    return 0
-  fi
-  return 1
-}
-
 function bes_console_message()
 {
   if bes_is_ci ; then
@@ -223,12 +207,6 @@ function bes_function_invoke_if()
   return ${_rv}
 }
 
-# FIXME: retire this one
-function bes_invoke()
-{
-  bes_function_invoke_if ${1+"$@"}
-}
-
 # atexit function suitable for trapping and printing the exit code
 # trap "bes_atexit_message_successful ${_remote_name}" EXIT
 function bes_atexit_message_successful()
@@ -296,5 +274,3 @@ function bes_abs_file()
   echo ${_result}
   return 0
 }
-
-#_bes_trace_file "end"
