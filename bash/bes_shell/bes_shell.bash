@@ -28,25 +28,12 @@ function bes_import()
   local _var_name=__imported_${_sanitized_filename}__
   local _var_value=$(eval 'printf "%s\n" "${'"${_var_name}"'}"')
   if [[ "${_var_value}" == "true" ]]; then
-    #echo "already imported ${_filename}"
     return 0
   fi
-  #echo "calling ${_filename_abs} _var_name=${_var_name} _var_value=${_var_value}"
   source "${_filename_abs}"
   eval "${_var_name}=\"true\""
   return 0
 }
-
-#bes_import "bes_var.bash"
-#bes_import "bes_log.bash"
-#bes_import "bes_system.bash"
-#bes_import "bes_list.bash"
-#bes_import "bes_path.bash"
-#bes_import "bes_string.bash"
-#bes_import "bes_file.bash"
-#bes_import "bes_filename.bash"
-
-#_bes_trace_file "begin"
 
 # Source a shell file or print an error if it does not exist
 function bes_source_file()
@@ -111,21 +98,6 @@ function bes_is_true()
       ;;
   esac
   return ${_rv}
-}
-
-function bes_PATH()
-{
-  bes_env_path_print PATH
-}
-
-function bes_PYTHONPATH()
-{
-  bes_env_path_print PYTHONPATH
-}
-
-function bes_LD_LIBRARY_PATH()
-{
-  bes_env_path_print LD_LIBRARY_PATH
 }
 
 function bes_script_name()

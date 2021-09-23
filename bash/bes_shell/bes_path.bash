@@ -406,4 +406,19 @@ function bes_path_is_symlink()
   return 1
 }
 
+function bes_PATH()
+{
+  bes_env_path_print PATH
+}
+
+function bes_PYTHONPATH()
+{
+  bes_env_path_print PYTHONPATH
+}
+
+function bes_LD_LIBRARY_PATH()
+{
+  bes_env_path_print LD_LIBRARY_PATH
+}
+
 bes_log_trace_file path "end"
