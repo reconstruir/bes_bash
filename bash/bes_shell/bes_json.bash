@@ -11,7 +11,7 @@ function bes_json_file_parse()
   local _filename="${1}"
   shift
   local _this_dir=$(echo "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )")
-  local _json_parser="${_this_dir}/dominictarr_json.sh"
+  local _json_parser="${_this_dir}/bes_dominictarr_json.sh"
 
   "${_json_parser}" ${1+"$@"} < "${_filename}"
   local _exit_code=$?
