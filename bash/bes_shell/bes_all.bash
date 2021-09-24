@@ -7,9 +7,9 @@ function _bes_all_this_dir()
 }
 
 source $(_bes_all_this_dir)/bes_shell.bash
-source $(_bes_all_this_dir)/bes_git.bash
-source $(_bes_all_this_dir)/bes_git_subtree.bash
-source $(_bes_all_this_dir)/bes_download.bash
-source $(_bes_all_this_dir)/bes_bfg.bash
-source $(_bes_all_this_dir)/bes_version.bash
-source $(_bes_all_this_dir)/bes_python.bash
+bes_import "bes_git.bash"
+bes_import "bes_git_subtree.bash"
+bes_import "bes_download.bash"
+bes_import "bes_bfg.bash"
+bes_import "bes_version.bash"
+bes_import "bes_python.bash"
