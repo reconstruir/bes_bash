@@ -8,7 +8,6 @@ function main()
   local _bes_shell_dir="${_this_dir}/../bash/bes_shell"
 
   source "${_bes_shell_dir}/bes_all.bash"
-  source "${_bes_shell_dir}/caca.bash"
 
   _bes_shell_dir="$(bes_path_abs_dir ${_bes_shell_dir})"
 
