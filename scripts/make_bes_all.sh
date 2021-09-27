@@ -15,8 +15,6 @@ function main()
   rm -f "${_tmp_file}"
 
   cat ${_bes_shell_dir}/bes_shell.bash > "${_tmp_file}"
-  cat ${_bes_shell_dir}/bes_log.bash >> "${_tmp_file}"
-  echo "_bes_import_filename_set_imported \"bes_log.bash\"" >> "${_tmp_file}"
   
   local _file
   for _file in ${_bes_shell_dir}/bes_*.bash; do
@@ -47,7 +45,7 @@ function _make_bes_all_should_exclude()
   local _basename="${1}"
   local _rv
   case "${_basename}" in
-    "bes_all.bash"|"bes_shell.bash"|"bes_log.bash")
+    "bes_all.bash"|"bes_shell.bash")
       _rv=0
       ;;
     *)

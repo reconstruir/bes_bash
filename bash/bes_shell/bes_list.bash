@@ -1,7 +1,5 @@
 #-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
 
-bes_import "bes_log.bash"
-
 bes_log_trace_file list "begin"
 
 # Return 0 if the first argument is in any of the following arguments

@@ -3,7 +3,6 @@
 # Functions to deal with python
 
 bes_import "bes_download.bash"
-bes_import "bes_log.bash"
 bes_import "bes_path.bash"
 bes_import "bes_system.bash"
 bes_import "bes_string.bash"
