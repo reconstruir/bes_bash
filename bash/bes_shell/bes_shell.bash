@@ -30,15 +30,52 @@ function bes_import()
     exit 1
   fi
 
-  local _sanitized_filename=$(echo ${_filename} | tr '[:punct:]' '_' | tr '[:space:]' '_')
-  local _var_name=__imported_${_sanitized_filename}__
+  if _bes_import_filename_is_imported "${_filename_abs}"; then
+    return 0
+  fi
+  source "${_filename_abs}"
+  _bes_import_filename_set_imported "${_filename_abs}"
+  return 0
+}
+
+function _bes_import_filename_variable_name()
+{
+  if [[ $# != 1 ]]; then
+    echo "usage: _bes_import_filename_variable_name filename"
+    return 1
+  fi
+
+  local _filename="${1}"
+  local _basename="$(basename "${_filename}")"
+  local _sanitized_basename=$(echo ${_basename} | tr '[:punct:]' '_' | tr '[:space:]' '_')
+  local _var_name=__imported_${_sanitized_basename}__
+  echo ${_var_name}
+  return 0
+}
+
+function _bes_import_filename_set_imported()
+{
+  if [[ $# != 1 ]]; then
+    echo "usage: _bes_import_filename_mark_imported filename"
+    return 1
+  fi
+  local _var_name=$(_bes_import_filename_variable_name "${_filename}")
+  eval "${_var_name}=\"true\""
+  return 0
+}
+
+function _bes_import_filename_is_imported()
+{
+  if [[ $# != 1 ]]; then
+    echo "usage: _bes_import_filename_is_imported filename"
+    return 1
+  fi
+  local _var_name=$(_bes_import_filename_variable_name "${_filename}")
   local _var_value=$(eval 'printf "%s\n" "${'"${_var_name}"'}"')
   if [[ "${_var_value}" == "true" ]]; then
     return 0
   fi
-  source "${_filename_abs}"
-  eval "${_var_name}=\"true\""
-  return 0
+  return 1
 }
 
 # Source a shell file or print an error if it does not exist
