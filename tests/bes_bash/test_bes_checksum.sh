@@ -13,12 +13,10 @@ function _test_this_dir()
   return 0
 }
 
-source "$(_test_this_dir)"/../bash/bes_shell/bes_shell.bash
+source "$(_test_this_dir)"/../../bash/bes_bash/bes_basic.bash
 bes_import "bes_system.bash"
 bes_import "bes_checksum.bash"
 bes_import "bes_testing.bash"
-
-#source "$(_test_this_dir)"/../bash/bes_shell/bes_shell.bash # for bes_sytem
 
 function test_bes_checksum_file()
 {

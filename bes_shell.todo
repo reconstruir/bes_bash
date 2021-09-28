@@ -4,6 +4,6 @@
 
 2021-10-22
 - move bes_message to its own module
-- move everything other than bes_import out of bes_shell.bash
+- move everything other than bes_import out of bes_basic.bash
 - bes_str namespace and bes_string.bash filename are inconsistent
 - incorporate bes_log into bes_shell.sh and get rid of it.

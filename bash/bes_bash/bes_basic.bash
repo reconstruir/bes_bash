@@ -24,15 +24,17 @@ function bes_import()
   local _filename="${1}"
   local _this_dir="$(_bes_shell_this_dir)"
   local _filename_abs="${_this_dir}/${_filename}"
-  if [[ ! -f "${_filename_abs}" ]]; then
-    local _basename="$(basename ${_filename_abs})"
-    echo "bes_import: ${BASH_SOURCE[1]}:${BASH_LINENO[0]}: file \"${_basename}\"not found in ${_this_dir}"
-    exit 1
-  fi
 
   if _bes_import_filename_is_imported "${_filename_abs}"; then
     return 0
   fi
+  
+  if [[ ! -f "${_filename_abs}" ]]; then
+    local _basename="$(basename ${_filename_abs})"
+    echo "bes_import: ${BASH_SOURCE[1]}:${BASH_LINENO[0]}: file \"${_basename}\" not found in ${_this_dir}"
+    exit 1
+  fi
+
   source "${_filename_abs}"
   _bes_import_filename_set_imported "${_filename_abs}"
   return 0
@@ -59,6 +61,7 @@ function _bes_import_filename_set_imported()
     echo "usage: _bes_import_filename_mark_imported filename"
     return 1
   fi
+  local _filename="${1}"
   local _var_name=$(_bes_import_filename_variable_name "${_filename}")
   eval "${_var_name}=\"true\""
   return 0
@@ -70,6 +73,7 @@ function _bes_import_filename_is_imported()
     echo "usage: _bes_import_filename_is_imported filename"
     return 1
   fi
+  local _filename="${1}"
   local _var_name=$(_bes_import_filename_variable_name "${_filename}")
   local _var_value=$(eval 'printf "%s\n" "${'"${_var_name}"'}"')
   if [[ "${_var_value}" == "true" ]]; then
