@@ -27,7 +27,6 @@ done
 
 echo "bes_testing_run_unit_tests" >> "${_tmp_file}"
 
-echo CACA source ${_tmp_file}
 source ${_tmp_file}
 
 bes_testing_run_unit_tests
