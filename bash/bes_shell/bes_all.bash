@@ -283,11 +283,30 @@ function bes_atexit_remove_dir_handler()
   fi
   return ${_actual_exit_code}
 }
-#-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
 
-bes_import "bes_var.bash"
+# Get a var value
+function bes_var_get()
+{
+  eval 'printf "%s\n" "${'"$1"'}"'
+}
 
-_bes_trace_file "begin"
+# Set a var value
+function bes_var_set()
+{
+  eval "$1=\"\$2\""
+}
+
+# Unset a var value
+function bes_var_unset()
+{
+  eval "unset $1"
+}
+
+# Export a var value
+function bes_var_export()
+{
+  eval "export $1=\"\$2\""
+}
 
 _BES_LOG_FILE=$(tty)
 
@@ -485,9 +504,6 @@ function bes_log_set_log_file()
   _BES_LOG_FILE="${_log_file}"
   return 0
 }
-
-_bes_trace_file "end"
-_bes_import_filename_set_imported "bes_log.bash"
 _bes_import_filename_set_imported "bes_bfg.bash"
 _bes_import_filename_set_imported "bes_brew.bash"
 _bes_import_filename_set_imported "bes_checksum.bash"
@@ -507,7 +523,6 @@ _bes_import_filename_set_imported "bes_question.bash"
 _bes_import_filename_set_imported "bes_string.bash"
 _bes_import_filename_set_imported "bes_system.bash"
 _bes_import_filename_set_imported "bes_testing.bash"
-_bes_import_filename_set_imported "bes_var.bash"
 _bes_import_filename_set_imported "bes_version.bash"
 _bes_import_filename_set_imported "bes_web.bash"
 #-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
@@ -1265,8 +1280,6 @@ fi
 
 # Functions to download stuff
 
-bes_import "bes_log.bash"
-
 _bes_trace_file "begin"
 
 # Download a url to a file with optional username and password.
@@ -1362,8 +1375,6 @@ function _bes_download_wget()
 
 _bes_trace_file "end"
 #-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
-
-bes_import "bes_log.bash"
 
 bes_log_trace_file path "begin"
 
@@ -2389,8 +2400,6 @@ function bes_json_file_get_field()
 _bes_trace_file "end"
 #-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
 
-bes_import "bes_log.bash"
-
 bes_log_trace_file list "begin"
 
 # Return 0 if the first argument is in any of the following arguments
@@ -2414,11 +2423,11 @@ function bes_is_in_list()
 }
 
 bes_log_trace_file path "end"
+
 #-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
 
 bes_import "bes_list.bash"
-bes_import "bes_log.bash"
-bes_import "bes_var.bash"
+bes_import "bes_system.bash"
 
 bes_log_trace_file path "begin"
 
@@ -2877,7 +2886,6 @@ bes_log_trace_file path "end"
 # Functions to deal with python
 
 bes_import "bes_download.bash"
-bes_import "bes_log.bash"
 bes_import "bes_path.bash"
 bes_import "bes_system.bash"
 bes_import "bes_string.bash"
@@ -3225,8 +3233,6 @@ function bes_question_yes_no()
 _bes_trace_file "end"
 #-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
 
-bes_import "bes_log.bash"
-
 # Functions to deal with strings
 
 bes_log_trace_file path "begin"
@@ -3429,9 +3435,6 @@ function bes_str_is_integer()
 
 bes_log_trace_file path "end"
 #-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
-
-bes_import "bes_var.bash"
-bes_import "bes_log.bash"
 
 bes_log_trace_file system "begin"
 
@@ -3806,31 +3809,6 @@ function bes_testing_check_file()
     echo "${_content}" | "${_BES_DIFF}" "${_filename}" -
   fi
   return ${_rv}
-}
-#-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
-
-# Get a var value
-function bes_var_get()
-{
-  eval 'printf "%s\n" "${'"$1"'}"'
-}
-
-# Set a var value
-function bes_var_set()
-{
-  eval "$1=\"\$2\""
-}
-
-# Unset a var value
-function bes_var_unset()
-{
-  eval "unset $1"
-}
-
-# Export a var value
-function bes_var_export()
-{
-  eval "export $1=\"\$2\""
 }
 #-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
 

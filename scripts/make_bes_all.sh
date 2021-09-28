@@ -7,11 +7,12 @@ function main()
   local _this_dir="$(_this_dir_make_bes_all)"
   local _bes_shell_dir="${_this_dir}/../bash/bes_shell"
 
-  source "${_bes_shell_dir}/bes_all.bash"
+  source "${_bes_shell_dir}/bes_shell.bash"
+  bes_import "bes_path.bash"
 
   _bes_shell_dir="$(bes_path_abs_dir ${_bes_shell_dir})"
 
-  local _tmp_file="${TMPDIR}/bes_all.bash.$$"
+  local _tmp_file="${TMPDIR}/bes_shell.bash.$$"
   rm -f "${_tmp_file}"
 
   cat ${_bes_shell_dir}/bes_shell.bash > "${_tmp_file}"
