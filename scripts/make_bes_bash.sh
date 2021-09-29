@@ -4,20 +4,24 @@ set -e
 
 function main()
 {
+  if [[ $# != 1 ]]; then
+    echo "usage: make_bes_bash.sh target_filename"
+    return 1
+  fi
+  local _target_filename="${1}"
   local _this_dir="$(_this_dir_make_bes_all)"
-  local _bes_shell_dir="${_this_dir}/../bash/bes_shell"
-  local _bes_shell_one_file_dir="${_this_dir}/../bash/bes_shell_one_file"
+  local _bes_shell_dir="${_this_dir}/../bash/bes_bash"
 
-  source "${_bes_shell_dir}/bes_shell.bash"
+  source "${_bes_shell_dir}/bes_basic.bash"
   bes_import "bes_path.bash"
 
+  _target_filename="$(bes_path_abs_file ${_target_filename})"
   _bes_shell_dir="$(bes_path_abs_dir ${_bes_shell_dir})"
-  _bes_shell_one_file_dir="$(bes_path_abs_dir ${_bes_shell_one_file_dir})"
 
-  local _tmp_file="${TMPDIR}/bes_shell.bash.$$"
+  local _tmp_file="${TMPDIR}/bes_basic.bash.$$"
   rm -f "${_tmp_file}"
 
-  cat ${_bes_shell_dir}/bes_shell.bash > "${_tmp_file}"
+  cat ${_bes_shell_dir}/bes_basic.bash > "${_tmp_file}"
   
   local _file
   for _file in ${_bes_shell_dir}/bes_*.bash; do
@@ -34,11 +38,13 @@ function main()
     fi
   done
 
-  local _target="${_bes_shell_one_file_dir}/bes.bash"
+  echo _target_filename $_target_filename
+  _target_filename_dir="$(dirname ${_target_filename})"
+  mkdir -p "${_target_filename_dir}"
 
-  /bin/cp -f "${_tmp_file}" "${_target}"
+  /bin/cp -f "${_tmp_file}" "${_target_filename}"
 
-  bes_message "Wrote ${_target}"
+  bes_message "Wrote ${_target_filename}"
   
   return 0
 }
@@ -48,7 +54,7 @@ function _make_bes_all_should_exclude()
   local _basename="${1}"
   local _rv
   case "${_basename}" in
-    "bes_all.bash"|"bes_shell.bash")
+    "bes_all.bash"|"bes_basic.bash")
       _rv=0
       ;;
     *)

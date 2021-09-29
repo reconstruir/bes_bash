@@ -13,7 +13,7 @@ function _test_this_dir()
   return 0
 }
 
-source "$(_test_this_dir)"/../bash/bes_shell/bes_shell.bash
+source "$(_test_this_dir)"/../../bash/bes_bash/bes_basic.bash
 bes_import "bes_testing.bash"
 bes_import "bes_git.bash"
 bes_import "_bes_git_unit_test.bash"

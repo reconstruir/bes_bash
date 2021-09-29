@@ -61,6 +61,7 @@ function _bes_import_filename_set_imported()
     echo "usage: _bes_import_filename_mark_imported filename"
     return 1
   fi
+  local _filename="${1}"
   local _var_name=$(_bes_import_filename_variable_name "${_filename}")
   eval "${_var_name}=\"true\""
   return 0
@@ -72,6 +73,7 @@ function _bes_import_filename_is_imported()
     echo "usage: _bes_import_filename_is_imported filename"
     return 1
   fi
+  local _filename="${1}"
   local _var_name=$(_bes_import_filename_variable_name "${_filename}")
   local _var_value=$(eval 'printf "%s\n" "${'"${_var_name}"'}"')
   if [[ "${_var_value}" == "true" ]]; then

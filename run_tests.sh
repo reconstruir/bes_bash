@@ -5,7 +5,7 @@ function main()
   local _tmp=/tmp/bes_run_tests_tmp_$$
   rm -rf "${_tmp}"
   mkdir -p "${_tmp}"
-  local _test_dir=$(_bes_test_this_dir)/tests
+  local _this_dir="$(_run_tests_this_dir)"
   local _result=0
   local _test_file
   local _tests
@@ -23,7 +23,7 @@ function main()
   if [[ $# > 0 ]]; then
     _tests=${1+"$@"}
   else
-    _tests="${_test_dir}/test*.sh"
+    _tests="${_this_dir}/tests/bes_bash/test_bes_*.sh ${_this_dir}/tests/bes_bash_one_file/test_bes_*.sh"
   fi
   for _test_file in ${_tests}; do
     local _test_file_rel=${_test_file#${_pwd}/}
@@ -60,7 +60,7 @@ function main()
   return ${_result}
 }
 
-function _bes_test_this_dir()
+function _run_tests_this_dir()
 {
   echo "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
   return 0
