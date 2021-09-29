@@ -38,14 +38,11 @@ function main()
     fi
   done
 
-  echo _target_filename $_target_filename
   _target_filename_dir="$(dirname ${_target_filename})"
   mkdir -p "${_target_filename_dir}"
 
   /bin/cp -f "${_tmp_file}" "${_target_filename}"
 
-  bes_message "Wrote ${_target_filename}"
-  
   return 0
 }
 
