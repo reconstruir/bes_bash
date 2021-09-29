@@ -23,7 +23,7 @@ function main()
   if [[ $# > 0 ]]; then
     _tests=${1+"$@"}
   else
-    _tests="${_this_dir}/tests/bes_bash/test_bes_*.sh ${_this_dir}/tests/bes_bash_one_file/test_bes_*.sh"
+    _tests="${_this_dir}/../tests/bes_bash/test_bes_*.sh ${_this_dir}/../tests/bes_bash_one_file/test_bes_*.sh"
   fi
   for _test_file in ${_tests}; do
     local _test_file_rel=${_test_file#${_pwd}/}
