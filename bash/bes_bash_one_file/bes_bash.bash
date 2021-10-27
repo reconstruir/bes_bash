@@ -1,12 +1,12 @@
 #-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
 
-function _bes_shell_this_dir()
+function _bes_bash_this_dir()
 {
   echo "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
   return 0
 }
 
-_BES_SHELL_THIS_DIR="$(_bes_shell_this_dir)"
+_BES_BASH_THIS_DIR="$(_bes_bash_this_dir)"
 
 function _bes_trace() ( if [[ "$_BES_TRACE" == "1" ]]; then printf '_BES_TRACE: %s\n' "$*"; fi )
 function _bes_trace_function() ( _bes_trace "func: ${FUNCNAME[1]}($*)" )
@@ -22,7 +22,7 @@ function bes_import()
   fi
 
   local _filename="${1}"
-  local _this_dir="$(_bes_shell_this_dir)"
+  local _this_dir="$(_bes_bash_this_dir)"
   local _filename_abs="${_this_dir}/${_filename}"
 
   if _bes_import_filename_is_imported "${_filename_abs}"; then
@@ -146,7 +146,7 @@ function bes_script_name()
     return 0
   fi
   if [[ ${0} =~ .+bash$ ]]; then
-    echo "bes_shell"
+    echo "bes_bash"
     return 0
   fi
   echo $(basename "${0}")

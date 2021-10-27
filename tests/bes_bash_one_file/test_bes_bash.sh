@@ -22,7 +22,8 @@ _bes_import_filename_set_imported "_bes_git_unit_test.bash"
 source "${_this_dir}/../../bash/bes_bash/_bes_python_testing.bash"
 _bes_import_filename_set_imported "_bes_python_testing.bash"
 
-_tmp_file="${TMPDIR}/test_bes_bash.sh.$$"
+_tmp_dir="$(mktemp -d)"
+_tmp_file="${_tmp_dir}/test_bes_bash.sh.$$"
 rm -f "${_tmp_file}"
 
 _tests_dir="$(bes_path_abs_dir "${_this_dir}/../bes_bash")"
@@ -33,7 +34,6 @@ done
 
 echo "bes_testing_run_unit_tests" >> "${_tmp_file}"
 
-#echo CACA source ${_tmp_file}
-source ${_tmp_file}
+source "${_tmp_file}"
 
 bes_testing_run_unit_tests
