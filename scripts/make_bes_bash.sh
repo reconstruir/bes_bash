@@ -18,7 +18,7 @@ function main()
   _target_filename="$(bes_path_abs_file ${_target_filename})"
   _bes_shell_dir="$(bes_path_abs_dir ${_bes_shell_dir})"
 
-  local _tmp_file="${TMPDIR}/bes_basic.bash.$$"
+  local _tmp_file="$(mktemp -d)/bes_basic.bash.$$"
   rm -f "${_tmp_file}"
 
   cat ${_bes_shell_dir}/bes_basic.bash > "${_tmp_file}"
