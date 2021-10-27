@@ -36,7 +36,7 @@ function bes_testing_call_function()
 
 function _bes_testing_exit_code_filename()
 {
-  local _exit_code_filename="${TMPDIR}/_bes_testing_exit_code_$$"
+  local _exit_code_filename="/tmp/_bes_testing_exit_code_$$"
   echo "${_exit_code_filename}"
   return 0
 }
@@ -109,7 +109,7 @@ function bes_testing_make_temp_dir()
   local _label="${1}"
   local _pid=$$
   local _basename="${_label}_${_pid}"
-  local _tmpdir="${TMPDIR}/${_basename}"
+  local _tmpdir="$(mktemp -d)/${_basename}"
   mkdir -p "${_tmpdir}"
   local _normalized_tmpdir="$(command cd -P "${_tmpdir}" > /dev/null && command pwd -P )"
   echo "${_normalized_tmpdir}"

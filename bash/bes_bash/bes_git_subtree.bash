@@ -22,7 +22,7 @@ function bes_git_subtree_update_with_temp_repo()
   local _tmp_branch_name=tmp-split-branch-${_remote_name}
   local _my_name=$(basename ${_my_address} | sed 's/.git//')
 
-  local _tmp_dir="${TMPDIR}/bes_git_subtree_update_tmp-${_my_name}-$$"
+  local _tmp_dir="$(mktemp -d)/bes_git_subtree_update_tmp-${_my_name}-$$"
   if ! git clone ${_my_address} "${_tmp_dir}"; then
     bes_message "bes_git_subtree_update_with_temp_repo: Failed to clone ${_my_address}"
     return 3

@@ -2176,7 +2176,7 @@ function bes_git_subtree_update_with_temp_repo()
   local _tmp_branch_name=tmp-split-branch-${_remote_name}
   local _my_name=$(basename ${_my_address} | sed 's/.git//')
 
-  local _tmp_dir="${TMPDIR}/bes_git_subtree_update_tmp-${_my_name}-$$"
+  local _tmp_dir="$(mktemp -d)/bes_git_subtree_update_tmp-${_my_name}-$$"
   if ! git clone ${_my_address} "${_tmp_dir}"; then
     bes_message "bes_git_subtree_update_with_temp_repo: Failed to clone ${_my_address}"
     return 3
@@ -3718,7 +3718,7 @@ function bes_testing_call_function()
 
 function _bes_testing_exit_code_filename()
 {
-  local _exit_code_filename="${TMPDIR}/_bes_testing_exit_code_$$"
+  local _exit_code_filename="/tmp/_bes_testing_exit_code_$$"
   echo "${_exit_code_filename}"
   return 0
 }
@@ -3791,7 +3791,7 @@ function bes_testing_make_temp_dir()
   local _label="${1}"
   local _pid=$$
   local _basename="${_label}_${_pid}"
-  local _tmpdir="${TMPDIR}/${_basename}"
+  local _tmpdir="$(mktemp -d)/${_basename}"
   mkdir -p "${_tmpdir}"
   local _normalized_tmpdir="$(command cd -P "${_tmpdir}" > /dev/null && command pwd -P )"
   echo "${_normalized_tmpdir}"
