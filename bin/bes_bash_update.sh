@@ -4,15 +4,15 @@ set -e
 
 function main()
 {
-  source $(_bes_shell_update_this_dir)/../bash/bes_shell/bes_all.sh
+  source $(_bes_bash_update_this_dir)/../bash/bes_bash/bes_all.sh
 
   local _root_dir="$(pwd)"
   local _local_branch="master"
-  local _address="git@gitlab_rebuilder:rebuilder/bes_shell.git"
+  local _address="git@gitlab_rebuilder:rebuilder/bes_bash.git"
   local _remote_branch="master"
   local _revision="@latest@"
-  local _src_dir="bash/bes_shell"
-  local _dst_dir="bes_shell"
+  local _src_dir="bash/bes_bash"
+  local _dst_dir="bes_bash"
   local _retry_with_delete="true"
 
   bes_git_subtree_update \
@@ -28,7 +28,7 @@ function main()
   return 0
 }
 
-function _bes_shell_update_this_dir()
+function _bes_bash_update_this_dir()
 {
   echo "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
   return 0

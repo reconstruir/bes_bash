@@ -4,7 +4,7 @@ set -e
 
 function main()
 {
-  source $(_this_dir_git_subtree_update)/../bash/bes_shell/bes_all.sh
+  source $(_this_dir_git_subtree_update)/../bash/bes_bash/bes_all.sh
   if [[ $# != 7 ]]; then
     bes_message "usage: local_branch address remote_branch revision src_dir dst_dir retry_with_delete"
     return 1

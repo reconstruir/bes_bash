@@ -1,4 +1,4 @@
-# bes_shell
-name: bes_shell
+# bes_bash
+name: bes_bash
 unixpath: ${root_dir}/bin
 pythonpath: ${root_dir}/lib
