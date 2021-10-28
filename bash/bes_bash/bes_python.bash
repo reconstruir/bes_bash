@@ -310,4 +310,19 @@ function bes_python_check_python_exe()
   return 0
 }
 
+# Find the best possible python preferring the latest 3.x
+function bes_python_find()
+{
+  local _possible_python
+  for _possible_version in 3.9 3.8 3.7 3 2.7; do
+    if bes_has_python ${_possible_version}; then
+      local _python_exe="$(${_BES_WHICH_EXE} python${_possible_version})"
+      echo ${_python_exe}
+      return 0
+    fi
+  done
+  echo ""
+  return 1
+}
+
 _bes_trace_file "end"
