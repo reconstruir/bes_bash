@@ -5,3 +5,4 @@
 2021-10-22
 - move bes_message to its own module
 - move everything other than bes_import out of bes_basic.bash
+- add version to standalone file
