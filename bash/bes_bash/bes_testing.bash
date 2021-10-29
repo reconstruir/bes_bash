@@ -5,6 +5,10 @@
 
 bes_import "bes_system.bash"
 
+# The total number of tests and the current test index
+_BES_TESTS_NUM_TOTAL=0
+_BES_TESTS_INDEX=0
+
 # Print all the unit tests defined in this script environment (functions starting with test_)
 function bes_testing_print_unit_tests()
 {
@@ -52,7 +56,6 @@ function _bes_testing_exit_code_set()
 {
   local _exit_code_filename="$(_bes_testing_exit_code_filename)"
   echo $1 > "${_exit_code_filename}"
-  echo set ${_exit_code_filename} to 1
   return 0
 }
 
@@ -73,7 +76,12 @@ function bes_testing_run_unit_tests()
   local _tests=$(bes_testing_print_unit_tests)
   local _test
   local _rv
+  local _index=$(expr 0)
+  local _num_total=$(expr $(echo ${_tests} | wc -w))
+  _BES_TESTS_NUM_TOTAL=${_num_total}
   for _test in $_tests; do
+    _index=$(expr ${_index} + 1)
+    _BES_TESTS_INDEX=${_index}
     ${_test}
   done
   local _exit_code="$(_bes_testing_exit_code_get)"
@@ -84,18 +92,31 @@ function bes_testing_run_unit_tests()
 # Run that an expression argument is true and print that
 function bes_assert()
 {
+  function _bes_testing_make_counter()
+  {
+    local _num_total=${1}
+    local _index=${2}
+    local _num_digits=$(expr $(printf ${_num_total} | wc -c))
+    local _format="%${_num_digits}d"
+    local _counter=$(printf "[${_format} of ${_format}]" ${_index} ${_num_total})
+    echo "${_counter}"
+    return 0
+  }
+  
   local _filename=$($_BES_BASENAME_EXE ${BASH_SOURCE[1]})
   local _line=${BASH_LINENO[0]}
   local _function=${FUNCNAME[1]}
+  local _counter="$(_bes_testing_make_counter ${_BES_TESTS_NUM_TOTAL} ${_BES_TESTS_INDEX})"
+  local _header="${_filename} ${_counter} ${_function}"
   eval "${1}"
   if [[ $? -ne 0 ]]; then
-    echo "failed: ${_function} $_filename:$_line: " ${1}
+    echo "${_header}: FAILED: ${_filename}:${_line}: ${1}"
     if [[ -n ${BES_UNIT_TEST_FAIL} ]]; then
         exit 1
     fi
     _bes_testing_exit_code_set 1
   else
-    echo "$_filename $_function: passed"
+    echo "${_header}: PASSSED"
   fi
 }
 
