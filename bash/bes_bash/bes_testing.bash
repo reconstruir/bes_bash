@@ -107,16 +107,17 @@ function bes_assert()
   local _line=${BASH_LINENO[0]}
   local _function=${FUNCNAME[1]}
   local _counter="$(_bes_testing_make_counter ${_BES_TESTS_NUM_TOTAL} ${_BES_TESTS_INDEX})"
-  local _header="${_filename} ${_counter} ${_function}"
+  local _header_passed="${_filename} ${_counter} passed: ${_function}"
+  local _header_failed="${_filename} ${_counter} FAILED: ${_function}"
   eval "${1}"
   if [[ $? -ne 0 ]]; then
-    echo "${_header}: FAILED: ${_filename}:${_line}: ${1}"
+    echo "${_header_failed}: ${_filename}:${_line}: ${1}"
     if [[ -n ${BES_UNIT_TEST_FAIL} ]]; then
         exit 1
     fi
     _bes_testing_exit_code_set 1
   else
-    echo "${_header}: PASSSED"
+    echo "${_header_passed}"
   fi
 }
 
