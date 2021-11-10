@@ -1,6 +1,7 @@
 #-*- coding:utf-8; mode:shell-script; indent-tabs-mode: nil; sh-basic-offset: 2; tab-width: 2 -*-
 
 bes_import "bes_list.bash"
+bes_import "bes_string.bash"
 bes_import "bes_system.bash"
 
 bes_log_trace_file path "begin"
@@ -148,7 +149,7 @@ function bes_path_append()
   bes_log_trace_function path $*
 
   if [[ $# < 2 ]]; then
-    echo "Usage: bes_path_prepend path p1 p2 ... pN"
+    echo "Usage: bes_path_append path p1 p2 ... pN"
     return 1
   fi
   local _left
@@ -452,6 +453,19 @@ function bes_path_abs_file()
   local _result="${_abs_dirname}"/"${_basename}"
   echo ${_result}
   return 0
+}
+
+# Split a path by path delimiter
+function bes_path_split()
+{
+  if [[ $# < 1 ]]; then
+    bes_message "usage: bes_path_split path"
+    return 1
+  fi
+  local _path="${1}"
+  bes_str_split "${_path}" :
+  local _rv=$?
+  return ${_rv}
 }
 
 bes_log_trace_file path "end"

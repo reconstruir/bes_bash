@@ -99,6 +99,7 @@ function _bes_which_one_program()
   IFS=':' read -ra _path <<< "${PATH}"
   for _path_entry in "${_path[@]}"; do
     _possible_which=${_path_entry}/${_program}
+    #echo FUCK CHECKIGN ${_possible_which} >& $(tty)
     if [[ -x "${_possible_which}" ]]; then
       echo "${_possible_which}"
       if [[ ${_list_all} != "true" ]]; then
@@ -120,6 +121,7 @@ if [[ -x /usr/bin/which ]]; then
 else
   _BES_WHICH_EXE=_bes_which
 fi
+_BES_WHICH_EXE=_bes_which
 
 # Use which to find the abs paths to a handful of executables used in this library.
 # The reason for using _BES_BASIC_PATH in this manner is that we want this library to
@@ -129,12 +131,14 @@ _BES_BASENAME_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} basename)
 _BES_CAT_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} cat)
 _BES_DIFF=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} diff)
 _BES_DIRNAME_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} dirname)
+_BES_EXPR=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} expr)
 _BES_GREP_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} grep)
 _BES_MKDIR_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} mkdir)
 _BES_PWD_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} pwd)
 _BES_SED=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} sed)
 _BES_TR_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} tr)
 _BES_UNAME=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} uname)
+_BES_WC=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} wc)
 
 function bes_has_program()
 {

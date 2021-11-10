@@ -4,8 +4,8 @@
 
 bes_import "bes_download.bash"
 bes_import "bes_path.bash"
-bes_import "bes_system.bash"
 bes_import "bes_string.bash"
+bes_import "bes_system.bash"
 
 _bes_trace_file "begin"
 
@@ -310,11 +310,11 @@ function bes_python_check_python_exe()
   return 0
 }
 
-# Find the best possible python preferring the latest 3.x
-function bes_python_find()
+# Find the default python preferring the latest 3.x
+function bes_python_find_default()
 {
   local _possible_python
-  for _possible_version in 3.9 3.8 3.7 3 2.7; do
+  for _possible_version in 3.10 3.9 3.8 3.7 3 2.7; do
     if bes_has_python ${_possible_version}; then
       local _python_exe="$(${_BES_WHICH_EXE} python${_possible_version})"
       echo ${_python_exe}
@@ -323,6 +323,107 @@ function bes_python_find()
   done
   echo ""
   return 1
+}
+
+# Find python by version
+function bes_python_find()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "Usage: bes_python_find version"
+    return 1
+  fi
+  
+  local _possible_python
+  for _possible_version in 3.9 3.8 3.7 3.10 2.7; do
+    if bes_has_python ${_possible_version}; then
+      local _python_exe="$(${_BES_WHICH_EXE} python${_possible_version})"
+      echo ${_python_exe}
+      return 0
+    fi
+  done
+  echo ""
+  return 1
+}
+
+# Find python by version ($major.$minor)
+function _bes_python_find_by_major_minor_version()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "Usage: _bes_python_find_by_major_minor_version version"
+    return 1
+  fi
+  local _version=${1}
+#  local _PYTHON_VERSION_SEARCH_ORDER=(3.9 3.8 3.7 3.10 2.7)
+  local _searchPATH="$(_bes_python_exe_search_path)"
+  local _possible_python=python${_version}
+  local _python_exe
+  if _python_exe=$(PATH="${_searchPATH}" ${_BES_WHICH_EXE} ${_possible_python}); then
+    echo "${_python_exe}"
+    return 0
+  fi
+  echo ""
+  return 1
+}
+
+function _bes_python_exe_search_path()
+{
+  local _possiblePATH=($(_bes_python_possible_bin_dirs))
+  local _searchPATH=$(bes_path_prepend "${PATH}" ${_possiblePATH[@]})
+  local _sanitizedPATH=$(bes_path_sanitize "${_searchPATH}")
+  echo "${_sanitizedPATH}"
+  return 0
+}
+
+function _bes_python_possible_bin_dirs()
+{
+  local _system=$(bes_system)
+  local _rv=1
+  local _dirs=()
+  case ${_system} in
+    linux)
+      _dirs=$(_bes_python_possible_bin_dirs_linux)
+      _rv=$?
+      ;;
+    macos)
+      _dirs=$(_bes_python_possible_bin_dirs_macos)
+      _rv=$?
+      ;;
+    windows)
+      _dirs=$(_bes_python_possible_bin_dirs_windows)
+      _rv=$?
+      ;;
+    *)
+      bes_message "Unsupported system: ${_system}"
+      ;;
+  esac
+  echo "${_dirs[@]}"
+  return ${_rv}
+}
+
+function _bes_python_possible_bin_dirs_linux()
+{
+  local _dirs=()
+  _dirs+=(/usr/bin /usr/local/bin /opt/local/bin)
+  echo ${_dirs[@]}
+  return 0
+}
+
+function _bes_python_possible_bin_dirs_macos()
+{
+  local _dirs=()
+  _dirs+=(/opt/local/bin /usr/bin /usr/local/bin)
+  _dirs+=($(echo /usr/local/opt/python@3.*/bin))
+  echo ${_dirs[@]}
+  return 0
+}
+
+function _bes_python_possible_bin_dirs_windows()
+{
+  local _dirs=()
+  _dirs+=(/opt/local/bin /usr/bin /usr/local/bin)
+  _dirs+=($(echo /usr/local/opt/python@3.*))
+  echo ${_dirs[@]}
+  return 0
 }
 
 _bes_trace_file "end"

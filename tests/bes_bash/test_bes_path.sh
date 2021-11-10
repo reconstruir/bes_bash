@@ -55,6 +55,7 @@ function test_bes_path_dedup()
   bes_assert "[ $(_call bes_path_dedup /bin:/foo/bin:/bin) = /bin:/foo/bin ]"
   bes_assert "[ $(_call bes_path_dedup /bin:/foo/bin:/bin:/a\ b) = /bin:/foo/bin:/a_b ]"
   bes_assert "[ $(_call bes_path_dedup /bin\ foo:/bin\ foo:/bin\ foo) = /bin_foo ]"
+  bes_assert "[ $(_call bes_path_dedup /foo/p@3.7/bin:/foo/p@3.8/bin:/bin\ foo:/bar) = /foo/p@3.7/bin:/foo/p@3.8/bin:/bin_foo:/bar ]"
 }
 
 function test_bes_path_clean_rogue_slashes()
@@ -285,6 +286,17 @@ function test_bes_path_abs_file()
   bes_assert "[[ $(cd ${_tmp} && bes_path_abs_file foo/bar/../baz) == ${_tmp}/foo/baz ]]"
   bes_assert "[[ $(cd ${_tmp} && bes_path_abs_file foo/../bar) == ${_tmp}/bar ]]"
   rm -rf ${_tmp}
+}
+
+function test_bes_path_split()
+{
+  function _call_bes_path_split()
+  {
+    bes_path_split "${1}" | tr ' ' '_'
+  }
+
+  bes_assert "[ $(_call_bes_path_split a:b:c) = 'a_b_c' ]"
+  bes_assert "[ $(_call_bes_path_split a\ :b:c) = 'a__b_c' ]"
 }
 
 bes_testing_run_unit_tests
