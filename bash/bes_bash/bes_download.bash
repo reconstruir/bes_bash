@@ -88,7 +88,11 @@ function _bes_download_wget()
   fi
 
   # FIXME: need more error checking here
-  wget --quiet --user ${_auth_args} ${_url} -O ${_filename}
+  wget --quiet --hsts-file /dev/null ${_auth_args} ${_url} -O ${_filename}
+  local _rv=$?
+  if [[ ${_rv} != 0 ]]; then
+    return 1
+  fi
   if [[ -f ${_filename} ]]; then
     return 0
   fi
