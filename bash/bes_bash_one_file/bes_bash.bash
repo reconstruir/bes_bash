@@ -3233,17 +3233,11 @@ function bes_python_find()
     bes_message "Usage: bes_python_find version"
     return 1
   fi
-  
-  local _possible_python
-  for _possible_version in 3.9 3.8 3.7 3.10 2.7; do
-    if bes_has_python ${_possible_version}; then
-      local _python_exe="$(${_BES_WHICH_EXE} python${_possible_version})"
-      echo ${_python_exe}
-      return 0
-    fi
-  done
-  echo ""
-  return 1
+  local _version=${1}
+  local _exe=$(_bes_python_find_check_version ${_version})
+  local _rv=$?
+  echo ${_exe}
+  return ${_rv}
 }
 
 # Find python by version ($major.$minor)
@@ -3254,7 +3248,6 @@ function _bes_python_find_by_major_minor_version()
     return 1
   fi
   local _version=${1}
-#  local _PYTHON_VERSION_SEARCH_ORDER=(3.9 3.8 3.7 3.10 2.7)
   local _searchPATH="$(_bes_python_exe_search_path)"
   local _possible_python=python${_version}
   local _python_exe
@@ -3264,6 +3257,60 @@ function _bes_python_find_by_major_minor_version()
   fi
   echo ""
   return 1
+}
+
+# Find python by checking the version of the possible python executables
+function _bes_python_find_check_version()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "Usage: _bes_python_find_caca version"
+    return 1
+  fi
+  local _version=${1}
+  local _searchPATH="$(_bes_python_exe_search_path)"
+  declare -a _path
+  local _path_entry
+  IFS=':' read -ra _path <<< "${_searchPATH}"
+  for _path_entry in "${_path[@]}"; do
+    if [[ -d "${_path_entry}" ]]; then
+      local _exes=( $(_bes_python_possible_exes_in_dir "${_path_entry}") )
+      local _next_exe
+      for _next_exe in ${_exes[@]}; do
+        local _next_version=$(bes_python_exe_version "${_next_exe}")
+        if [[ ${_next_version} == ${_version} ]]; then
+          echo ${_next_exe}
+          return 0
+        fi
+      done
+    fi
+  done
+  echo ""
+  return 0
+}
+
+function _bes_python_possible_exes_in_dir()
+{
+  if [[ $# != 1 ]]; then
+    bes_message "Usage: _bes_python_possible_exes_in_dir dir"
+    return 1
+  fi
+  local _dir="${1}"
+  declare -a _exes
+  local _exes=()
+  local _possible_patterns=( python3.[0-9] python3.[0-9][0-9] python3 python2.[0-9] python2 python )
+  local _pattern
+  
+  for _pattern in ${_possible_patterns[*]}; do
+    local _next_exes
+    if _next_exes=$(cd "${_dir}" && "${_BES_LS}" -1 ${_pattern} 2> /dev/null); then
+      local _next_exe
+      for _next_exe in ${_next_exes}; do
+        _exes+=( "${_dir}/${_next_exe}" )
+      done
+    fi
+  done
+  echo ${_exes[@]}
+  return 0
 }
 
 function _bes_python_exe_search_path()
@@ -3312,8 +3359,8 @@ function _bes_python_possible_bin_dirs_linux()
 function _bes_python_possible_bin_dirs_macos()
 {
   local _dirs=()
-  _dirs+=(/opt/local/bin /usr/bin /usr/local/bin)
   _dirs+=($(echo /usr/local/opt/python@3.*/bin))
+  _dirs+=(/opt/local/bin /usr/bin /usr/local/bin)
   echo ${_dirs[@]}
   return 0
 }
@@ -3669,7 +3716,6 @@ function _bes_which_one_program()
   IFS=':' read -ra _path <<< "${PATH}"
   for _path_entry in "${_path[@]}"; do
     _possible_which=${_path_entry}/${_program}
-    #echo FUCK CHECKIGN ${_possible_which} >& $(tty)
     if [[ -x "${_possible_which}" ]]; then
       echo "${_possible_which}"
       if [[ ${_list_all} != "true" ]]; then
@@ -3709,6 +3755,7 @@ _BES_SED=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} sed)
 _BES_TR_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} tr)
 _BES_UNAME=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} uname)
 _BES_WC=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} wc)
+_BES_LS=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} ls)
 
 function bes_has_program()
 {

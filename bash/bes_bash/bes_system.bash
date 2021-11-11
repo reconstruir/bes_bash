@@ -99,7 +99,6 @@ function _bes_which_one_program()
   IFS=':' read -ra _path <<< "${PATH}"
   for _path_entry in "${_path[@]}"; do
     _possible_which=${_path_entry}/${_program}
-    #echo FUCK CHECKIGN ${_possible_which} >& $(tty)
     if [[ -x "${_possible_which}" ]]; then
       echo "${_possible_which}"
       if [[ ${_list_all} != "true" ]]; then
@@ -139,6 +138,7 @@ _BES_SED=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} sed)
 _BES_TR_EXE=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} tr)
 _BES_UNAME=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} uname)
 _BES_WC=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} wc)
+_BES_LS=$(PATH=${_BES_BASIC_PATH} ${_BES_WHICH_EXE} ls)
 
 function bes_has_program()
 {
