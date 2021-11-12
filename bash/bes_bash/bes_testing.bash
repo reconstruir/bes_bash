@@ -67,7 +67,7 @@ function _bes_testing_exit_code_get()
     _exit_code=$(cat "${_exit_code_filename}")
   fi
   echo ${_exit_code}
-  return $(expr ${_exit_code})
+  return $(${_BES_EXPR} ${_exit_code})
 }
 
 # Run all the unit tests found in this script environment
@@ -76,11 +76,11 @@ function bes_testing_run_unit_tests()
   local _tests=$(bes_testing_print_unit_tests)
   local _test
   local _rv
-  local _index=$(expr 0)
-  local _num_total=$(expr $(echo ${_tests} | wc -w))
+  local _index=$(${_BES_EXPR} 0)
+  local _num_total=$(${_BES_EXPR} $(echo ${_tests} | ${_BES_WC} -w))
   _BES_TESTS_NUM_TOTAL=${_num_total}
   for _test in $_tests; do
-    _index=$(expr ${_index} + 1)
+    _index=$(${_BES_EXPR} ${_index} + 1)
     _BES_TESTS_INDEX=${_index}
     ${_test}
   done
@@ -96,7 +96,7 @@ function bes_assert()
   {
     local _num_total=${1}
     local _index=${2}
-    local _num_digits=$(expr $(printf ${_num_total} | wc -c))
+    local _num_digits=$(${_BES_EXPR} $(printf ${_num_total} | ${_BES_WC} -c))
     local _format="%${_num_digits}d"
     local _counter=$(printf "[${_format} of ${_format}]" ${_index} ${_num_total})
     echo "${_counter}"
