@@ -234,4 +234,24 @@ function _bes_checksum_text_linux()
   return 0
 }
 
+function bes_checksum_check_file()
+{
+  # Return True (0) if filename matches the checksum written in checksum_filename"
+  if [[ $# != 2 ]]; then
+    echo "Usage: bes_checksum_check_file filename checksum_filename"
+    return 1
+  fi
+  local _filename="${1}"
+  local _checksum_filename="${2}"
+  if [[ ! -f "${_checksum_filename}" ]]; then
+    return 1
+  fi
+  local _old_checksum=$(cat "${_checksum_filename}")
+  local _new_checksum=$(bes_checksum_file "sha256" "${_filename}")
+  if [[ ${_old_checksum} == ${_new_checksum} ]]; then
+    return 0
+  fi
+  return 1
+}
+
 bes_log_trace_file checksum "end"
