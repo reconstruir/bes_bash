@@ -508,3 +508,10 @@ function bes_log_set_log_file()
   _BES_LOG_FILE="${_log_file}"
   return 0
 }
+
+function bes_prompt_set_title
+{
+  echo -ne "\033]0;"$*"\007"
+  local _prompt=$(echo -ne "\033]0;"$*"\007")
+  export PROMPT_COMMAND='${_prompt}'
+}
